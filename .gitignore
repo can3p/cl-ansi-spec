@@ -1,0 +1,5 @@
+# Pinned third-party Lisp dependencies, fetched by `make deps`
+/.deps/
+# Build outputs
+/build/
+*.fasl
