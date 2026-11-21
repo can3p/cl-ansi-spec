@@ -3,7 +3,7 @@
 SBCL ?= sbcl
 LISP := $(SBCL) --noinform --non-interactive --no-sysinit --no-userinit
 
-.PHONY: all deps test clean distclean
+.PHONY: all deps test tokens clean distclean
 
 all: test
 
@@ -12,6 +12,10 @@ deps:
 
 test: deps
 	$(LISP) --load tools/test.lisp
+
+# Dump the tokens of a spec file: make tokens FILE=chap-1 [LINES=10-20] [SKIPS=1]
+tokens: deps
+	@FILE='$(FILE)' LINES='$(LINES)' SKIPS='$(SKIPS)' $(LISP) --load tools/tokens.lisp
 
 # Remove build outputs (fasls).
 clean:

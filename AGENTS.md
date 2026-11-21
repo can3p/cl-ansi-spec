@@ -35,6 +35,11 @@
   the verdict. Pipe through `tail -5` to read only the summary and save tokens.
 * `make deps` — bring `.deps/` to the commits in `tools/deps.sexp`. Offline
   once fetched; broken checkouts are re-cloned automatically.
+* `make tokens FILE=chap-1 [LINES=10-20] [SKIPS=1]` — dump a spec file's
+  tokens, one `LINE:COL<tab>TOKEN` per line (character tokens as
+  `<char> <catcode>`), under plain catcodes and without expansion. Always
+  pass `LINES` to keep the output small; `SKIPS=1` also lists comments,
+  skipped spaces, etc.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine
   sources (also run in CI; `make test` checks the file list against it).

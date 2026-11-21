@@ -1,7 +1,7 @@
 ;;;; tests/package.lisp
 
 (defpackage #:cl-ansi-spec/tests
-  (:use #:cl #:cl-ansi-spec)
+  (:use #:cl #:cl-ansi-spec #:cl-ansi-spec/tex)
   (:import-from #:parachute
                 #:define-test #:test #:status #:is #:true #:false #:fail)
   (:export #:run-tests))

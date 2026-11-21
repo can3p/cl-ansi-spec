@@ -10,8 +10,8 @@ AST, and a clean HTML rendering of it published on GitHub Pages.
 
 ## Status
 
-- Current milestone: **M1 — TeX reader (tokenizer)**
-- Last completed: M0 (scaffold), commit `a007a6b`.
+- Current milestone: **M2 — Macro expander** (to be planned and critiqued)
+- Last completed: M1 (TeX reader), all steps below.
 
 ## Milestones
 
@@ -20,7 +20,7 @@ AST, and a clean HTML rendering of it published on GitHub Pages.
 - [x] ASDF system, Parachute tests, strict build, pinned deps, CI.
 - [x] `lisp-review` skill.
 
-### M1 — TeX reader (tokenizer)
+### M1 — TeX reader (tokenizer) ✅
 TeX tokenisation depends on category codes that the sources change while
 being read (`\catcode`\|=\active`, active `,`/`-` inside `\begincom`,
 `\catothers` in format directives, `\obeylines`, `\IgnoreWhiteSpace`).
@@ -32,10 +32,10 @@ e.g. `\input\jobname.toc`, `\input #1`) belongs to M2.
 
 Steps (each separately reviewable, in this order):
 
-- [ ] **1. Token dump tool first** — `tools/tokens.lisp`, `make tokens
+- [x] **1. Token dump tool first** — `tools/tokens.lisp`, `make tokens
       FILE=… [LINES=a-b]`: compact one-token-per-line dump, used to debug
       every later step. Grows as the steps land.
-- [ ] **2. `src/tex/state.lisp` — equivalents + save stack.** One TeX-style
+- [x] **2. `src/tex/state.lisp` — equivalents + save stack.** One TeX-style
       state (eqtb-like): catcode, lccode, uccode tables, `\endlinechar`
       (later: meanings, registers). Scoping via a single **save stack** of
       (location . old-value) entries restored at group end — not table
@@ -45,20 +45,20 @@ Steps (each separately reviewable, in this order):
       `#`=6, `^`=7, `^^K`=7, `_`=8, `^^A`=8, `^^@`=9, `^^I`=10, space=10,
       letters=11, `~`=13, `^^L`=13 (active), `%`=14, `^^?`=15, others=12.
       Plain-TeX *macros* are not part of M1 (see open questions).
-- [ ] **3. `src/tex/token.lisp` — tokens.** Character tokens (char +
+- [x] **3. `src/tex/token.lisp` — tokens.** Character tokens (char +
       catcode) and symbolic tokens; control sequences **and active
       characters** share one interned *meaning namespace* (so `\let<=\LT`,
       `\ifx`, `\csname` are cheap in M2). Each token carries a source span
       (file name, start/end line and column). TeX equality ignores spans.
-- [ ] **4. `src/tex/line.lisp` — line buffer.** Reads a file line by line;
+- [x] **4. `src/tex/line.lisp` — line buffer.** Reads a file line by line;
       strips trailing spaces (103 files have them); appends `\endlinechar`
       as read from state at the moment the line is loaded.
-- [ ] **5. `src/tex/scanner.lisp` — state machine** (TeXbook ch. 7–8):
+- [x] **5. `src/tex/scanner.lisp` — state machine** (TeXbook ch. 7–8):
       states N/M/S; space skipping after control words; `\par` on empty
       lines; comments (14) and ignored (9) characters; invalid (15) →
       condition; `^^` notation (`^^X`, `^^hh`) everywhere incl. control
       sequence names; control symbols vs words.
-- [ ] **6. `src/tex/input-stack.lisp` — TeX's single input stack.** Levels
+- [x] **6. `src/tex/input-stack.lisp` — TeX's single input stack.** Levels
       of kind file, token list (macro bodies, inserted lists) and back
       list; operations `push-file`, `push-tokens`, `back-input`,
       `next-token`, `peek`, end-of-file handling; **pluggable file
@@ -122,6 +122,18 @@ Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
   CTAN's published checksum where possible. Planned in detail with M2.
 - 2026-11-21: The HyperSpec may be consulted for ambiguity only; nothing is
   ever copied from it (see AGENTS.md).
+
+- 2026-11-21: M1 implementation notes.  The token dump tool landed together
+  with the scanner (it has nothing to dump before tokens exist).  Spans are
+  file character offsets [start, end) plus line/column of start; a line's
+  \endlinechar owns the removed trailing spaces and the newline, otherwise
+  they are reported as a `:line-end` skip.  Every buffer element keeps its
+  file offset, so `^^` notation inside control sequence names is rewritten
+  in the buffer exactly as TeX does (a later catcode change cannot re-read
+  it).  Character tables are vectors for codes 0-255 plus a hash table for
+  larger codes (patched sources may be UTF-8), defaulting to category 12.
+  `next-token` returns NIL at the end of all input; `\endinput`, `\outer`
+  checks and `\everyeof`-style hooks are left to M2.
 
 ## Open questions
 
