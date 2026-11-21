@@ -29,7 +29,8 @@ Rules:
 - **End of input.** `next-token` returns `nil` at the end of all input.
   After a file ends, the stack's file-end hook runs (the expander checks
   for runaways there) and may push tokens to read next.  `\endinput`
-  marks the innermost file to end with its current line.
+  sets TeX's one global force_eof: the next file to finish a line ends
+  there (after `\endinput\input f` on one line, that is `f`).
 - **Resolver.** It maps a name to a line source or `nil`. Names that are
   absolute or contain `..` never resolve.
 

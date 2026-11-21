@@ -345,3 +345,92 @@ output string and error messages."
                    :files (list (cons "sub" (format nil "B\\endinput C~%D"))))
   (let ((expander (make-test-expander "\\input nosuchfile ")))
     (fail (expansion-of expander) 'expand:tex-fatal-error)))
+
+;;; Rare paths
+
+(define-test primitive-table
+  :parent expansion
+  (let ((names (expand:tex82-command-names)))
+    (is = (length names) (length (remove-duplicates names :test #'string=)))
+    ;; Every code table and register command is a primitive.
+    (dolist (name '("catcode" "lccode" "uccode" "sfcode" "mathcode" "delcode"
+                    "count" "dimen" "skip" "muskip" "toks" "box"))
+      (true (expand:find-primitive name) "\\~A is a primitive" name))
+    (true (expand:find-primitive "tolerance"))))
+
+(define-test align-state-after-aborted-calls
+  :parent expansion
+  (flet ((align-state-after (text)
+           (let ((expander (make-test-expander text)))
+             (define-test-macro expander "f" "#1" "[#1]")
+             (expansion-of expander)
+             (expand:expander-align-state expander))))
+    ;; Every brace read counts, every brace put back is uncounted, and an
+    ;; abandoned group is uncounted (§396): its { is gone, its } is not.
+    (is = 999999 (align-state-after "\\f{a\\par}"))
+    ;; The extra } is put back, counted once more (§395) and read again.
+    (is = 1000000 (align-state-after "\\f}"))
+    (is = 1000000 (align-state-after "\\f{{a}}"))
+    (is = 1000000 (align-state-after "{\\f{a\\par b}"))))
+
+(define-test brace-delimiter-with-a-nested-group
+  :parent expansion
+  (let ((expander (make-test-expander "\\g a{b}c{d}")))
+    (let ((hash (first (test-tokens expander "#")))
+          (brace (first (test-tokens expander "{"))))
+      (expand:set-meaning (expand:expander-state expander)
+                          (intern-control-sequence
+                           (expand:es-tex (expand:expander-state expander)) "g")
+                          (expand:make-macro (list hash brace)
+                                             (append (test-tokens expander "[")
+                                                     (list 1)
+                                                     (test-tokens expander "]")
+                                                     (list brace)))))
+    ;; The delimiter is matched before groups are: the first { ends it.
+    (is string= "[a]{b}c{d}" (expansion-of expander))))
+
+(define-test outer-macro-while-skipping
+  :parent expansion
+  (let ((expander (make-test-expander "\\o")))
+    (define-test-macro expander "o" "" "O" :outer t)
+    (setf (expand:expander-scanner-status expander) :skipping)
+    ;; A space comes instead of \o, then an inserted frozen \fi, then \o.
+    (let ((errors 0))
+      (expand:call-recovering-tex-errors
+       (lambda ()
+         (let ((token (expand:get-next expander)))
+           (true (and (character-token-p token) (= 32 (character-token-code token))))))
+       (lambda (condition) (declare (ignore condition)) (incf errors)))
+      (is = 1 errors))
+    (setf (expand:expander-scanner-status expander) :normal)
+    (multiple-value-bind (token meaning) (expand:get-next expander)
+      (is string= "fi" (control-sequence-name (cs-token-control-sequence token)))
+      (is eq (expand:find-primitive "fi") meaning))
+    (is string= "o" (control-sequence-name
+                     (cs-token-control-sequence (expand:get-next expander))))))
+
+(define-test marks
+  :parent expansion
+  (let ((expander (make-test-expander "\\meaning\\botmark|\\botmark")))
+    (setf (aref (expand:expander-marks expander) 2) (test-tokens expander "x\\relax"))
+    (is string= "\\botmark:x\\relax |x\\relax " (expansion-of expander))))
+
+(define-test endinput-cases
+  :parent expansion
+  ;; \endinput from a macro body still ends the file being read.
+  (check-expansion "\\input sub A" "BCA"
+                   :files (list (cons "sub" (format nil "B\\e C~%D")))
+                   :setup ((define-test-macro expander "e" "" "\\endinput")))
+  ;; force_eof is one flag: after \endinput\input f, f ends after its
+  ;; first line instead, and the outer file goes on.
+  (check-expansion (format nil "\\endinput\\input sub A~%Z") "BAZ"
+                   :files (list (cons "sub" (format nil "B~%C"))))
+  ;; A blank \let to a space is skipped before a file name.
+  (check-expansion "\\input\\sp sub A" "BA"
+                   :files (list (cons "sub" "B"))
+                   :setup ((expand:set-meaning (expand:expander-state expander)
+                                               (intern-control-sequence
+                                                (expand:es-tex (expand:expander-state expander))
+                                                "sp")
+                                               (expand:make-character-meaning 32 +space+)))))
+

@@ -150,8 +150,8 @@ or NIL and NIL when the call is abandoned."
             (when matched
               (multiple-value-bind (moved rematched)
                   (rematch-delimiter delimiter matched token)
-                (dolist (token (subseq matched 0 moved))
-                  (store token)
+                (dolist (moved-token (subseq matched 0 moved))
+                  (store moved-token)
                   (incf items))
                 (setf matched rematched)
                 (when rematched

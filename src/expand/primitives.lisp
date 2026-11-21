@@ -29,7 +29,7 @@ control space, \"/\" the italic correction, \"-\" the discretionary
 hyphen."
   '(" " "/" "-" "above" "abovewithdelims" "accent" "advance"
     "afterassignment" "aftergroup" "atop" "atopwithdelims" "badness"
-    "batchmode" "begingroup" "box" "char" "chardef" "cleaders" "closein"
+    "batchmode" "begingroup" "box" "catcode" "char" "chardef" "cleaders" "closein"
     "closeout" "copy" "count" "countdef" "cr" "crcr" "deadcycles" "def"
     "delcode" "delimiter" "dimen" "dimendef" "discretionary"
     "displaylimits" "displaystyle" "divide" "dp" "dump" "edef" "end"

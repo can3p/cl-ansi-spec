@@ -7,7 +7,7 @@
 ;;;; with cur_cmd/cur_chr: the MEANING of a control sequence or active
 ;;;; character (see meaning.lisp), NIL for a character token.  A token
 ;;;; read through \noexpand comes back as itself with the meaning
-;;;; +DONT-EXPAND+ when it would have expanded (§358).
+;;;; DONT-EXPAND-MEANING when it would have expanded (§358).
 
 (in-package #:cl-ansi-spec/expand)
 
@@ -34,6 +34,9 @@ end-of-file checks."
   ;; \topmark, \firstmark, \botmark, \splitfirstmark, \splitbotmark.
   (marks (make-array 5 :initial-element nil) :read-only t)
   (name-in-progress nil :type boolean)
+  ;; The control sequence \par (TeX's par_loc), cached for the checks of
+  ;; every token read while matching arguments.
+  (par nil)
   ;; Frozen control sequences by name, made on first use.
   (frozen (make-hash-table :test 'equal) :read-only t))
 
@@ -88,7 +91,9 @@ The primitives are installed in STATE."
 its meaning."
   (and (cs-token-p token)
        (eq (cs-token-control-sequence token)
-           (intern-control-sequence (expander-tex expander) "par"))))
+           (or (expander-par expander)
+               (setf (expander-par expander)
+                     (intern-control-sequence (expander-tex expander) "par"))))))
 
 (defun character-catcode-p (token catcode)
   "True when TOKEN is a character token of category CATCODE."
@@ -134,7 +139,8 @@ status."
        (values token nil)))))
 
 (defun get-token (expander)
-  "TeX's get_token: GET-NEXT, without expansion."
+  "TeX's get_token: GET-NEXT, without expansion.  (TeX's two differ only
+in setting cur_tok, which here is always the token returned.)"
   (get-next expander))
 
 (defun back-token (expander token)

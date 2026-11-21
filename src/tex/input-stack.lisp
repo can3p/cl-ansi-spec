@@ -27,6 +27,9 @@ next (TeX checks for runaway text there, §362)."
   (resolver nil :type function :read-only t)
   (skip-hook nil :type (or null function) :read-only t)
   (file-end-hook nil :type (or null function))
+  ;; TeX's force_eof, set by \\endinput: the next file to finish a line
+  ;; ends there.
+  (force-eof nil :type boolean)
   (levels '() :type list))
 
 (define-condition input-file-missing (error)
@@ -91,11 +94,10 @@ Returns no values."
   token)
 
 (defun end-current-file (stack)
-  "Make the innermost file of STACK end once its current line is read
-(TeX's \\endinput, §362).  Does nothing outside every file."
-  (let ((reader (find-if #'file-reader-p (input-stack-levels stack))))
-    (when reader
-      (setf (file-reader-force-eof reader) t))))
+  "TeX's \\endinput (§362): the next file of STACK to finish a line ends
+there.  As TeX's force_eof is one global flag, after `\\endinput\\input f'
+on one line that file is f."
+  (setf (input-stack-force-eof stack) t))
 
 (defun next-token (stack)
   "Return the next token of STACK, or NIL once all its input is read.
@@ -109,7 +111,9 @@ Exhausted levels (finished token lists, files at their end) are removed."
              (return (pop (token-level-tokens top)))
              (pop (input-stack-levels stack))))
         (file-reader
-         (let ((token (next-file-token top (input-stack-state stack))))
+         (let ((token (next-file-token top (input-stack-state stack)
+                                       (lambda ()
+                                         (shiftf (input-stack-force-eof stack) nil)))))
            (cond (token (return token))
                  (t (pop (input-stack-levels stack))
                     (let ((hook (input-stack-file-end-hook stack)))

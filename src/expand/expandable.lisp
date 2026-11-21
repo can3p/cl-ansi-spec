@@ -88,6 +88,13 @@ the expander and the primitive's token."
     (insert-tokens expander (string-tokens (expander-job-name expander)
                                            (token-span token)))))
 
+(defun blank-p (token meaning)
+  "True when TOKEN with MEANING is TeX's spacer command: a space token, or
+a control sequence \\let to one."
+  (or (character-catcode-p token +space+)
+      (and (character-meaning-p meaning)
+           (= (character-meaning-catcode meaning) +space+))))
+
 (defun scan-file-name (expander)
   "TeX's scan_file_name (§526): skip blanks, then take characters, with
 expansion, up to a space (consumed) or a token that is not a character
@@ -96,7 +103,7 @@ expansion, up to a space (consumed) or a token that is not a character
   (unwind-protect
        (let ((codes '()))
          (multiple-value-bind (token meaning) (get-x-token expander)
-           (loop while (and token (character-catcode-p token +space+))
+           (loop while (and token (blank-p token meaning))
                  do (multiple-value-setq (token meaning) (get-x-token expander)))
            (loop
              (when (null token) (return))
