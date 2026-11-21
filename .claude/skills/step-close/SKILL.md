@@ -16,6 +16,12 @@ A step is done when code, tests and docs agree (`docs/process.md`).
      directory appeared;
    - a decision the step took: state it as a current rule, with its reason,
      in the topic doc it governs, not in the plan.
+   - the schema: if the step changed what the model holds or means, or
+     showed a definition to be wrong, fix the `define-node` declarations
+     and their documentation (`docs/exports.md`, "Documentation of every
+     definition") and regenerate the JSON Schema and reference doc. Wrong
+     definitions are fixed now, whichever step wrote them (`docs/exports.md`,
+     "Versioning").
    Docs hold no history and no milestone names ("since step 4…", "in M2");
    history goes to `docs/history/` when the milestone closes.
 2. **Plan.** Tick the step in `docs/plan/<id>.md`. Adjust later steps only

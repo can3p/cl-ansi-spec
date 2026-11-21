@@ -2,24 +2,55 @@
 
 How outside code learns the shape of the model. The model itself is
 described in [model.md](model.md); this page covers the formats it is
-exported in and how they are specified, checked and versioned.
+exported in and how they are specified, documented and checked.
 
 ## One definition, everything generated
 
 Each node kind is declared once, in Lisp, with a `define-node` form (planned).
 The form gives the node's fields, each field's type, whether it is required
-or repeated, and a docstring. Everything else is generated from these
+or repeated, and documentation. Everything else is generated from these
 declarations:
 
 | Generated | What it is |
 |-----------|------------|
 | the model classes | the CLOS classes the model builder fills in |
-| `schema/model.schema.json` (planned) | a JSON Schema, draft 2020-12. It has one `$defs` entry per node kind, picked out by a constant `"kind"`, and `additionalProperties: false`. Each field's description is its docstring. The `$id` contains the schema version. |
+| `schema/model.schema.json` (planned) | a JSON Schema, draft 2020-12. It has one `$defs` entry per node kind, picked out by a constant `"kind"`, and `additionalProperties: false`. All the documentation (see below) is carried over as `title`, `description` and `examples`. |
 | `docs/model-reference.md` (planned) | the human reference: a field table for each node kind, plus one short example taken from the real spec |
 
 The generated files are committed. `make test` regenerates them and fails if
 they differ from the committed copies, so code, schema and docs cannot drift
 apart.
+
+## Documentation of every definition
+
+The schema is how a consumer learns what the data *means*, not only its
+shape. So documentation is part of every declaration, and `make test`
+rejects a declaration that lacks any of it.
+
+- **Every node kind, field, enum value and target kind** has a docstring.
+  The docstring says:
+  - what it means in the standard;
+  - where it comes from in the sources (the macro or construct, e.g. "the
+    `\label` heading of a dictionary entry's part");
+  - for fields, when the field is absent.
+
+  Node kinds and fields also carry an example value taken from the real
+  spec.
+- **Checks.** `make test` checks mechanically that every docstring is
+  present and non-empty, and that every node kind and field has an
+  example. Whether a docstring is *meaningful* is a manual check, done in
+  review (`lisp-review` checklist). A docstring that only restates the
+  name ("The id of the entry") fails that check.
+- **Everything goes into the schema.**
+  - Node kinds and fields get `title` and `description`.
+  - Enum values are emitted as `oneOf` of `{"const": …, "description": …}`,
+    so each value keeps its own meaning.
+  - Examples become `examples`.
+
+  A test walks the generated schema and fails on any definition, property
+  or enum value without a description.
+- **The reference doc** (`docs/model-reference.md`) is generated from the
+  same docstrings. Nothing about a node is written by hand anywhere else.
 
 ## Validation
 
@@ -93,37 +124,29 @@ code base.
 | `glossary.json`, `index.json` | the glossary, and the symbol index |
 | `report.json` | unresolved references and recovered TeX errors, each with its span |
 
-Every JSON file is an object with `schemaVersion` and its content.
+Every JSON file is an object with `schemaVersion` and its content, e.g.
+`{"schemaVersion": "<sha256>", "chapter": {…}}`.
 The S-expression export has the same files with `.sexp`. Each one is a
-single form `(:schema-version "1.2.0" . content)`, read back with `read`
+single form `(:schema-version "<digest>" . content)`, read back with `read`
 under the readtable documented in `docs/model-reference.md`.
 
 ## Versioning
 
-`schemaVersion` follows semver:
+Correctness comes before compatibility. Until the model is complete, the
+schema changes whenever correctness requires it. No deprecation path is
+kept, and no compatibility layer is added.
 
-- Adding an optional field or a new node kind bumps the **minor** version.
-- These changes bump the **major** version:
-  - removing or renaming anything;
-  - changing a field's type or meaning;
-  - making a field required;
-  - adding a value to an existing enum or target kind.
+- Every file states the `schemaVersion` it was written with: the
+  lowercase hex SHA-256 of the committed `schema/model.schema.json` file's
+  bytes, untruncated, so a consumer always knows exactly which
+  schema matches a file.
+- The schema is published alongside every export.
+- A summary of each schema change goes in the commit message that makes
+  it.
 
-The schema `$id` names its major version: `…/schema/v<major>/model.schema.json`.
-The base URL is the published site, fixed in M5. Each major version's
-schema stays published there.
-
-Rules for consumers:
-
-- Accept files whose major version you were built for.
-- Within that major version, **ignore unknown fields and unknown node
-  kinds**: they are minor additions.
-- `additionalProperties: false` in the schema is how *we* check our own
-  output. A consumer validating with an older schema of the same major
-  version should drop it, or validate with the schema named by the file's
-  `schemaVersion`.
-
-Each change is recorded in `schema/CHANGES.md` (planned).
+This is the one place the rule is stated; the process docs and skills link
+here. Compatibility rules are decided only when a stable release is
+planned.
 
 ## For consumers
 

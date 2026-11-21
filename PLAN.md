@@ -36,13 +36,19 @@ tested inflection rules (plurals, "-ing", ...); everything unresolved is
 reported.  **Exports** per `docs/exports.md`.
 
 First steps, before the model builder, so that the builder is written
-against them: node declarations (`define-node`) with the model classes,
-the JSON Schema and `docs/model-reference.md` generated from them and
-checked for staleness by `make test`, and the Lisp validator for the
-schema subset.  Later steps: S-expression/JSON writers, `manifest.json`,
+against them:
+
+- node declarations (`define-node`) with documentation of every node kind,
+  field and enum value (`docs/exports.md`);
+- the model classes, the JSON Schema and `docs/model-reference.md`
+  generated from them; `make test` fails if they are stale or if any
+  description or example is missing;
+- the Lisp validator for the emitted schema subset.
+
+Later steps: the S-expression and JSON writers, `manifest.json`,
 `report.json`, validation of the whole spec's exports (plus an external
-validator as a CI-only cross-check), `schema/CHANGES.md`, and
-`docs/consuming.md` with a sample export.
+validator as a CI-only cross-check), and `docs/consuming.md` with a
+sample export.
 
 ### M4 — Patch tooling
 Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
@@ -50,7 +56,7 @@ Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
 ### M5 — Consumers
 An HTML site (our own HyperSpec-like rendering, nothing borrowed from the
 HyperSpec) generated from the model and deployed to GitHub Pages; the
-exports, the JSON Schema (at its versioned `$id`) and the sample export
+exports, the JSON Schema and the sample export
 published alongside it.
 
 ## Open questions

@@ -29,6 +29,12 @@ the milestone's history file when it closes.
    - The docs the step names under *Docs:* describe the code as it now is.
      So do `docs/architecture.md` (package table, status), `AGENTS.md`
      (commands, layout) and any topic doc the change made untrue.
+   - **The schema is correct and documented.** If the step changed what
+     the model holds or means, the node declarations and their
+     documentation say so, and the generated JSON Schema and reference doc
+     are regenerated. A step that finds a schema definition or its
+     documentation wrong fixes it there and then, even if the definition
+     belongs to an earlier step (`docs/exports.md`, "Versioning").
    - Run `lisp-review` on everything, plan tick included; fix or justify
      every finding.
    - Tick the step in `docs/plan/<id>.md` (the first unticked step is the
@@ -42,6 +48,7 @@ the milestone's history file when it closes.
 Plan it as a file `docs/plan/<id>.md` and run `plan-critic` on the whole
 file once (record the date in the file); afterwards `plan-critic` runs per
 step, before the step is implemented. When every step is ticked, close it with the
-`milestone-close` skill: fold decisions into the topic docs, prune what the
+`milestone-close` skill: fold decisions into the topic docs, audit the
+schema documentation against what the model now holds, prune what the
 milestone made stale, write `docs/history/<id>.md`, delete the plan file,
 and update `PLAN.md`.

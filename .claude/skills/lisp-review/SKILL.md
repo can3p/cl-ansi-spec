@@ -27,6 +27,13 @@ description: Pre-commit quality gate for this repository — run the build/test 
   through the documented tables and protocols (resolver, primitive table,
   vocabulary), not through special cases scattered across the code. New
   code can be tested without running the whole pipeline.
+- **Schema documentation**: every `define-node` node kind, field, enum
+  value and target kind has a docstring. It says what the thing means in
+  the standard, where it comes from in the sources, when it is absent, and
+  gives a real example; a docstring that restates the name is a
+  should-fix. If the change alters what the model holds, the declarations
+  and the generated schema and reference doc reflect it. Wrong
+  definitions are fixed (`docs/exports.md`, "Versioning").
 - **Docs in step**: the docs the step names, `docs/architecture.md` and
   `AGENTS.md` describe the code as it now is, as current rules with no
   history.

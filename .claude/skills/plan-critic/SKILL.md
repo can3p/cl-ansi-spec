@@ -34,7 +34,9 @@ Act as a skeptical senior Common Lisp / TeX engineer. Try to break the plan:
 - **Modularity**: does the step respect the phase/package boundaries and
   one-way dependencies of `docs/architecture.md`? Will its pieces be
   testable and replaceable alone?
-- **Docs**: does the step name the docs it must leave up to date?
+- **Docs and schema**: does the step name the docs it must leave up to
+  date? If it touches what the model holds, does it include updating the
+  node declarations, their documentation and the generated schema?
 
 - **Completeness against the sources**: grep `spec/tex/` for constructs the
   step must handle and the plan does not mention. Cite file:line.

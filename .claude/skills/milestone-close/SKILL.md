@@ -15,14 +15,18 @@ description: Finish a milestone - fold its decisions into the topic docs, prune 
    a skill's checklist (`lisp-review`, `plan-critic`), or a topic doc.
    Sharpen an existing rule rather than adding a second one. A one-off goes
    to the history only.
-3. **Prune.** `grep -rnE '<id>\b|\bM[0-9]+\b|step [0-9]+'` over `AGENTS.md`, `.claude/skills`,
+3. **Schema audit** (once `docs/model-reference.md` exists). Have a sub-agent read the generated
+   `docs/model-reference.md` against the model built for the whole spec. It reports any
+   description that is wrong, vague, a mere restatement of the name, or
+   missing an example. Fix the declarations and regenerate.
+4. **Prune.** `grep -rnE '<id>\b|\bM[0-9]+\b|step [0-9]+'` over `AGENTS.md`, `.claude/skills`,
    `docs/*.md` and `PLAN.md`. Delete rules that only held during the
    milestone, and restate lasting ones without the milestone's name. Check
    the paths, symbols and commands the docs name against the code.
-4. **Next milestone.** If the milestone changed what the next one assumes,
+5. **Next milestone.** If the milestone changed what the next one assumes,
    update its outline in `PLAN.md`.
-5. **History.** Write `docs/history/<id>.md`: what was built, what turned
+6. **History.** Write `docs/history/<id>.md`: what was built, what turned
    out wrong, what was left out on purpose, the options weighed, and which
    docs and skills changed. Delete `docs/plan/<id>.md`, and update
    `PLAN.md` Status.
-6. **Commit** the docs separately from the last step's code. Push.
+7. **Commit** the docs separately from the last step's code. Push.
