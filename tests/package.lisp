@@ -1,0 +1,16 @@
+;;;; tests/package.lisp
+
+(defpackage #:cl-ansi-spec/tests
+  (:use #:cl #:cl-ansi-spec)
+  (:import-from #:parachute
+                #:define-test #:test #:status #:is #:true #:false #:fail)
+  (:export #:run-tests))
+
+(in-package #:cl-ansi-spec/tests)
+
+(define-test cl-ansi-spec
+  :description "Root suite of cl-ansi-spec.")
+
+(defun run-tests ()
+  "Run the whole test suite, print a report, and return true iff it passed."
+  (eq :passed (status (test 'cl-ansi-spec :report 'parachute:plain))))
