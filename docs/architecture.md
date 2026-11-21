@@ -167,7 +167,7 @@ has the export formats, their JSON Schema and versioning.
   export writers.
 - Each package has its own test suite under `tests/<phase>/`, and its own
   debugging tool under `tools/`: `make tokens`, and as their phases land
-  `make vocab`, `make expand` (planned), `make events` (planned)
+  `make vocab`, `make expand`, `make events` (planned)
   and `make model` (planned).
 
 ## Status
@@ -176,7 +176,7 @@ has the export formats, their JSON Schema and versioning.
 |-------|-------|
 | 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
-| 2–3 Expander, semantic layer | planned: [`docs/plan/m2.md`](plan/m2.md) |
+| 2–3 Expander, semantic layer | in progress: quantities, state and the expansion core done (`src/expand/`, `make expand`); the rest planned in [`docs/plan/m2.md`](plan/m2.md) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |
 
 Related: [process](process.md) explains how work advances.

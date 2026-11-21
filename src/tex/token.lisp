@@ -44,6 +44,12 @@ NAME is a string (a single character for an active character)."
         (let ((name (coerce (copy-seq name) 'simple-string)))
           (setf (gethash name names) (%make-control-sequence name nil))))))
 
+(defun make-frozen-control-sequence (name)
+  "Return a new control sequence NAME that is not interned: TeX's frozen
+copies (\\relax, \\fi, \\cr, ...) that the expander inserts and no
+definition in the sources can reach."
+  (%make-control-sequence (coerce (copy-seq name) 'simple-string) nil))
+
 (defun intern-active-character (state code)
   "Return the unique active character with character code CODE in STATE."
   (let ((names (state-names state)))

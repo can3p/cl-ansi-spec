@@ -3,7 +3,7 @@
 SBCL ?= sbcl
 LISP := $(SBCL) --noinform --non-interactive --no-sysinit --no-userinit
 
-.PHONY: all deps test tokens vocab clean distclean
+.PHONY: all deps test tokens vocab expand clean distclean
 
 all: test
 
@@ -21,6 +21,10 @@ tokens: deps
 # make vocab [JOB=chap-1] [FILE=setup-aux.tex] [NAME=\term] [LIMIT=40]
 vocab: deps
 	@JOB='$(JOB)' FILE='$(FILE)' NAME='$(NAME)' LIMIT='$(LIMIT)' $(LISP) --load tools/vocab.lisp
+
+# Expand a spec file as a TeX job: make expand FILE=chap-1 [LINES=10-20]
+expand: deps
+	@FILE='$(FILE)' LINES='$(LINES)' $(LISP) --load tools/expand.lisp
 
 # Remove build outputs (fasls).
 clean:

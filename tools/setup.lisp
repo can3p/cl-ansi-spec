@@ -42,3 +42,18 @@ or signals a serious condition."
       (serious-condition (condition)
         (format *error-output* "~&Error: ~A~%" condition)
         1))))
+
+(defun parse-line-range (string)
+  "Parse \"A-B\", \"A-\" or \"A\" into an inclusive range (FIRST LAST),
+LAST being NIL for no upper bound.  NIL or \"\" means every line."
+  (if (or (null string) (string= string ""))
+      (list 1 nil)
+      (handler-case
+          (let* ((dash (position #\- string))
+                 (first (parse-integer string :end dash))
+                 (last (cond ((null dash) first)
+                             ((= dash (1- (length string))) nil)
+                             (t (parse-integer string :start (1+ dash))))))
+            (list first last))
+        (parse-error ()
+          (error "LINES must look like A-B, A- or A, not ~S." string)))))

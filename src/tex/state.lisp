@@ -9,6 +9,10 @@
 ;;;; the entry as belonging to the outermost level, so that leaving a group
 ;;;; keeps ("retains") it instead of restoring the saved value.  Nothing is
 ;;;; ever copied wholesale.
+;;;;
+;;;; The table protocol (MAKE-EQUIVALENTS, EQUIVALENT, ASSIGN) is exported:
+;;;; the expander keeps its own tables (meanings, registers, ...) under
+;;;; the same save stack.
 
 (in-package #:cl-ansi-spec/tex)
 
@@ -216,16 +220,26 @@ otherwise locally to the current group.  Returns VALUE."
   (check-character-code value)
   (assign state (state-uccodes state) code value global))
 
+(defun integer-parameter (state name)
+  "Return the integer parameter NAME (a keyword, e.g. :ENDLINECHAR for
+\\endlinechar); 0 unless assigned."
+  (equivalent (state-integers state) name))
+
+(defun set-integer-parameter (state name value &key global)
+  "Assign the integer VALUE to the integer parameter NAME (a keyword)."
+  (check-type name keyword)
+  (check-type value integer)
+  (assign state (state-integers state) name value global))
+
 (defun endlinechar (state)
   "Return \\endlinechar: the code appended to every input line, or a
 value outside 0..255 for none."
-  (equivalent (state-integers state) :endlinechar))
+  (integer-parameter state :endlinechar))
 
 (defun set-endlinechar (state value &key global)
   "Assign VALUE to \\endlinechar.  Any integer is allowed, as in TeX;
 values outside 0..255 mean that nothing is appended to input lines."
-  (check-type value integer)
-  (assign state (state-integers state) :endlinechar value global))
+  (set-integer-parameter state :endlinechar value :global global))
 
 ;;; Initial states.
 
