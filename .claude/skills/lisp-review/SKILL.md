@@ -13,6 +13,11 @@ description: Pre-commit quality gate for this repository — run the build/test 
    (by line range), and the docs the step names. Ask for a ranked list (bug /
    should-fix / nit) with file:line and a concrete fix, under 400 words, no
    file modifications, using the checklist below.
+   Save the diff to a scratchpad file first and give the reviewer that
+   path, a budget (at most 4 tool calls) and "at most 6 findings, under
+   250 words". If the next plan step is known, append the `plan-critic`
+   brief for it to the same spawn: a spawn's fixed cost (~60-70k tokens)
+   dwarfs its reading, so one spawn serves both.
 4. Fix bugs and should-fixes; deliberately skipped items go in the commit message.
 
 ## Checklist for reviewers (grown from past findings)

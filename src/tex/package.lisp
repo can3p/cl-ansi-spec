@@ -6,7 +6,8 @@
 
 (defpackage #:cl-ansi-spec/tex
   (:use #:cl)
-  (:import-from #:cl-ansi-spec #:read-spec-file #:spec-directory)
+  (:import-from #:cl-ansi-spec #:read-spec-file
+                #:find-input-file #:source-search-path)
   (:export
    ;; Category codes
    #:+escape+ #:+begin-group+ #:+end-group+ #:+math-shift+ #:+alignment-tab+

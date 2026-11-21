@@ -61,7 +61,11 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 | 5 | Consumers | model → S-expression/JSON exports, HTML site | `…/export`, `…/html` | M3, M5 |
 
 - **Sources.** These are the pristine tree and the plain-TeX files vendored
-  under `vendor/plain/` (planned). File access goes through a pluggable *resolver*.
+  under `vendor/plain/` (`vendor/PROVENANCE.md`). An `\input` name is looked
+  up along a search path, the spec tree first (`find-input-file` in
+  `src/source.lisp`); a name found in both trees is an error, so each source
+  keeps its own file name in spans. File access goes through a pluggable
+  *resolver*, which by default follows that search path.
   Missing generated files (`chap-N.fig`, `.tc`, `.toc`, `.idx`) are
   synthesised by the resolver, not treated as errors.
 - **Reader** ([reader](reader.md)). This is a lazy, pull-based token stream. It consults the
@@ -165,7 +169,7 @@ has the export formats, their JSON Schema and versioning.
 
 | Phase | State |
 |-------|-------|
-| 0 Sources | pristine tree and resolver done; patching is M4 |
+| 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | planned: [`docs/plan/m2.md`](plan/m2.md) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |

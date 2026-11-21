@@ -39,4 +39,6 @@ dimension-dependent branch the setup files take; each one has a test.
 Each chapter file is a separate TeX job. Its `\jobname` is the chapter name.
 Every job starts from a snapshot of the state after Knuth's `plain.tex` and
 `hyphen.tex` were run through our expander. Those files are vendored
-unmodified in `vendor/plain/` (planned) with their provenance.
+unmodified in `vendor/plain/`, with their provenance and licence in
+`vendor/PROVENANCE.md`; `patches/` never applies to them. Jobs read inputs
+along the source search path: the spec tree, then `vendor/plain/`.

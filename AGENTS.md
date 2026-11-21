@@ -27,6 +27,8 @@
 # Repository layout
 
 * `spec/tex/` — pristine dpANS3 TeX sources. Never edit; see `spec/PROVENANCE.md`.
+* `vendor/plain/` — Knuth's `plain.tex` and `hyphen.tex`, unmodified (their
+  licence requires it). Never edit; see `vendor/PROVENANCE.md`.
 * `patches/` — independent, numbered patches applied on top of `spec/tex/`.
 * `src/` — the `cl-ansi-spec` system. `tests/` — `cl-ansi-spec/tests` (Parachute).
 * `tools/` — command-line tools, written in Lisp; `make` is only a thin wrapper.
@@ -50,8 +52,9 @@
   pass `LINES` to keep the output small; `SKIPS=1` also lists comments,
   skipped spaces, etc.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
-* `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine
-  sources (also run in CI; `make test` checks the file list against it).
+* `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
+  `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine
+  sources (also run in CI; `make test` checks both file lists against them).
 
 # Process
 

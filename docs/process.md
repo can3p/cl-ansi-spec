@@ -26,7 +26,7 @@ a convention. In `AGENTS.md`, `PLAN.md`, `docs/*.md`, `docs/plan/*.md` and
 
 - every repository path in backticks exists. A path is a code span without
   spaces that starts with `docs/`, `src/`, `tests/`, `tools/`, `spec/`,
-  `patches/`, `.github/`, `.claude/`, `vendor/` (planned) or `schema/` (planned), and may end in
+  `patches/`, `.github/`, `.claude/`, `vendor/` or `schema/` (planned), and may end in
   `:<line>` or `:<line>-<line>`. A glob (`*`) must match something.
   Placeholders (`<id>`, `…`) are not checked, and neither are bare file
   names, system names, export paths or command lines;
