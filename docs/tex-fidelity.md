@@ -12,6 +12,30 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
 - Assignments and grouping: the save stack, `\global`, `\globaldefs`,
   `\afterassignment` and `\aftergroup`; registers and parameters with
   INITEX defaults; TeX's integer, dimension and glue arithmetic.
+- Quantities (`src/expand/`, files `arithmetic.lisp`, `units.lisp`,
+  `glue.lisp`, `print.lisp`): integers are CL integers, dimensions integers
+  in scaled points, glue an immutable struct (width, stretch, shrink,
+  orders 0–3 for finite/fil/fill/filll, and a mu tag for `\muskip`).
+  Every rule follows *TeX: The Program* and cites its section number;
+  nothing is copied from it.
+  - *Arithmetic*: `x_over_n`, `xn_over_d` and `nx_plus_y` as TeX computes
+    them, including the value TeX leaves on overflow.  An operation that
+    can overflow returns its result, then an overflow flag (TeX's
+    `arith_error`), then the remainder where TeX has one; the scanner
+    reports the error ("Arithmetic overflow", "Dimension too large"),
+    because only it knows TeX's recovery.  `\divide` by 0 is an overflow.
+    `\advance` is unchecked in TeX: sums wrap to 32 bits, as TeX's
+    implementations do, so registers hold any 32-bit word.
+  - *Units* are data (`physical-unit-table`: exact ratios to the point) and
+    pure functions in scan_dimen's order: `true` (through `\mag`), the
+    physical unit, or a scale by a unit value (em/ex from the font's
+    `\fontdimen`, an internal dimen, mu), then the sign and the
+    `max_dimen` clamp.  Decimal fractions round as `round_decimals` (17
+    digits at most).  Parsing the keywords is the scanner's.
+  - *Printing* (`\the`, `\showthe`): `print_scaled`, so every dimension
+    prints with the fewest digits that read back as itself; glue shows
+    ` plus `/` minus ` only when nonzero, with `fil`, `fill`, `filll` or the
+    unit (`pt`, or `mu` for mu glue).
 - Alignments: preamble, templates, `\span`, `\omit`, `\noalign`, `\cr`,
   `\crcr`.
 - Modes, tracked so that `\ifmmode`, `\leavevmode` and `\par` behave as in

@@ -18,6 +18,13 @@ Lisp draft standard (dpANS3)."
                              (:file "line")
                              (:file "scanner")
                              (:file "input-stack")))
+               (:module "expand"
+                :serial t
+                :components ((:file "package")
+                             (:file "arithmetic")
+                             (:file "units")
+                             (:file "glue")
+                             (:file "print")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
@@ -38,6 +45,9 @@ Lisp draft standard (dpANS3)."
                 :components ((:file "state")
                              (:file "scanner")
                              (:file "input-stack")))
+               (:module "expand"
+                :serial t
+                :components ((:file "quantities")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))
