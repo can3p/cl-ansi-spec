@@ -33,8 +33,16 @@ resolved: section and figure references from `\Define*` events (not from
 the stale generated `setup-sections.tex`/`setup-figures.tex`), operator
 references to entries, `\term` uses to glossary entries with explicit,
 tested inflection rules (plurals, "-ing", ...); everything unresolved is
-reported.  **Export** to documented formats (S-expressions and JSON), with
-schema tests over the whole spec.
+reported.  **Exports** per `docs/exports.md`.
+
+First steps, before the model builder, so that the builder is written
+against them: node declarations (`define-node`) with the model classes,
+the JSON Schema and `docs/model-reference.md` generated from them and
+checked for staleness by `make test`, and the Lisp validator for the
+schema subset.  Later steps: S-expression/JSON writers, `manifest.json`,
+`report.json`, validation of the whole spec's exports (plus an external
+validator as a CI-only cross-check), `schema/CHANGES.md`, and
+`docs/consuming.md` with a sample export.
 
 ### M4 — Patch tooling
 Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
@@ -42,7 +50,8 @@ Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
 ### M5 — Consumers
 An HTML site (our own HyperSpec-like rendering, nothing borrowed from the
 HyperSpec) generated from the model and deployed to GitHub Pages; the
-exports published alongside it.
+exports, the JSON Schema (at its versioned `$id`) and the sample export
+published alongside it.
 
 ## Open questions
 

@@ -31,7 +31,7 @@
 * `src/` — the `cl-ansi-spec` system. `tests/` — `cl-ansi-spec/tests` (Parachute).
 * `tools/` — command-line tools, written in Lisp; `make` is only a thin wrapper.
 * `docs/` — `architecture.md` (start here), `process.md`, topic docs (`reader`, `events`,
-  `vocabulary`, `tex-fidelity`, `model`), `plan/<id>.md`
+  `vocabulary`, `tex-fidelity`, `model`, `exports`), `plan/<id>.md`
   (running milestone), `history/` (finished milestones; not read by default).
 * `.deps/` — git-ignored checkouts of the dependencies pinned in `tools/deps.sexp`.
 

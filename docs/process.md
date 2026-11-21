@@ -11,7 +11,7 @@ docs** describe the same thing. It is not finished when the code lands.
 | `PLAN.md` | index: current milestone and step; outline of later milestones | at session start |
 | `docs/architecture.md` | end goal, phases, packages, example | at session start |
 | `docs/plan/<id>.md` | the running milestone's steps, each naming the docs it updates | at session start, only the current milestone's file |
-| `docs/<topic>.md` | design of one phase or interface (`reader`, `events`, `vocabulary`, `tex-fidelity`, `model`) | when the step touches that topic |
+| `docs/<topic>.md` | design of one phase or interface (`reader`, `events`, `vocabulary`, `tex-fidelity`, `model`, `exports`) | when the step touches that topic |
 | `docs/history/<id>.md` | what a finished milestone did and decided | never by default |
 
 The docs state **current rules with their reasons**, never history.

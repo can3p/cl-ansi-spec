@@ -139,7 +139,8 @@ Document model, as phase 4 builds it (spans and most content omitted):
               (:operator-ref "endp" :target (:entry "endp")) " is to test ...")))))
 ```
 
-[Document model](model.md) has the full schema and the export formats.
+[Document model](model.md) has the schema draft; [exports](exports.md)
+has the export formats, their JSON Schema and versioning.
 
 ## Code layout and composability
 

@@ -9,8 +9,9 @@ as the code.
 The model is a tree of nodes. Each node has a kind, named fields, optional
 children and a `:span`. The span gives the source file, line and offsets
 (`docs/architecture.md`, principle 4). In Lisp, nodes are CLOS instances. The
-plist notation below is the S-expression export, and the JSON export maps it
-one to one (see "Exports").
+plist notation below is the S-expression export. The JSON export follows the
+rules in [exports.md](exports.md); for example, text becomes `{"kind": "text"}`
+objects there.
 
 ### Document level
 
@@ -93,15 +94,10 @@ text.
 
 ## Exports
 
-- **S-expressions**: exactly the notation above, one file per chapter plus
-  `glossary.sexp` and `index.sexp`. They can be read back with `read` under a
-  documented readtable.
-- **JSON**: `{"kind": "dictionary-entry", "id": "endp", …, "children": […]}`.
-  Keywords become strings. Strings and inline objects alternate in
-  `children`.
-
-Both formats carry a schema version. Tests check the full spec against the
-schema.
+S-expression and JSON exports are generated from the same node declarations
+as the model classes. They come with a generated JSON Schema, a reference
+doc and a manifest, and they are versioned. All of this is in
+[exports.md](exports.md).
 
 ## Not in the model
 
