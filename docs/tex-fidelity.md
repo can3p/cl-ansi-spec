@@ -36,6 +36,32 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     prints with the fewest digits that read back as itself; glue shows
     ` plus `/` minus ` only when nonzero, with `fil`, `fill`, `filll` or the
     unit (`pt`, or `mu` for mu glue).
+- The state (`src/expand/state.lisp`, with `meaning.lisp`, `font.lisp`,
+  `parameters.lisp`): the rest of TeX's table of equivalents on top of the
+  reader's `tex-state`, all under its one save stack, so one `end-group`
+  restores everything.
+  - *Meanings* of control sequences and active characters: undefined
+    (`nil`), macro (parameter text, body, `\long`/`\outer`), primitive,
+    a character (`\let` to a character token), a shorthand (`\chardef`,
+    `\mathchardef`, `\countdef` … `\toksdef`), or a font.  Meanings are
+    immutable, so `\let` shares them; `meaning=` compares as `\ifx` does.
+  - *Registers* 0–255 of each kind (count, dimen, skip, muskip, toks,
+    box), every TeX82 parameter by keyword (`:tolerance`), and the math,
+    space-factor and delimiter codes.  Values are type-checked (a skip is
+    never mu glue); range errors TeX reports ("Invalid code") are the
+    scanner's.  Integer parameters live in the reader's table, since the
+    reader reads `\endlinechar`.
+  - *Defaults are INITEX's* and are not stored: an unassigned entry reads
+    as INITEX's value (§§232, 240), which also gives characters beyond 255
+    TeX's rule.  `\time`, `\day`, `\month`, `\year` are TeX's own
+    fallback (noon, 4 July 1776), so that jobs are reproducible.
+  - *`\globaldefs`* is applied to every assignment, as TeX does before
+    the assignment is made (so `\globaldefs=1` itself is local).
+  - *Fonts* are identifiers: file, size specification, the name of the
+    control sequence that loaded it, and the `\fontdimen`, `\hyphenchar`
+    and `\skewchar` values assigned (globally, as in TeX).  `\font`
+    reuses a font of the same file and size; `scaled 1000` is the design
+    size, but without metrics an `at` size never equals it.
 - Alignments: preamble, templates, `\span`, `\omit`, `\noalign`, `\cr`,
   `\crcr`.
 - Modes, tracked so that `\ifmmode`, `\leavevmode` and `\par` behave as in

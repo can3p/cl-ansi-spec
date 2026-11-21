@@ -17,7 +17,8 @@
    ;; State: equivalents and the save stack
    #:tex-state #:make-initex-state #:make-plain-state #:apply-plain-catcodes
    #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
-   #:endlinechar #:set-endlinechar
+   #:endlinechar #:set-endlinechar #:integer-parameter #:set-integer-parameter
+   #:equivalents #:make-equivalents #:equivalent #:assign
    #:group-level #:begin-group #:end-group #:current-group-kind #:save-stack-depth
    #:group-underflow
    ;; Spans, control sequences and tokens
