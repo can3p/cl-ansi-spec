@@ -17,8 +17,12 @@
   parsing, but **never borrow anything from it** (text, markup, structure,
   examples, links) — its license forbids it. Everything rendered comes from
   `spec/tex/` (plus `patches/`).
-* Keep the plan in `PLAN.md`, so that any new session can pick up where the
-  last one stopped. Update it in the same commit as the work.
+* Keep the plan in `PLAN.md` (an index) and `docs/plan/<id>.md` (the running
+  milestone), so that any new session can pick up where the last one
+  stopped. Update it in the same commit as the work.
+* End goal and design: `docs/architecture.md`. The product is a semantic
+  model of the standard, not a TeX rendering; keep the code modular (one
+  package per phase, one-way dependencies).
 
 # Repository layout
 
@@ -26,6 +30,9 @@
 * `patches/` — independent, numbered patches applied on top of `spec/tex/`.
 * `src/` — the `cl-ansi-spec` system. `tests/` — `cl-ansi-spec/tests` (Parachute).
 * `tools/` — command-line tools, written in Lisp; `make` is only a thin wrapper.
+* `docs/` — `architecture.md` (start here), `process.md`, topic docs (`reader`, `events`,
+  `vocabulary`, `tex-fidelity`, `model`, `exports`), `plan/<id>.md`
+  (running milestone), `history/` (finished milestones; not read by default).
 * `.deps/` — git-ignored checkouts of the dependencies pinned in `tools/deps.sexp`.
 
 # Commands
@@ -46,11 +53,31 @@
 
 # Process
 
-* New session: read `PLAN.md` first; continue at its first unchecked step.
-* Before implementing any newly planned step, run the `plan-critic` skill
-  (`.claude/skills/plan-critic`) on it and revise `PLAN.md` on the feedback.
-* Before each commit, run the `lisp-review` skill (`.claude/skills/lisp-review`):
-  build gate + sub-agent review of the diff; fix or justify every finding.
+See `docs/process.md`. In short:
+
+* New session: read `PLAN.md`, `docs/architecture.md` and the current
+  `docs/plan/<id>.md`; continue at its first unchecked step.
+* Before implementing a step: `plan-critic` skill. To finish it: `step-close`
+  skill (docs up to date, `lisp-review`, plan ticked, one commit). To finish
+  a milestone: `milestone-close` skill.
+
+# Reading economy
+
+Context is re-read on every turn; what you load early you pay for all
+session.
+
+* Learn the project from `docs/`, not from the code. Each topic doc has a
+  file table; open code only for the step at hand.
+* Never `cat` whole directories or several source files at once. To see a
+  file's contents: its header (`head -12 FILE`) and its definitions
+  (`grep -n '^(def' FILE`), then `Read` only the line ranges you need.
+* Never read whole `spec/tex/` files: `grep -n` them, `make tokens … LINES=`,
+  or `sed -n 'a,bp'`.
+* Pipe long command output through `tail`/`head`, or write it to a file in
+  the scratchpad and grep that file.
+* Every sub-agent brief names what to read (docs and line ranges), forbids
+  whole-file and whole-directory reads, gives a tool-call budget, and asks
+  for a bounded answer (word limit, fixed format).
 
 # Environment notes
 

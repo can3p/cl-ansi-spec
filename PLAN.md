@@ -1,139 +1,63 @@
 # Plan
 
-The living plan for this repository. **Any session starts here**: read this
-file and `AGENTS.md`, then continue at the first unchecked step of the
-current milestone. Update this file in the same commit as the work it
-describes (tick steps, record decisions, adjust what comes next).
+The index of planned work. **A session reads this file, `docs/architecture.md`
+and the one milestone file it works on — nothing else up front.** How a step
+and a milestone advance is in `docs/process.md`.
 
-Goal: a complete, reproducible parser of the dpANS3 TeX sources into an
-AST, and a clean HTML rendering of it published on GitHub Pages.
+Goal: a semantic model of the standard, parsed from `spec/tex/`
+(`docs/architecture.md`).
 
 ## Status
 
-- Current milestone: **M2 — Macro expander** (to be planned and critiqued)
-- Last completed: M1 (TeX reader), all steps below.
+- Current: **M2 — Expander and semantic layer** (first unticked step) —
+  [`docs/plan/m2.md`](docs/plan/m2.md).
+- Done: M0 (scaffold), M1 (TeX reader) — [`docs/history/m0-m1.md`](docs/history/m0-m1.md).
 
 ## Milestones
 
-### M0 — Scaffold ✅
-- [x] Vendor sources into `spec/tex/` with provenance + SHA256SUMS.
-- [x] ASDF system, Parachute tests, strict build, pinned deps, CI.
-- [x] `lisp-review` skill.
+A milestone gets its own file `docs/plan/<id>.md` (steps, order, docs each
+step updates) when it is planned; the file is deleted when the milestone
+closes and its history goes to `docs/history/`.  Not yet planned in detail:
 
-### M1 — TeX reader (tokenizer) ✅
-TeX tokenisation depends on category codes that the sources change while
-being read (`\catcode`\|=\active`, active `,`/`-` inside `\begincom`,
-`\catothers` in format directives, `\obeylines`, `\IgnoreWhiteSpace`).
-So the reader is a **lazy token stream** that consults the *current*
-catcodes and `\endlinechar` at every token, pulled by the expander (M2) —
-never a whole-file pre-pass. M1 builds TeX's machinery below expansion;
-the `\input` *primitive* (which needs expansion to read its file name,
-e.g. `\input\jobname.toc`, `\input #1`) belongs to M2.
+### M3 — Semantic document model
+A documented schema (Lisp classes) for the standard: chapters and
+sections (numbered, labelled), glossary entries, dictionary entries (names,
+kind, `\label` sections such as Syntax, Arguments and Values, Description,
+Examples, Affected By, Exceptional Situations, See Also, Notes, ...),
+figures and tables, BNF/syntax, issues (ranges over content), editor
+notes; inline content as a small tree of semantic nodes.  Built from the
+M2 event streams of all jobs.  Tables of contents and figure lists come
+from section and figure events (not from `\write`s, which the options
+gate and which carry `\pagenumber`).  The cross-reference graph is
+resolved: section and figure references from `\Define*` events (not from
+the stale generated `setup-sections.tex`/`setup-figures.tex`), operator
+references to entries, `\term` uses to glossary entries with explicit,
+tested inflection rules (plurals, "-ing", ...); everything unresolved is
+reported.  **Exports** per `docs/exports.md`.
 
-Steps (each separately reviewable, in this order):
+First steps, before the model builder, so that the builder is written
+against them:
 
-- [x] **1. Token dump tool first** — `tools/tokens.lisp`, `make tokens
-      FILE=… [LINES=a-b]`: compact one-token-per-line dump, used to debug
-      every later step. Grows as the steps land.
-- [x] **2. `src/tex/state.lisp` — equivalents + save stack.** One TeX-style
-      state (eqtb-like): catcode, lccode, uccode tables, `\endlinechar`
-      (later: meanings, registers). Scoping via a single **save stack** of
-      (location . old-value) entries restored at group end — not table
-      copying. Includes `begin-group`/`end-group` and global assignment.
-      Initialised with INITEX defaults plus the plain-TeX catcode changes,
-      each listed and tested: `\`=0, `{`=1, `}`=2, `$`=3, `&`=4, `^^M`=5,
-      `#`=6, `^`=7, `^^K`=7, `_`=8, `^^A`=8, `^^@`=9, `^^I`=10, space=10,
-      letters=11, `~`=13, `^^L`=13 (active), `%`=14, `^^?`=15, others=12.
-      Plain-TeX *macros* are not part of M1 (see open questions).
-- [x] **3. `src/tex/token.lisp` — tokens.** Character tokens (char +
-      catcode) and symbolic tokens; control sequences **and active
-      characters** share one interned *meaning namespace* (so `\let<=\LT`,
-      `\ifx`, `\csname` are cheap in M2). Each token carries a source span
-      (file name, start/end line and column). TeX equality ignores spans.
-- [x] **4. `src/tex/line.lisp` — line buffer.** Reads a file line by line;
-      strips trailing spaces (103 files have them); appends `\endlinechar`
-      as read from state at the moment the line is loaded.
-- [x] **5. `src/tex/scanner.lisp` — state machine** (TeXbook ch. 7–8):
-      states N/M/S; space skipping after control words; `\par` on empty
-      lines; comments (14) and ignored (9) characters; invalid (15) →
-      condition; `^^` notation (`^^X`, `^^hh`) everywhere incl. control
-      sequence names; control symbols vs words.
-- [x] **6. `src/tex/input-stack.lisp` — TeX's single input stack.** Levels
-      of kind file, token list (macro bodies, inserted lists) and back
-      list; operations `push-file`, `push-tokens`, `back-input`,
-      `next-token`, `peek`, end-of-file handling; **pluggable file
-      resolver** returning a stream or a synthesised source, so missing
-      generated files (`chap-N.fig`, `.tc`, `.toc`, `.idx`) are a hook M3
-      fills, not an error.
+- node declarations (`define-node`) with documentation of every node kind,
+  field and enum value (`docs/exports.md`);
+- the model classes, the JSON Schema and `docs/model-reference.md`
+  generated from them; `make test` fails if they are stale or if any
+  description or example is missing;
+- the Lisp validator for the emitted schema subset.
 
-Tests:
-- Golden token dumps for small fixtures, one per TeXbook rule, including
-  catcode changes in the middle of a line and `\endlinechar` changes.
-- **Coverage property**: for every `spec/tex/*.tex` (not `.text`/`.lisp`),
-  the source spans of tokens plus skipped comments/spaces/line ends cover
-  the file exactly, in order — proves locations are right.
-- Save-stack tests: nested groups, global assignments inside groups.
-
-Done when: every step ticked, coverage property green on all 125 `.tex`
-files under plain catcodes, `lisp-review` clean.
-
-### M2 — Macro expander
-Macros from `setup-*.tex` (~1000 `\def`s) and inline `\def`s expanded per
-TeX semantics: delimited/undelimited parameters, `\let`, `\edef`/`\xdef`/
-`\gdef`, grouping, `\expandafter`, `\noexpand`, `\csname`, conditionals
-(`\if`, `\ifx`, `\ifcase`, `\ifnum`, `\ifdim`, `\ifodd`, `\ifmmode`, …),
-`\catcode` assignments, registers as needed. A configurable set of
-*semantic* control sequences (`\term`, `\param`, `\begincom`, `\label`,
-`\code`, tables, …) is not expanded but emitted as structure.
-Plain-TeX macros come from vendored `plain.tex`, loaded through the
-expander first (see decisions log).
-Detailed steps to be planned (and critiqued) when M1 is done.
-
-### M3 — Document model / AST
-Chapters, sections, dictionary entries, glossary, figures, tables, BNF,
-cross-references; synthesise the generated `.fig`/`.tc`/`.toc`/`.idx` data.
+Later steps: the S-expression and JSON writers, `manifest.json`,
+`report.json`, validation of the whole spec's exports (plus an external
+validator as a CI-only cross-check), and `docs/consuming.md` with a
+sample export.
 
 ### M4 — Patch tooling
 Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
 
-### M5 — HTML renderer + GitHub Pages deployment
-
-## Decisions log
-
-- 2026-11-20: Sources vendored verbatim from LispLang/ansi-spec@e18e52d.
-- 2026-11-20: Parachute over FiveAM (Alexandria unreachable from the agent
-  network); deps pinned by commit, no Quicklisp.
-- 2026-11-21: Reader is lazy and catcode-driven (sources change catcodes).
-- 2026-11-21: M1 revised after plan-critic: single input stack with
-  back-input and resolver hook in M1, `\input` primitive in M2; eqtb-like
-  state with one save stack instead of copied catcode tables; active chars
-  share the control-sequence meaning namespace; coverage-property tests
-  instead of token counts; token dump tool built first.
-- 2026-11-21: Source locations name the file actually read, by file name
-  relative to the tree root. Patched and pristine trees use the same names,
-  so locations stay meaningful once M4 exists. M4 may add the patch origin
-  to these locations.
-- 2026-11-21: Plain-TeX macro layer: **option A** (user decision). Vendor
-  Knuth's `plain.tex` unmodified (own directory, with provenance) and run
-  it through our expander before the spec, as TeX does. Typesetting-only
-  primitives it relies on (fonts, boxes, ...) are accepted and recorded or
-  ignored by the expander, never faked as macros. Candidate source: the
-  Debian/Ubuntu `texlive-base` package (reachable via apt); verify against
-  CTAN's published checksum where possible. Planned in detail with M2.
-- 2026-11-21: The HyperSpec may be consulted for ambiguity only; nothing is
-  ever copied from it (see AGENTS.md).
-
-- 2026-11-21: M1 implementation notes.  The token dump tool landed together
-  with the scanner (it has nothing to dump before tokens exist).  Spans are
-  file character offsets [start, end) plus line/column of start; a line's
-  \endlinechar owns the removed trailing spaces and the newline, otherwise
-  they are reported as a `:line-end` skip.  Every buffer element keeps its
-  file offset, so `^^` notation inside control sequence names is rewritten
-  in the buffer exactly as TeX does (a later catcode change cannot re-read
-  it).  Character tables are vectors for codes 0-255 plus a hash table for
-  larger codes (patched sources may be UTF-8), defaulting to category 12.
-  `next-token` returns NIL at the end of all input; `\endinput`, `\outer`
-  checks and `\everyeof`-style hooks are left to M2.
+### M5 — Consumers
+An HTML site (our own HyperSpec-like rendering, nothing borrowed from the
+HyperSpec) generated from the model and deployed to GitHub Pages; the
+exports, the JSON Schema and the sample export
+published alongside it.
 
 ## Open questions
 

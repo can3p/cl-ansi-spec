@@ -8,11 +8,35 @@ description: Pre-commit quality gate for this repository — run the build/test 
 1. `make test 2>&1 | tail -5` must exit 0 (any compiler warning fails the build).
 2. `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` must pass: `spec/tex/` is never edited.
 3. Spawn a review sub-agent (a mid-size model is enough) on `git diff` / new
-   files, excluding `spec/tex/`. Ask for a ranked list (bug / should-fix / nit)
-   with file:line and a concrete fix, under 400 words, no file modifications.
+   files, excluding `spec/tex/`. Give it the diff command and
+   `docs/architecture.md`; it reads only the diff, the files the diff touches
+   (by line range), and the docs the step names. Ask for a ranked list (bug /
+   should-fix / nit) with file:line and a concrete fix, under 400 words, no
+   file modifications, using the checklist below.
 4. Fix bugs and should-fixes; deliberately skipped items go in the commit message.
 
 ## Checklist for reviewers (grown from past findings)
+
+- **End goal** (`docs/architecture.md`): the change serves the semantic
+  model. It keeps source spans and meaning, adds no typesetting emulation,
+  and its output matches the documented interface of the next phase.
+- **Composability**: code sits in the package of its phase. It uses only
+  exported symbols of lower phases and never reaches upward. Each file has
+  one job and a header; functions are small and named for what they do.
+  State is passed explicitly, and specials are documented. Extension goes
+  through the documented tables and protocols (resolver, primitive table,
+  vocabulary), not through special cases scattered across the code. New
+  code can be tested without running the whole pipeline.
+- **Schema documentation**: every `define-node` node kind, field, enum
+  value and target kind has a docstring. It says what the thing means in
+  the standard, where it comes from in the sources, when it is absent, and
+  gives a real example; a docstring that restates the name is a
+  should-fix. If the change alters what the model holds, the declarations
+  and the generated schema and reference doc reflect it. Wrong
+  definitions are fixed (`docs/exports.md`, "Versioning").
+- **Docs in step**: the docs the step names, `docs/architecture.md` and
+  `AGENTS.md` describe the code as it now is, as current rules with no
+  history.
 
 - **Reproducibility**: tools must ignore user/system ASDF config (source
   registry *and* output translations); deps pinned by commit in `tools/deps.sexp`.
