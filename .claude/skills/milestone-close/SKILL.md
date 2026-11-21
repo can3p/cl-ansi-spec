@@ -15,8 +15,8 @@ description: Finish a milestone - fold its decisions into the topic docs, prune 
    a skill's checklist (`lisp-review`, `plan-critic`), or a topic doc.
    Sharpen an existing rule rather than adding a second one. A one-off goes
    to the history only.
-3. **Schema audit** (once `docs/model-reference.md` exists). Have a sub-agent read the generated
-   `docs/model-reference.md` against the model built for the whole spec. It reports any
+3. **Schema audit** (once `docs/model-reference.md` (planned) exists). Have a sub-agent read the generated
+   reference doc against the model built for the whole spec. It reports any
    description that is wrong, vague, a mere restatement of the name, or
    missing an example. Fix the declarations and regenerate.
 4. **Prune.** `grep -rnE '<id>\b|\bM[0-9]+\b|step [0-9]+'` over `AGENTS.md`, `.claude/skills`,

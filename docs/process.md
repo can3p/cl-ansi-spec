@@ -18,6 +18,26 @@ The docs state **current rules with their reasons**, never history.
 Decisions go into the topic doc they govern. Where they came from goes into
 the milestone's history file when it closes.
 
+## Docs name what exists
+
+`make test` checks it (`tests/docs.lisp`), so "docs up to date" is not just
+a convention. In `AGENTS.md`, `PLAN.md`, `docs/*.md`, `docs/plan/*.md` and
+`.claude/skills/*/SKILL.md`:
+
+- every repository path in backticks exists. A path is a code span without
+  spaces that starts with `docs/`, `src/`, `tests/`, `tools/`, `spec/`,
+  `patches/`, `.github/`, `.claude/`, `vendor/` or `schema/` (planned), and may end in
+  `:<line>` or `:<line>-<line>`. A glob (`*`) must match something.
+  Placeholders (`<id>`, `…`) are not checked, and neither are bare file
+  names, system names, export paths or command lines;
+- every `make <target>` is a rule of the `Makefile`, wherever `make`
+  appears in a code span.
+
+Something not built yet is marked `(planned)` right after its closing
+backtick, at every mention. In a milestone file, unticked `- [ ]` steps are
+planned as a whole; so is the Milestones section of `PLAN.md`. Fenced code
+blocks and `docs/history/` (the past) are not checked.
+
 ## A step
 
 1. **Plan.** Run the `plan-critic` skill on the step in

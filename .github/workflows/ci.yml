@@ -30,8 +30,10 @@ jobs:
           path: .deps
           key: deps-${{ hashFiles('tools/deps.sexp') }}
 
-      - name: Verify pristine spec sources
-        run: cd spec/tex && sha256sum --quiet -c ../SHA256SUMS
+      - name: Verify pristine spec and vendored sources
+        run: |
+          (cd spec/tex && sha256sum --quiet -c ../SHA256SUMS)
+          (cd vendor/plain && sha256sum --quiet -c ../SHA256SUMS)
 
       - name: Build and test
         run: make test

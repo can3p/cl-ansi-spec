@@ -61,6 +61,19 @@
     (is = +other+ (catcode state (code #\|)))
     (is = 0 (group-level state))))
 
+(define-test current-group-kind
+  :parent tex-state
+  (let ((state (make-plain-state)))
+    (is eq nil (current-group-kind state))
+    (begin-group state :brace)
+    (begin-group state :semi)
+    (set-catcode state (code #\|) +active+)
+    (is eq :semi (current-group-kind state))
+    (end-group state)
+    (is eq :brace (current-group-kind state))
+    (end-group state)
+    (is eq nil (current-group-kind state))))
+
 (define-test nested-groups
   :parent tex-state
   (let ((state (make-plain-state))

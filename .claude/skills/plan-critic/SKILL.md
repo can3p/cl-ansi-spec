@@ -1,54 +1,57 @@
 ---
 name: plan-critic
-description: Adversarial review of a proposed plan step BEFORE implementing it. Use every time a new step or milestone is planned in docs/plan/<id>.md - spawn a sub-agent with this brief, then revise the plan on its feedback.
+description: Adversarial review of a proposed plan step BEFORE implementing it. Use every time a new step or milestone is planned in docs/plan/<id>.md - spawn a cheap sub-agent with a self-contained brief, then revise the plan on its feedback.
 ---
 
 # Plan critic
 
+The critic must cost far less than the step it reviews. Most of a
+sub-agent's cost is fixed: every spawn starts from ~60-70k tokens of
+system prompt and tool schemas, even with one tool call. So **spawn
+rarely**, and keep the reading small:
+
+- **Pair it with the previous step's review.** When a step closes, the one
+  `lisp-review` sub-agent also critiques the next step (one spawn, two
+  answers). Spawn a critic alone only for the first step of a session.
+- The coordinator already knows the context, so it *hands it over*
+  instead of making the critic rediscover it.
+
 ## How to run
 
-1. Write or update the step in `docs/plan/<id>.md` first (the critic
-   reviews the file, not chat).
-2. Spawn a sub-agent (a strong model: this is direction-setting) with:
-   - the step to critique (milestone + step names),
-   - "Read `docs/architecture.md` (the end goal), the milestone file and
-     the topic docs the step names; for code and sources, `grep -n` first
-     and `Read` only the line ranges you need — never whole `spec/tex/`
-     files or whole directories. Do not modify files.",
-   - a budget: "stop exploring after ~25 tool calls; evidence for the top
-     findings beats coverage",
+1. Write or update the step in `docs/plan/<id>.md` first.
+2. Gather the evidence yourself, cheaply: the step text, the one or two
+   doc rules it must satisfy, and the facts you already found (file:line,
+   counts, grep hits). Keep it under ~60 lines.
+3. Spawn **one** sub-agent (or add the brief to the `lisp-review` spawn)
+   with `model: sonnet` (a whole-milestone review
+   may use a stronger model once). The brief contains:
+   - the step text and the gathered facts, pasted in;
+   - at most ~5 exact commands it may run to check suspicions
+     (`grep -n …`, `sed -n 'a,bp' FILE`, `make tokens … LINES=`), and a
+     hard budget: **at most 8 tool calls, no `Read` of whole files, no
+     docs/architecture.md or other topic doc unless you name line ranges**;
+   - "Do not modify files.";
    - the brief below.
-3. Revise the milestone file on the feedback: accept, or record in the milestone file
-   why a point was rejected. Then implement.
+4. Revise the milestone file on the feedback: accept, or record why a point
+   was rejected. Then implement.
 
 ## Brief for the critic
 
-Act as a skeptical senior Common Lisp / TeX engineer. Try to break the plan:
+Act as a skeptical senior Common Lisp / TeX engineer. Try to break the
+step. Check, in this order, and skip what does not apply:
 
-- **End goal**: does the step move the project toward the semantic model
-  of `docs/architecture.md` (meaning kept, spans kept, every construct of
-  the sources covered)? Does it build anything the model does not need
-  (typesetting, layout fidelity) or lose meaning the model needs (expanding
-  a meaningful macro away, dropping source spans)? Does its output fit the
-  interface the next phase consumes (`docs/events.md`, `docs/model.md`)?
-- **Modularity**: does the step respect the phase/package boundaries and
-  one-way dependencies of `docs/architecture.md`? Will its pieces be
-  testable and replaceable alone?
-- **Docs and schema**: does the step name the docs it must leave up to
-  date? If it touches what the model holds, does it include updating the
-  node declarations, their documentation and the generated schema?
+- **Completeness against the sources**: constructs in `spec/tex/` the step
+  must handle and does not mention (cite file:line).
+- **Shortcuts**: anything that only works for the common case (the parser
+  must be full).
+- **Boundaries**: one package per phase, one-way dependencies; does the
+  output fit what the next phase consumes?
+- **Meaning and spans**: does anything drop meaning or source spans the
+  semantic model needs, or emulate typesetting it does not need?
+- **Testability**: the test that proves the step done.
+- **Docs**: does the step name the docs it leaves up to date (and the
+  schema, if the model changes)?
 
-- **Completeness against the sources**: grep `spec/tex/` for constructs the
-  step must handle and the plan does not mention. Cite file:line.
-- **Wrong abstraction**: will this design survive the *next* milestones
-  (expander, AST, renderer, patches)? What will have to be rewritten?
-- **Shortcuts**: anything that only works for the common case (AGENTS.md
-  forbids shortcuts — the parser must be full).
-- **Testability**: is each step verifiable in isolation? What test would
-  prove it is done?
-- **Sequencing and size**: steps too large to review, or in the wrong order.
-- **Rules**: Lisp-only, no HyperSpec text borrowed, patches not edits,
-  main always usable, token-saving tools.
-
-Answer as a ranked list (blocker / should-change / consider), each with
-evidence and a concrete alternative. Under 400 words. No praise.
+Answer with at most 6 findings, ranked (blocker / should-change /
+consider), each with evidence and a concrete alternative. Under 250 words.
+No praise, no restating the plan.

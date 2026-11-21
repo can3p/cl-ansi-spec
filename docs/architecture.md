@@ -60,8 +60,17 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 | 4 | Model builder | event streams of all chapters → **document model**, resolved references | `cl-ansi-spec/model` | M3 |
 | 5 | Consumers | model → S-expression/JSON exports, HTML site | `…/export`, `…/html` | M3, M5 |
 
+Development aids are packages outside the phases, depending on them
+one way like a phase: `cl-ansi-spec/inventory` (`src/inventory/`) surveys
+the sources' macros with the reader alone, for `make vocab`
+([vocabulary](vocabulary.md), "Choosing entries").
+
 - **Sources.** These are the pristine tree and the plain-TeX files vendored
-  under `vendor/plain/`. File access goes through a pluggable *resolver*.
+  under `vendor/plain/` (`vendor/PROVENANCE.md`). An `\input` name is looked
+  up along a search path, the spec tree first (`find-input-file` in
+  `src/source.lisp`); a name found in both trees is an error, so each source
+  keeps its own file name in spans. File access goes through a pluggable
+  *resolver*, which by default follows that search path.
   Missing generated files (`chap-N.fig`, `.tc`, `.toc`, `.idx`) are
   synthesised by the resolver, not treated as errors.
 - **Reader** ([reader](reader.md)). This is a lazy, pull-based token stream. It consults the
@@ -157,14 +166,15 @@ has the export formats, their JSON Schema and versioning.
   code: the file resolver, the primitive table, the vocabulary table, and the
   export writers.
 - Each package has its own test suite under `tests/<phase>/`, and its own
-  debugging tool under `tools/` (`make tokens`; planned: `make expand`,
-  `make events`, `make vocab` and `make model` as their phases land).
+  debugging tool under `tools/`: `make tokens`, and as their phases land
+  `make vocab`, `make expand` (planned), `make events` (planned)
+  and `make model` (planned).
 
 ## Status
 
 | Phase | State |
 |-------|-------|
-| 0 Sources | pristine tree and resolver done; patching is M4 |
+| 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | planned: [`docs/plan/m2.md`](plan/m2.md) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |

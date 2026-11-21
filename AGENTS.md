@@ -27,6 +27,8 @@
 # Repository layout
 
 * `spec/tex/` — pristine dpANS3 TeX sources. Never edit; see `spec/PROVENANCE.md`.
+* `vendor/plain/` — Knuth's `plain.tex` and `hyphen.tex`, unmodified (their
+  licence requires it). Never edit; see `vendor/PROVENANCE.md`.
 * `patches/` — independent, numbered patches applied on top of `spec/tex/`.
 * `src/` — the `cl-ansi-spec` system. `tests/` — `cl-ansi-spec/tests` (Parachute).
 * `tools/` — command-line tools, written in Lisp; `make` is only a thin wrapper.
@@ -40,6 +42,8 @@
 * `make test` — fetch pinned deps, build from scratch into `build/` with *any*
   warning (style-warnings included) as an error, run the suite. Exit status is
   the verdict. Pipe through `tail -5` to read only the summary and save tokens.
+  It also checks that the docs name only existing paths and make targets
+  (mark the rest `(planned)`; rules in `docs/process.md`).
 * `make deps` — bring `.deps/` to the commits in `tools/deps.sexp`. Offline
   once fetched; broken checkouts are re-cloned automatically.
 * `make tokens FILE=chap-1 [LINES=10-20] [SKIPS=1]` — dump a spec file's
@@ -47,9 +51,15 @@
   `<char> <catcode>`), under plain catcodes and without expansion. Always
   pass `LINES` to keep the output small; `SKIPS=1` also lists comments,
   skipped spaces, etc.
+* `make vocab [JOB=chap-1] [FILE=setup-aux.tex] [NAME=\term] [LIMIT=40]` —
+  survey of the control sequences the sources define and use, without
+  expansion: one line per name (class, first definition, text/body/
+  uncertain uses, files), most used first; `NAME=` details one macro. All
+  chapter jobs unless `JOB=`; keep `LIMIT` small. Rules: `docs/vocabulary.md`.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
-* `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine
-  sources (also run in CI; `make test` checks the file list against it).
+* `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
+  `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine
+  sources (also run in CI; `make test` checks both file lists against them).
 
 # Process
 

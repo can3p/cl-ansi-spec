@@ -141,6 +141,12 @@ braces versus \\begingroup) are properly matched."
   (incf (state-level state))
   kind)
 
+(defun current-group-kind (state)
+  "Return the kind of the innermost open group of STATE (TeX's cur_group),
+or NIL outside every group."
+  (let ((boundary (find-if #'group-boundary-p (state-save-stack state))))
+    (and boundary (group-boundary-kind boundary))))
+
 (defun end-group (state)
   "Close the innermost group of STATE, undoing its local assignments, and
 return its kind.  Entries assigned globally inside the group keep their

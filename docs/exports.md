@@ -49,7 +49,7 @@ rejects a declaration that lacks any of it.
 
   A test walks the generated schema and fails on any definition, property
   or enum value without a description.
-- **The reference doc** (`docs/model-reference.md`) is generated from the
+- **The reference doc** (`docs/model-reference.md` (planned)) is generated from the
   same docstrings. Nothing about a node is written by hand anywhere else.
 
 ## Validation
@@ -128,7 +128,7 @@ Every JSON file is an object with `schemaVersion` and its content, e.g.
 `{"schemaVersion": "<sha256>", "chapter": {…}}`.
 The S-expression export has the same files with `.sexp`. Each one is a
 single form `(:schema-version "<digest>" . content)`, read back with `read`
-under the readtable documented in `docs/model-reference.md`.
+under the readtable documented in `docs/model-reference.md` (planned).
 
 ## Versioning
 
@@ -137,7 +137,7 @@ schema changes whenever correctness requires it. No deprecation path is
 kept, and no compatibility layer is added.
 
 - Every file states the `schemaVersion` it was written with: the
-  lowercase hex SHA-256 of the committed `schema/model.schema.json` file's
+  lowercase hex SHA-256 of the committed `schema/model.schema.json` (planned) file's
   bytes, untruncated, so a consumer always knows exactly which
   schema matches a file.
 - The schema is published alongside every export.

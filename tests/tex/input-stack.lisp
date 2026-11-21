@@ -103,7 +103,9 @@ b")
     (is equal "chap-0.tex" (current-file-name stack))
     (true (next-token stack))
     (push-file stack "setup.tex")
-    (is equal "setup.tex" (current-file-name stack))))
+    (is equal "setup.tex" (current-file-name stack))
+    (push-file stack "hyphen")
+    (is equal "hyphen.tex" (current-file-name stack))))
 
 (define-test token-lists-are-read-before-files
   :parent input-stack

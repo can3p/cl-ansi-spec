@@ -6,7 +6,8 @@
 
 (defpackage #:cl-ansi-spec/tex
   (:use #:cl)
-  (:import-from #:cl-ansi-spec #:read-spec-file #:spec-directory)
+  (:import-from #:cl-ansi-spec #:read-spec-file
+                #:find-input-file #:source-search-path)
   (:export
    ;; Category codes
    #:+escape+ #:+begin-group+ #:+end-group+ #:+math-shift+ #:+alignment-tab+
@@ -17,7 +18,7 @@
    #:tex-state #:make-initex-state #:make-plain-state #:apply-plain-catcodes
    #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
    #:endlinechar #:set-endlinechar
-   #:group-level #:begin-group #:end-group #:save-stack-depth
+   #:group-level #:begin-group #:end-group #:current-group-kind #:save-stack-depth
    #:group-underflow
    ;; Spans, control sequences and tokens
    #:span #:make-span #:span-file #:span-start #:span-end #:span-line

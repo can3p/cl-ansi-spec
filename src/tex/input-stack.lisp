@@ -32,33 +32,22 @@ SKIP-HOOK is given to every file reader (see FILE-READER)."
                      (input-file-missing-name condition))))
   (:documentation "Signalled when the resolver finds no file for a name."))
 
-(defun directory-resolver (directory)
-  "Return a resolver for the files in DIRECTORY.  As TeX82 does, a name
-without a type (no dot in its last component) is tried with type tex
-first; a name with a type is used as given.  Sources are named by their
-file name relative to DIRECTORY.  Absolute names and names containing a
-\"..\" component never resolve: only files under DIRECTORY are read."
+(defun directory-resolver (&rest directories)
+  "Return a resolver for the files in DIRECTORIES, looked up in order with
+FIND-INPUT-FILE: type tex is tried first for a name without one, unsafe
+names never resolve, and a name found in two directories signals
+AMBIGUOUS-INPUT-FILE.  Sources are named by their file name relative to
+their directory."
   (lambda (name)
-    (unless (or (zerop (length name))
-                (char= (char name 0) #\/)
-                (member ".." (uiop:split-string name :separator "/")
-                        :test #'string=))
-      (flet ((try (file-name)
-               (let ((pathname (merge-pathnames
-                                (uiop:parse-unix-namestring file-name)
-                                directory)))
-                 (when (and (not (wild-pathname-p pathname))
-                            (uiop:file-exists-p pathname))
-                   (open-line-source file-name pathname)))))
-        (or (and (member (pathname-type (uiop:parse-unix-namestring name))
-                         '(nil :unspecific))
-                 (try (concatenate 'string name ".tex")))
-            (try name))))))
+    (multiple-value-bind (file-name pathname) (find-input-file name directories)
+      (and file-name (open-line-source file-name pathname)))))
 
-(defun make-input-stack (state &key (resolver (directory-resolver (spec-directory)))
+(defun make-input-stack (state &key (resolver (apply #'directory-resolver
+                                                     (source-search-path)))
                                     skip-hook)
   "Return an empty input stack reading with the equivalents of STATE.
-RESOLVER defaults to the pristine spec sources."
+RESOLVER defaults to the source search path: the spec tree, then the
+vendored plain TeX format."
   (%make-input-stack state resolver skip-hook))
 
 (defun push-source (stack source)
