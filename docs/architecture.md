@@ -61,7 +61,7 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 | 5 | Consumers | model → S-expression/JSON exports, HTML site | `…/export`, `…/html` | M3, M5 |
 
 - **Sources.** These are the pristine tree and the plain-TeX files vendored
-  under `vendor/plain/`. File access goes through a pluggable *resolver*.
+  under `vendor/plain/` (planned). File access goes through a pluggable *resolver*.
   Missing generated files (`chap-N.fig`, `.tc`, `.toc`, `.idx`) are
   synthesised by the resolver, not treated as errors.
 - **Reader** ([reader](reader.md)). This is a lazy, pull-based token stream. It consults the
@@ -157,8 +157,9 @@ has the export formats, their JSON Schema and versioning.
   code: the file resolver, the primitive table, the vocabulary table, and the
   export writers.
 - Each package has its own test suite under `tests/<phase>/`, and its own
-  debugging tool under `tools/` (`make tokens`; planned: `make expand`,
-  `make events`, `make vocab` and `make model` as their phases land).
+  debugging tool under `tools/`: `make tokens`, and as their phases land
+  `make vocab` (planned), `make expand` (planned), `make events` (planned)
+  and `make model` (planned).
 
 ## Status
 

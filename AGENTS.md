@@ -40,6 +40,8 @@
 * `make test` — fetch pinned deps, build from scratch into `build/` with *any*
   warning (style-warnings included) as an error, run the suite. Exit status is
   the verdict. Pipe through `tail -5` to read only the summary and save tokens.
+  It also checks that the docs name only existing paths and make targets
+  (mark the rest `(planned)`; rules in `docs/process.md`).
 * `make deps` — bring `.deps/` to the commits in `tools/deps.sexp`. Offline
   once fetched; broken checkouts are re-cloned automatically.
 * `make tokens FILE=chap-1 [LINES=10-20] [SKIPS=1]` — dump a spec file's

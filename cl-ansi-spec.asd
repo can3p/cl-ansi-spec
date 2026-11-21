@@ -28,6 +28,7 @@ Lisp draft standard (dpANS3)."
   :serial t
   :components ((:file "package")
                (:file "source")
+               (:file "docs")
                (:module "tex"
                 :serial t
                 :components ((:file "state")

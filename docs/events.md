@@ -26,6 +26,6 @@ replay.
 - The stream for a job is deterministic. A hash of it is a snapshot test.
 - `:begin` and `:end` are balanced per entry.
 - For each vocabulary entry, the number of events equals the number of its
-  uses in the source (counted by `make vocab`).
+  uses in the source (counted by `make vocab` (planned)).
 
 `make events FILE=… LINES=…` (planned) prints the stream compactly.
