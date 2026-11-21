@@ -71,6 +71,7 @@ and whose entries all hold DEFAULT at level one."
 
 (declaim (inline vector-key-p))
 (defun vector-key-p (table key)
+  "True if KEY of TABLE is stored in its vectors rather than its overflow."
   (and (typep key 'fixnum)
        (< -1 key (length (equivalents-values table)))))
 
@@ -127,6 +128,11 @@ and whose entries all hold DEFAULT at level one."
   "Return how many groups are open in STATE (0 outside every group)."
   (- (state-level state) +level-one+))
 
+(defun save-stack-depth (state)
+  "Return the number of entries (saved values and group boundaries) on
+the save stack of STATE."
+  (length (state-save-stack state)))
+
 (defun begin-group (state &optional (kind :simple))
   "Open a group of KIND in STATE.  KIND is any object; END-GROUP returns
 it so that the caller can check that groups of different kinds (TeX's
@@ -170,6 +176,7 @@ otherwise locally to the current group.  Returns VALUE."
 (deftype character-code () `(integer 0 (,char-code-limit)))
 
 (defun check-character-code (code)
+  "Signal a TYPE-ERROR unless CODE is a character code; return CODE."
   (check-type code character-code)
   code)
 
@@ -209,7 +216,8 @@ value outside 0..255 for none."
   (equivalent (state-integers state) :endlinechar))
 
 (defun set-endlinechar (state value &key global)
-  "Assign VALUE to \\endlinechar."
+  "Assign VALUE to \\endlinechar.  Any integer is allowed, as in TeX;
+values outside 0..255 mean that nothing is appended to input lines."
   (check-type value integer)
   (assign state (state-integers state) :endlinechar value global))
 

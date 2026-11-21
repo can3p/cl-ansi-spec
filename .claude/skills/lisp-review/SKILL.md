@@ -27,3 +27,12 @@ description: Pre-commit quality gate for this repository — run the build/test 
 - **Tests**: exit status must reflect failure; verify by breaking a test once.
 - **Idiom**: docstrings on public definitions, conditions for error cases,
   `:import-from` over `:use` for third-party packages.
+- **Rare paths**: code paths the corpus barely exercises (e.g. `^^`
+  rewriting inside control sequence names) need dedicated fixtures with
+  exact expected values; a global property test is not enough.
+- **Untrusted names**: file resolvers reject absolute and `..` names.
+- **Make → Lisp**: pass user values as environment variables
+  (`VAR='$(VAR)'`, read with `uiop:getenv`), never interpolated into argv.
+- **Test expectations**: when a new test fails, re-derive the expectation
+  from the TeX rules before touching the code (most M1 failures were
+  wrong expectations, e.g. line ends after control words are skipped).

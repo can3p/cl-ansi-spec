@@ -60,6 +60,7 @@ and newline not represented by an \\endlinechar)."
     (setf (file-reader-loc reader) limit)))
 
 (defun span-of (reader from to)
+  "Return the span of elements FROM..TO of the reader's current line."
   (line-span (file-reader-source reader) (file-reader-line reader) from to))
 
 (defun hex-digit-value (code)

@@ -25,12 +25,15 @@
 LAST being NIL for no upper bound.  NIL or \"\" means every line."
   (if (or (null string) (string= string ""))
       (list 1 nil)
-      (let* ((dash (position #\- string))
-             (first (parse-integer string :end dash))
-             (last (cond ((null dash) first)
-                         ((= dash (1- (length string))) nil)
-                         (t (parse-integer string :start (1+ dash))))))
-        (list first last))))
+      (handler-case
+          (let* ((dash (position #\- string))
+                 (first (parse-integer string :end dash))
+                 (last (cond ((null dash) first)
+                             ((= dash (1- (length string))) nil)
+                             (t (parse-integer string :start (1+ dash))))))
+            (list first last))
+        (parse-error ()
+          (error "LINES must look like A-B, A- or A, not ~S." string)))))
 
 (defun dump-tokens (name &key lines skips)
   "Print the tokens of the spec file NAME within the line range LINES,
@@ -47,14 +50,15 @@ and the skipped input too if SKIPS is true."
                     :skip-hook (and skips
                                     (lambda (kind span)
                                       (when (in-range-p span)
-                                        (format t "~A	-- ~(~A~)~%"
-                                                (location span) kind)))))))
+                                        (format t "~A~C-- ~(~A~)~%"
+                                                (location span) #\Tab kind)))))))
         (cl-ansi-spec/tex:push-file stack name)
         (handler-bind ((cl-ansi-spec/tex:invalid-character
                          (lambda (condition)
-                           (format t "~A	!! invalid ~A~%"
+                           (format t "~A~C!! invalid ~A~%"
                                    (location (cl-ansi-spec/tex:invalid-character-span
                                               condition))
+                                   #\Tab
                                    (cl-ansi-spec/tex:character-text
                                     (cl-ansi-spec/tex:invalid-character-code
                                      condition)))
@@ -65,12 +69,14 @@ and the skipped input too if SKIPS is true."
                      (when (and last (> (cl-ansi-spec/tex:span-line span) last))
                        (return))
                      (when (in-range-p span)
-                       (format t "~A	~A~%" (location span)
+                       (format t "~A~C~A~%" (location span) #\Tab
                                (cl-ansi-spec/tex:token-text token))))))))
     t))
 
 (with-exit-status
-  (destructuring-bind (&optional name lines skips) (uiop:command-line-arguments)
+  (let ((name (uiop:getenv "FILE"))
+        (lines (uiop:getenv "LINES"))
+        (skips (uiop:getenv "SKIPS")))
     (unless (and name (string/= name ""))
       (error "Usage: make tokens FILE=<spec file> [LINES=a-b] [SKIPS=1]"))
     (dump-tokens name :lines lines

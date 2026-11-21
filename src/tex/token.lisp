@@ -75,7 +75,7 @@ character itself."
 
 ;;; Tokens.
 
-(defstruct (token (:constructor nil))
+(defstruct (token (:constructor nil) (:copier nil))
   "A TeX token.  SPAN tells where it was read, or is NIL for a token that
 was not read from a file."
   (span nil :type (or null span) :read-only t))

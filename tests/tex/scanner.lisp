@@ -154,6 +154,21 @@
                 tokens))
     (is equal "test.tex" (span-file (token-span (first tokens))))))
 
+(define-test spans-after-rewriting-names
+  :parent scanner
+  (flet ((spans (text)
+           (mapcar (lambda (token)
+                     (let ((span (token-span token)))
+                       (list (token-text token) (span-start span) (span-end span)
+                             (span-column span))))
+                   (read-all (string-stack text)))))
+    (is equal '(("\\abc" 0 7 0) ("d 11" 8 9 8) ("  10" 9 9 9))
+        (spans "\\a^^62c d"))
+    (is equal '(("x 11" 0 1 0) ("\\ab" 1 10 1) ("y 11" 11 12 11) ("  10" 12 12 12))
+        (spans "x\\^^61^^62 y"))
+    ;; ^^ at the end of a name pairs with the appended ^^M.
+    (is equal '(("\\aM" 0 4 0)) (spans "\\a^^"))))
+
 ;;; Coverage: tokens and skipped input together cover every file exactly.
 
 (defun coverage-gaps (name text)
@@ -189,7 +204,9 @@ where token and skip spans fail to tile it, or NIL if they tile it."
   :parent scanner
   (dolist (text (list "" "a" (lines "a" "") (lines "a  " "" "  b  % c  " "")
                       (lines "\\foo^^M rest  " "\\" "^^41^^5cbar")
-                      (format nil "a~C~Cb   " (code-char 0) #\Tab)))
+                      (format nil "a~C~Cb   " (code-char 0) #\Tab)
+                      ;; ^^ rewritten inside names shifts buffer offsets.
+                      (lines "\\a^^62c d" "\\^^61bc  " "x\\a^^")))
     (false (coverage-gaps "fixture" text)))
   (let ((state (make-plain-state)))
     (set-endlinechar state -1)

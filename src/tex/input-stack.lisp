@@ -33,20 +33,27 @@ SKIP-HOOK is given to every file reader (see FILE-READER)."
   (:documentation "Signalled when the resolver finds no file for a name."))
 
 (defun directory-resolver (directory)
-  "Return a resolver for the files in DIRECTORY.  As TeX does, a name
-without a type is tried with type tex first.  Sources are named by their
-file name relative to DIRECTORY."
+  "Return a resolver for the files in DIRECTORY.  As TeX82 does, a name
+without a type (no dot in its last component) is tried with type tex
+first; a name with a type is used as given.  Sources are named by their
+file name relative to DIRECTORY.  Absolute names and names containing a
+\"..\" component never resolve: only files under DIRECTORY are read."
   (lambda (name)
-    (flet ((try (file-name)
-             (let ((pathname (merge-pathnames (uiop:parse-unix-namestring file-name)
-                                              directory)))
-               (when (and (not (wild-pathname-p pathname))
-                          (uiop:file-exists-p pathname))
-                 (open-line-source file-name pathname)))))
-      (or (and (member (pathname-type (uiop:parse-unix-namestring name))
-                       '(nil :unspecific))
-               (try (concatenate 'string name ".tex")))
-          (try name)))))
+    (unless (or (zerop (length name))
+                (char= (char name 0) #\/)
+                (member ".." (uiop:split-string name :separator "/")
+                        :test #'string=))
+      (flet ((try (file-name)
+               (let ((pathname (merge-pathnames
+                                (uiop:parse-unix-namestring file-name)
+                                directory)))
+                 (when (and (not (wild-pathname-p pathname))
+                            (uiop:file-exists-p pathname))
+                   (open-line-source file-name pathname)))))
+        (or (and (member (pathname-type (uiop:parse-unix-namestring name))
+                         '(nil :unspecific))
+                 (try (concatenate 'string name ".tex")))
+            (try name))))))
 
 (defun make-input-stack (state &key (resolver (directory-resolver (spec-directory)))
                                     skip-hook)
@@ -68,9 +75,10 @@ Signal INPUT-FILE-MISSING if there is none."
                          (error 'input-file-missing :name name))))
 
 (defun push-tokens (stack tokens &optional (kind :inserted))
-  "Insert the list TOKENS to be read next, as a level of KIND."
+  "Insert the list TOKENS to be read next, as a level of KIND.  TOKENS
+is copied, never modified.  Returns no values."
   (push (make-token-level (copy-list tokens) kind) (input-stack-levels stack))
-  tokens)
+  (values))
 
 (defun back-input (stack token)
   "Put TOKEN back so that it is the next token read from STACK.

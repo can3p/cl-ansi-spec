@@ -37,6 +37,59 @@
     (is = 0 (input-depth stack))
     (is eq nil (current-file-name stack))))
 
+(define-test end-of-input-is-sticky
+  :parent input-stack
+  (let ((stack (string-stack "a")))
+    (read-all stack)
+    (is eq nil (next-token stack))
+    (is eq nil (next-token stack))
+    (is eq nil (peek-token stack))))
+
+(define-test skips-follow-file-order-across-files
+  :parent input-stack
+  (let* ((events '())
+         (state (make-plain-state))
+         (stack (make-input-stack
+                 state
+                 :resolver (alist-resolver '(("outer.tex" . "a % x
+b")
+                                             ("inner.tex" . "c%y
+")))
+                 :skip-hook (lambda (kind span)
+                              (push (list kind (span-file span) (span-start span))
+                                    events)))))
+    (set-endlinechar state -1)
+    (push-file stack "outer.tex")
+    (next-token stack)                  ; a
+    (push-file stack "inner.tex")
+    (read-all stack)
+    ;; Outer's space after "a" is a token: it is read after inner ends.
+    (is equal '((:comment "inner.tex" 1) (:line-end "inner.tex" 3)
+                (:comment "outer.tex" 2) (:line-end "outer.tex" 5))
+        (reverse events))))
+
+(define-test back-input-keeps-exhausted-files
+  :parent input-stack
+  (let ((stack (make-input-stack (make-plain-state)
+                                 :resolver (alist-resolver
+                                            '(("outer.tex" . "a")
+                                              ("inner.tex" . "b"))))))
+    (push-file stack "outer.tex")
+    (push-file stack "inner.tex")
+    (let ((b (next-token stack)))
+      (next-token stack)                ; inner's end-of-line space
+      (back-input stack b)
+      (is = 3 (input-depth stack))
+      (is equal '("b 11" "a 11" "  10") (texts (read-all stack))))))
+
+(define-test unsafe-names-are-not-resolved
+  :parent input-stack
+  (let ((resolver (directory-resolver (spec-directory))))
+    (false (funcall resolver "/etc/passwd"))
+    (false (funcall resolver "../SHA256SUMS"))
+    (false (funcall resolver ""))
+    (true (funcall resolver "chap-1"))))
+
 (define-test missing-files-are-signalled
   :parent input-stack
   (let ((stack (make-input-stack (make-plain-state)

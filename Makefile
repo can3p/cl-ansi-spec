@@ -15,7 +15,7 @@ test: deps
 
 # Dump the tokens of a spec file: make tokens FILE=chap-1 [LINES=10-20] [SKIPS=1]
 tokens: deps
-	@$(LISP) --load tools/tokens.lisp --end-toplevel-options "$(FILE)" "$(LINES)" "$(SKIPS)"
+	@FILE='$(FILE)' LINES='$(LINES)' SKIPS='$(SKIPS)' $(LISP) --load tools/tokens.lisp
 
 # Remove build outputs (fasls).
 clean:

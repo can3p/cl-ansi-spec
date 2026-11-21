@@ -12,12 +12,12 @@
    #:+escape+ #:+begin-group+ #:+end-group+ #:+math-shift+ #:+alignment-tab+
    #:+end-of-line+ #:+parameter+ #:+superscript+ #:+subscript+ #:+ignored+
    #:+space+ #:+letter+ #:+other+ #:+active+ #:+comment+ #:+invalid+
-   #:catcode-name
+   #:catcode-name #:catcode-value #:character-code
    ;; State: equivalents and the save stack
    #:tex-state #:make-initex-state #:make-plain-state #:apply-plain-catcodes
    #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
    #:endlinechar #:set-endlinechar
-   #:group-level #:begin-group #:end-group
+   #:group-level #:begin-group #:end-group #:save-stack-depth
    #:group-underflow
    ;; Spans, control sequences and tokens
    #:span #:make-span #:span-file #:span-start #:span-end #:span-line

@@ -75,7 +75,7 @@
     (is = 3 (catcode state bar))
     (end-group state)
     (is = 1 (catcode state bar))
-    (is eq nil (cl-ansi-spec/tex::state-save-stack state))))
+    (is = 0 (save-stack-depth state))))
 
 (define-test global-assignment-survives-groups
   :parent tex-state
@@ -108,7 +108,7 @@
   :parent tex-state
   (let ((state (make-plain-state)))
     (set-catcode state (code #\|) +active+)
-    (is eq nil (cl-ansi-spec/tex::state-save-stack state))
+    (is = 0 (save-stack-depth state))
     (begin-group state)
     (end-group state)
     (is = +active+ (catcode state (code #\|)))))

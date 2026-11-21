@@ -9,7 +9,9 @@
 
 (in-package #:cl-ansi-spec/tex)
 
-(deftype buffer () '(simple-array fixnum (*)))
+(deftype buffer ()
+  "A line buffer: character codes, or the file offsets of its elements."
+  '(simple-array fixnum (*)))
 
 (defstruct (line (:constructor %make-line))
   "One input line.  CODES holds LIMIT character codes; OFFSETS holds
