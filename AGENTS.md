@@ -13,6 +13,12 @@
 * Save tokens, make tools that help reducing the usage and encode their usage in this file
 * main branch should be usable at any point in time
 * do not improvise, plan your actions
+* The Common Lisp HyperSpec may be **consulted** to resolve ambiguity while
+  parsing, but **never borrow anything from it** (text, markup, structure,
+  examples, links) — its license forbids it. Everything rendered comes from
+  `spec/tex/` (plus `patches/`).
+* Keep the plan in `PLAN.md`, so that any new session can pick up where the
+  last one stopped. Update it in the same commit as the work.
 
 # Repository layout
 
@@ -35,6 +41,9 @@
 
 # Process
 
+* New session: read `PLAN.md` first; continue at its first unchecked step.
+* Before implementing any newly planned step, run the `plan-critic` skill
+  (`.claude/skills/plan-critic`) on it and revise `PLAN.md` on the feedback.
 * Before each commit, run the `lisp-review` skill (`.claude/skills/lisp-review`):
   build gate + sub-agent review of the diff; fix or justify every finding.
 
