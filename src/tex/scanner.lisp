@@ -33,7 +33,9 @@ and newline not represented by an \\endlinechar)."
   (skip-hook nil :type (or null function) :read-only t)
   (line nil :type (or null line))
   (loc 0 :type fixnum)
-  (mode :new-line :type (member :new-line :mid-line :skip-blanks)))
+  (mode :new-line :type (member :new-line :mid-line :skip-blanks))
+  ;; TeX's force_eof: \endinput ends the file with its current line.
+  (force-eof nil :type boolean))
 
 (defun make-file-reader (source state &key skip-hook)
   "Return a reader of SOURCE.  Its first line is read at once, with the
@@ -163,7 +165,8 @@ notation in names)."
            (when (and hook (< (span-start span) (span-end span)))
              (funcall hook :line-end span)))
          (setf (file-reader-line reader)
-               (read-source-line (file-reader-source reader) state)
+               (and (not (file-reader-force-eof reader))
+                    (read-source-line (file-reader-source reader) state))
                (file-reader-loc reader) 0
                (file-reader-mode reader) :new-line))
         (t

@@ -14,7 +14,18 @@
                 #:integer-parameter #:set-integer-parameter
                 #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
                 #:character-code #:catcode-value
-                #:control-sequence #:token #:token=)
+                #:control-sequence #:token #:token= #:span #:token-span
+                #:+begin-group+ #:+end-group+ #:+parameter+ #:+space+
+                #:+letter+ #:+other+ #:+math-shift+ #:+alignment-tab+
+                #:+superscript+ #:+subscript+
+                #:cs-token #:cs-token-p #:cs-token-control-sequence #:make-cs-token
+                #:character-token #:character-token-p #:character-token-code
+                #:character-token-catcode #:make-character-token
+                #:intern-control-sequence #:make-frozen-control-sequence
+                #:control-sequence-name #:control-sequence-active-p
+                #:input-stack #:make-input-stack #:input-stack-file-end-hook
+                #:next-token #:back-input #:push-tokens #:push-file
+                #:end-current-file #:input-file-missing)
   (:export
    ;; Integers and scaled values (arithmetic.lisp)
    #:+infinity+ #:+max-dimen+ #:+unity+
@@ -44,7 +55,7 @@
    #:macro #:macro-p #:make-macro #:macro-parameter-text #:macro-body
    #:macro-long-p #:macro-outer-p
    #:primitive #:primitive-p #:make-primitive #:primitive-name
-   #:primitive-operation
+   #:primitive-operation #:primitive-expandable-p
    #:character-meaning #:character-meaning-p #:make-character-meaning
    #:character-meaning-code #:character-meaning-catcode
    #:shorthand #:shorthand-p #:make-shorthand #:shorthand-kind
@@ -59,4 +70,17 @@
    #:set-meaning #:register #:set-register #:parameter #:set-parameter
    #:code #:set-code #:current-font #:set-current-font
    #:family-font #:set-family-font #:par-shape #:set-par-shape
-   #:load-font))
+   #:load-font
+   ;; Errors (errors.lisp)
+   #:tex-error #:tex-fatal-error #:tex-error-message #:tex-error-context
+   #:tex-error-span #:recover #:call-recovering-tex-errors
+   ;; Primitives (primitives.lisp)
+   #:define-primitive #:find-primitive #:install-primitives
+   #:tex82-command-names #:tex82-expandable-names
+   ;; The expander (expander.lisp, show.lisp, macro.lisp, expandable.lisp)
+   #:expander #:make-expander #:expander-state #:expander-input
+   #:expander-job-name #:expander-scanner-status #:expander-align-state
+   #:expander-marks #:scanner-status
+   #:get-next #:get-token #:get-x-token #:back-token #:insert-tokens
+   #:expand #:expandable-p #:frozen-control-sequence #:dont-expand-meaning
+   #:cs-name-text #:token-list-text #:meaning-text #:string-tokens))

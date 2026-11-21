@@ -20,21 +20,6 @@
 (let ((*standard-output* (make-broadcast-stream)))
   (asdf:load-system "cl-ansi-spec"))
 
-(defun parse-line-range (string)
-  "Parse \"A-B\", \"A-\" or \"A\" into an inclusive range (FIRST LAST),
-LAST being NIL for no upper bound.  NIL or \"\" means every line."
-  (if (or (null string) (string= string ""))
-      (list 1 nil)
-      (handler-case
-          (let* ((dash (position #\- string))
-                 (first (parse-integer string :end dash))
-                 (last (cond ((null dash) first)
-                             ((= dash (1- (length string))) nil)
-                             (t (parse-integer string :start (1+ dash))))))
-            (list first last))
-        (parse-error ()
-          (error "LINES must look like A-B, A- or A, not ~S." string)))))
-
 (defun dump-tokens (name &key lines skips)
   "Print the tokens of the spec file NAME within the line range LINES,
 and the skipped input too if SKIPS is true."

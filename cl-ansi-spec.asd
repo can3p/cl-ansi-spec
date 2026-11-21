@@ -28,7 +28,13 @@ Lisp draft standard (dpANS3)."
                              (:file "font")
                              (:file "meaning")
                              (:file "parameters")
-                             (:file "state")))
+                             (:file "state")
+                             (:file "errors")
+                             (:file "primitives")
+                             (:file "expander")
+                             (:file "show")
+                             (:file "macro")
+                             (:file "expandable")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
@@ -52,7 +58,8 @@ Lisp draft standard (dpANS3)."
                (:module "expand"
                 :serial t
                 :components ((:file "quantities")
-                             (:file "state")))
+                             (:file "state")
+                             (:file "expander")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

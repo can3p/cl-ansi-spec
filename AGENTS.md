@@ -56,6 +56,9 @@
   expansion: one line per name (class, first definition, text/body/
   uncertain uses, files), most used first; `NAME=` details one macro. All
   chapter jobs unless `JOB=`; keep `LIMIT` small. Rules: `docs/vocabulary.md`.
+* `make expand FILE=chap-1 [LINES=10-20]` — run a spec file as a TeX job
+  (INITEX with plain catcodes) and print the unexpandable tokens it yields,
+  `FILE:LINE:COL<tab>TOKEN`, and TeX errors as `!! …`.  Always pass `LINES`.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine

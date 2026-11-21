@@ -9,6 +9,37 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
 - Expansion: macros with full parameter matching, `\expandafter`,
   `\noexpand`, `\csname`, `\string`, `\meaning`, `\the`, `\number`,
   `\romannumeral`, `\input`, `\endinput`, and all of TeX82's conditionals.
+- The expansion core (`src/expand/`: `expander.lisp`, `macro.lisp`,
+  `expandable.lisp`, `show.lisp`, `primitives.lisp`, `errors.lisp`):
+  - *Tokens come with their meaning*, as TeX's cur_tok comes with
+    cur_cmd/cur_chr: `get-next`, `get-token` and `get-x-token` return the
+    token and the meaning of its control sequence (`nil` for a character).
+    A `\noexpand`-ed token is a marker token in the input; read, it is the
+    plain token with the meaning `\relax` when it would have expanded.
+  - *The primitive table* names every TeX82 primitive from the start, so
+    `\meaning` and `\ifx` see them; each step registers the operations
+    it implements.  An expandable primitive whose step has not landed is
+    a TeX error that drops the token.
+  - *Macro calls* follow §§389-400 token by token: delimited and
+    undelimited parameters, the recovery after a partial delimiter match,
+    brace stripping, `#{`, spaces before undelimited arguments (only
+    character 32 of category 10), `\par` in a macro that is not `\long`,
+    an extra `}`.  Arguments keep the tokens actually read, so spans
+    point to the input.  The body is substituted at once and pushed as
+    one list; exhausted token lists are removed first, so tail calls do
+    not grow the input stack.
+  - *Runaways*: an `\outer` macro, or the end of a file, met while
+    matching, defining, skipping, aligning or absorbing is reported and
+    ended as TeX does (an inserted `\par`, `}`, `\fi` or `\cr}`).
+  - *Errors are conditions*: `tex-error` signals with a `recover` restart
+    that continues as TeX does in `\batchmode`; every job recovers
+    (`call-recovering-tex-errors`) and reports.  A missing `\input` file
+    is a `tex-fatal-error`, as in nonstop mode.
+  - *Shown as TeX shows them* (`\string`, `\meaning`): `print_cs` spacing,
+    `\escapechar`, match characters, `\long`/`\outer` prefixes.  Without
+    metrics, a font loaded `scaled` shows no size.
+  - Marks expand to nothing until boxes and `\vsplit` set them.  Tracing
+    (`\tracingmacros` and the like) writes no log.
 - Assignments and grouping: the save stack, `\global`, `\globaldefs`,
   `\afterassignment` and `\aftergroup`; registers and parameters with
   INITEX defaults; TeX's integer, dimension and glue arithmetic.

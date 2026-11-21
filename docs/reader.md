@@ -6,10 +6,10 @@ rules; the history of how they were reached is in `docs/history/m0-m1.md`.
 | File | Holds |
 |------|-------|
 | `state.lisp` | catcode, lccode and uccode tables, integer parameters (`integer-parameter`, read here for `\endlinechar`); the save stack (`begin-group`, `end-group`, `current-group-kind`, global assignment) and its table protocol (`make-equivalents`, `equivalent`, `assign`), which the expander's tables share; the INITEX and plain catcodes |
-| `token.lisp` | spans; control sequences and active characters, interned in one namespace per state; character and control-sequence tokens; `token=` ignores spans |
+| `token.lisp` | spans; control sequences and active characters, interned in one namespace per state, plus uninterned frozen ones (`make-frozen-control-sequence`); character and control-sequence tokens; `token=` ignores spans |
 | `line.lisp` | line sources, and line buffers that keep the file offset of every element |
 | `scanner.lisp` | TeX's states N, M and S, comments, `^^` notation, and control words and symbols, reading the *current* catcodes at every token |
-| `input-stack.lisp` | TeX's single input stack (files, token lists, backed-up tokens) and the pluggable file resolver (`directory-resolver` over the source search path by default) |
+| `input-stack.lisp` | TeX's single input stack (files, token lists, backed-up tokens) and the pluggable file resolver (`directory-resolver` over the source search path by default); the file-end hook, `\endinput` (`end-current-file`), and the removal of exhausted token lists before a list is pushed |
 
 Rules:
 
@@ -27,7 +27,9 @@ Rules:
   for larger codes (patched sources may be UTF-8). Unassigned codes default
   to category 12.
 - **End of input.** `next-token` returns `nil` at the end of all input.
-  `\endinput`, `\outer` checks and end-of-file hooks belong to the expander.
+  After a file ends, the stack's file-end hook runs (the expander checks
+  for runaways there) and may push tokens to read next.  `\endinput`
+  marks the innermost file to end with its current line.
 - **Resolver.** It maps a name to a line source or `nil`. Names that are
   absolute or contain `..` never resolve.
 

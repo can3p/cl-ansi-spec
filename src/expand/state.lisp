@@ -95,11 +95,15 @@ assignment local (§1214)."
 undefined, else a MEANING or a TEX-FONT."
   (equivalent (es-meanings state) control-sequence))
 
-(defun set-meaning (state control-sequence meaning &key global)
-  "Give CONTROL-SEQUENCE the MEANING (NIL makes it undefined)."
+(defun set-meaning (state control-sequence meaning &key global (globaldefs t))
+  "Give CONTROL-SEQUENCE the MEANING (NIL makes it undefined).  With
+GLOBALDEFS false, \\globaldefs is ignored, as for the \\relax that
+\\csname gives an undefined name (TeX's eq_define, §372)."
   (check-type control-sequence control-sequence)
   (check-type meaning (or null meaning tex-font))
-  (store state (es-meanings state) control-sequence meaning global))
+  (if globaldefs
+      (store state (es-meanings state) control-sequence meaning global)
+      (assign (es-tex state) (es-meanings state) control-sequence meaning global)))
 
 ;;; Registers
 

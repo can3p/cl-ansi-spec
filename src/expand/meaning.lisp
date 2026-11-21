@@ -14,23 +14,30 @@
                   (:constructor make-macro
                       (parameter-text body &key long-p outer-p))
                   (:copier nil))
-  "A macro defined by \\def and its relatives.  PARAMETER-TEXT is a list of
-tokens and parameter numbers 1-9, ending in the symbol :BRACE for a `#{'
-ending.  BODY is a list of tokens and parameter numbers 1-9 (where #n is
-substituted); `##' in the source is a single parameter-character token."
+  "A macro defined by \\def and its relatives, as TeX stores it (§§473-476).
+PARAMETER-TEXT is a list of tokens in which every parameter-character
+token (category 6) stands for the next parameter, #1, #2, ... in order:
+TeX's match tokens, which keep the character for \\meaning.  Every other
+token is a delimiter; a `#{' ending is the begin-group token, which BODY
+then repeats at its end.  BODY is a list of tokens and parameter numbers
+1-9 (where an argument is substituted); `##' in the source is a single
+parameter-character token."
   (parameter-text '() :type list :read-only t)
   (body '() :type list :read-only t)
   (long-p nil :type boolean :read-only t)
   (outer-p nil :type boolean :read-only t))
 
 (defstruct (primitive (:include meaning)
-                      (:constructor make-primitive (name &optional operation))
+                      (:constructor make-primitive
+                          (name &key operation expandable-p))
                       (:copier nil))
-  "A primitive command.  NAME is the name TeX gives it (\"count\"),
-OPERATION what the expander runs for it (filled in by the primitive
-table)."
+  "A primitive command.  NAME is the name TeX gives it (\"count\").
+OPERATION is what the expander runs for it: for an EXPANDABLE-P primitive
+a function of the expander and the token, NIL for a command not yet
+implemented."
   (name "" :type string :read-only t)
-  (operation nil :read-only t))
+  (operation nil :read-only t)
+  (expandable-p nil :type boolean :read-only t))
 
 (defstruct (character-meaning (:include meaning)
                               (:constructor make-character-meaning (code catcode))
@@ -57,7 +64,7 @@ character code, math code or register number."
 
 (defun body-element= (a b)
   "True when two elements of a parameter text or body are the same: equal
-tokens (spans ignored), parameter numbers or :BRACE."
+tokens (spans ignored) or parameter numbers."
   (if (and (typep a 'token) (typep b 'token))
       (token= a b)
       (eql a b)))
