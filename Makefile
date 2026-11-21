@@ -3,7 +3,7 @@
 SBCL ?= sbcl
 LISP := $(SBCL) --noinform --non-interactive --no-sysinit --no-userinit
 
-.PHONY: all deps test tokens clean distclean
+.PHONY: all deps test tokens vocab clean distclean
 
 all: test
 
@@ -16,6 +16,11 @@ test: deps
 # Dump the tokens of a spec file: make tokens FILE=chap-1 [LINES=10-20] [SKIPS=1]
 tokens: deps
 	@FILE='$(FILE)' LINES='$(LINES)' SKIPS='$(SKIPS)' $(LISP) --load tools/tokens.lisp
+
+# Survey the macros the sources define and use (no expansion):
+# make vocab [JOB=chap-1] [FILE=setup-aux.tex] [NAME=\term] [LIMIT=40]
+vocab: deps
+	@JOB='$(JOB)' FILE='$(FILE)' NAME='$(NAME)' LIMIT='$(LIMIT)' $(LISP) --load tools/vocab.lisp
 
 # Remove build outputs (fasls).
 clean:

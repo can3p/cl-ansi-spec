@@ -51,6 +51,11 @@
   `<char> <catcode>`), under plain catcodes and without expansion. Always
   pass `LINES` to keep the output small; `SKIPS=1` also lists comments,
   skipped spaces, etc.
+* `make vocab [JOB=chap-1] [FILE=setup-aux.tex] [NAME=\term] [LIMIT=40]` —
+  survey of the control sequences the sources define and use, without
+  expansion: one line per name (class, first definition, text/body/
+  uncertain uses, files), most used first; `NAME=` details one macro. All
+  chapter jobs unless `JOB=`; keep `LIMIT` small. Rules: `docs/vocabulary.md`.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine

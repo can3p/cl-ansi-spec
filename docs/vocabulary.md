@@ -35,7 +35,45 @@ mode and why it is in the table.
 
 ## Choosing entries
 
-`make vocab` (planned) lists every macro each file defines and
-uses, its simple aliases, and the source counts of candidate entries. A
-macro that means something but is left to expand down to presentational
-events is a bug.
+`make vocab` surveys the sources without expansion (package
+`cl-ansi-spec/inventory`, `src/inventory/`). It lists, per job or for the
+whole spec, every control sequence defined and used: where it is defined,
+how (kind, prefixes, arity, alias), and how often it is used as text,
+inside macro bodies and on uncertain lines; `NAME=` shows one macro with
+its aliases. A macro that means something but is left to expand down to
+presentational events is a bug.
+
+The survey reads like TeX wherever reading does not depend on expansion,
+and says where it cannot:
+
+- **Definitions.** `\def`, `\gdef`, `\edef`, `\xdef` (with `\global`,
+  `\long`, `\outer`), `\let` with or without `=`, `\chardef` and the
+  other `…def`s (a literal value is kept), `\font` and plain's `\new…`
+  allocations (`\newif\iffoo` also defines `\footrue` and `\foofalse`).
+  `\def\a{\b}` is an alias of `\b`; so is `\let\a=\b`, whose target is
+  not counted as a use since `\let` does not expand it. A definition
+  inside a macro body is *nested* under that macro (`\secref`, made by
+  `\defsecrefs`, setup-aux.tex:1118): it exists only once the outer macro
+  runs.
+- **Catcodes.** Literal top-level assignments (`\catcode` with a
+  literal character and a number, `\active` or a `\chardef`'d name;
+  `\obeylines`; `\obeyspaces`) are applied, scoped by groups, so reading
+  stays exact (`!` as escape in chap-0.tex). Assignments inside macros
+  are not executed: calling such a macro makes its characters unknown for
+  the rest of the job. A line holding an unknown character that may be
+  structural (escape, braces, letter, comment) is *uncertain*, and so is
+  all on it. `\begincom` only makes `,` and `-` active, so the spec has no
+  uncertain line today.
+- **Inputs.** A job is a chapter file and what it inputs. `\input name`
+  is followed; so is a call of an *input macro*, one with undelimited
+  parameters whose body inputs one of them (`\includeDictionary{dict-x}`),
+  its arguments being read as text first. An active character in a file
+  name stands for itself (TeX would expand it). Each file is read once per
+  job, since the conditionals that guard real repeats cannot be
+  evaluated; missing (generated) files, repeats and computed names
+  (`\input\jobname.toc`) are listed. Files no chapter job reads are
+  checked by a test (`setup-boxfig.tex`, two commented-out appendices,
+  `setup-amfont.tex`).
+
+The survey's counts seed the invariants of the full runs: for each
+vocabulary entry, its events equal its certain uses.

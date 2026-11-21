@@ -60,6 +60,11 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 | 4 | Model builder | event streams of all chapters → **document model**, resolved references | `cl-ansi-spec/model` | M3 |
 | 5 | Consumers | model → S-expression/JSON exports, HTML site | `…/export`, `…/html` | M3, M5 |
 
+Development aids are packages outside the phases, depending on them
+one way like a phase: `cl-ansi-spec/inventory` (`src/inventory/`) surveys
+the sources' macros with the reader alone, for `make vocab`
+([vocabulary](vocabulary.md), "Choosing entries").
+
 - **Sources.** These are the pristine tree and the plain-TeX files vendored
   under `vendor/plain/` (`vendor/PROVENANCE.md`). An `\input` name is looked
   up along a search path, the spec tree first (`find-input-file` in
@@ -162,7 +167,7 @@ has the export formats, their JSON Schema and versioning.
   export writers.
 - Each package has its own test suite under `tests/<phase>/`, and its own
   debugging tool under `tools/`: `make tokens`, and as their phases land
-  `make vocab` (planned), `make expand` (planned), `make events` (planned)
+  `make vocab`, `make expand` (planned), `make events` (planned)
   and `make model` (planned).
 
 ## Status

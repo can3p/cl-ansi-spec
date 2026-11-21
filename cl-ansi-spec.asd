@@ -17,7 +17,11 @@ Lisp draft standard (dpANS3)."
                              (:file "token")
                              (:file "line")
                              (:file "scanner")
-                             (:file "input-stack"))))
+                             (:file "input-stack")))
+               (:module "inventory"
+                :serial t
+                :components ((:file "package")
+                             (:file "survey"))))
   :in-order-to ((test-op (test-op "cl-ansi-spec/tests"))))
 
 (defsystem "cl-ansi-spec/tests"
@@ -33,7 +37,8 @@ Lisp draft standard (dpANS3)."
                 :serial t
                 :components ((:file "state")
                              (:file "scanner")
-                             (:file "input-stack"))))
+                             (:file "input-stack")))
+               (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))
              (unless (uiop:symbol-call '#:cl-ansi-spec/tests '#:run-tests)
