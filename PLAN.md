@@ -85,6 +85,8 @@ TeX semantics: delimited/undelimited parameters, `\let`, `\edef`/`\xdef`/
 `\catcode` assignments, registers as needed. A configurable set of
 *semantic* control sequences (`\term`, `\param`, `\begincom`, `\label`,
 `\code`, tables, …) is not expanded but emitted as structure.
+Plain-TeX macros come from vendored `plain.tex`, loaded through the
+expander first (see decisions log).
 Detailed steps to be planned (and critiqued) when M1 is done.
 
 ### M3 — Document model / AST
@@ -111,12 +113,16 @@ Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
   relative to the tree root. Patched and pristine trees use the same names,
   so locations stay meaningful once M4 exists. M4 may add the patch origin
   to these locations.
+- 2026-11-21: Plain-TeX macro layer: **option A** (user decision). Vendor
+  Knuth's `plain.tex` unmodified (own directory, with provenance) and run
+  it through our expander before the spec, as TeX does. Typesetting-only
+  primitives it relies on (fonts, boxes, ...) are accepted and recorded or
+  ignored by the expander, never faked as macros. Candidate source: the
+  Debian/Ubuntu `texlive-base` package (reachable via apt); verify against
+  CTAN's published checksum where possible. Planned in detail with M2.
 - 2026-11-21: The HyperSpec may be consulted for ambiguity only; nothing is
   ever copied from it (see AGENTS.md).
 
 ## Open questions
 
-- Plain-TeX macro layer (`\obeylines`, `\newcount`, `\loop`, … used by
-  the sources): reimplement in Lisp, or vendor `plain.tex` (Knuth's terms
-  allow copying; modified versions must be renamed)? Decide when M2 is
-  planned.
+- (none)
