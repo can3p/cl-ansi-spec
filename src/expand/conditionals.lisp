@@ -36,19 +36,30 @@ none is open."
     "ifinner" "ifvoid" "ifhbox" "ifvbox" "ifx" "ifeof" "iftrue" "iffalse"
     "ifcase"))
 
+(defvar *conditional-codes*
+  (let ((table (make-hash-table :test 'equal)))
+    (dolist (name (if-test-names))
+      (setf (gethash name table) :if))
+    (loop for (name . code) in '(("fi" . :fi) ("else" . :else) ("or" . :or))
+          do (setf (gethash name table) code))
+    table)
+  "Primitive name to :IF for a conditional (if_test), or :FI, :ELSE, :OR
+(fi_or_else): what skipping looks at in every token.  Never modified.")
+
+(defun conditional-code (meaning)
+  "The entry of *CONDITIONAL-CODES* for MEANING, or NIL."
+  (and (primitive-p meaning)
+       (values (gethash (primitive-name meaning) *conditional-codes*))))
+
 (defun if-test-p (meaning)
   "True when MEANING is a conditional (cur_cmd = if_test)."
-  (and (primitive-p meaning)
-       (member (primitive-name meaning) (if-test-names) :test #'string=)
-       t))
+  (eq (conditional-code meaning) :if))
 
 (defun fi-or-else-code (meaning)
   "The code (:FI, :ELSE or :OR) of MEANING when it is \\fi, \\else or \\or
 (cur_cmd = fi_or_else), else NIL."
-  (and (primitive-p meaning)
-       (cdr (assoc (primitive-name meaning)
-                   '(("fi" . :fi) ("else" . :else) ("or" . :or))
-                   :test #'string=))))
+  (let ((code (conditional-code meaning)))
+    (and (not (eq code :if)) code)))
 
 (defun pass-text (expander)
   "TeX's pass_text (§494): skip tokens without expansion, counting nested
@@ -100,10 +111,9 @@ code of a character (also of a control sequence \\let to one, or of a
                                        0))))
           (t (values 0 256)))))
 
-(defun ifx-meaning (expander token meaning)
+(defun ifx-meaning (token meaning)
   "What \\ifx compares of TOKEN with MEANING (§507): a character token as
 the character it is, a control sequence by its meaning."
-  (declare (ignore expander))
   (if (character-token-p token)
       (make-character-meaning (character-token-code token)
                               (character-token-catcode token))
@@ -126,8 +136,8 @@ with \\outer macros allowed."
     (unwind-protect
          (multiple-value-bind (first first-meaning) (get-next expander)
            (multiple-value-bind (second second-meaning) (get-next expander)
-             (ifx-equal (ifx-meaning expander first first-meaning)
-                        (ifx-meaning expander second second-meaning))))
+             (ifx-equal (ifx-meaning first first-meaning)
+                        (ifx-meaning second second-meaning))))
       (setf (expander-scanner-status expander) saved))))
 
 (defun test-relation (expander name)
@@ -135,8 +145,8 @@ with \\outer macros allowed."
 category 12 (else `Missing = inserted'), a quantity."
   (flet ((quantity ()
            (if (string= name "ifnum") (scan-int expander) (values (scan-dimen expander)))))
-    (let ((left (quantity))
-          (relation (multiple-value-bind (token) (get-x-nonblank expander)
+    (let* ((left (quantity))
+           (relation (multiple-value-bind (token) (get-x-nonblank expander)
                       (cond ((other-character-p token #\<) #\<)
                             ((other-character-p token #\=) #\=)
                             ((other-character-p token #\>) #\>)
@@ -188,7 +198,7 @@ category 12 (else `Missing = inserted'), a quantity."
 
 ;;; Conditionals and \fi, \else, \or (§§498-500, 509-510)
 
-(defun conditional (expander name)
+(defun begin-conditional (expander name)
   "TeX's conditional (§498) for the test NAME: push the condition stack,
 decide, and either go on (waiting for \\else, \\or or \\fi) or skip."
   (let ((ours (make-conditional name (current-line-number (expander-input expander)))))
@@ -214,7 +224,8 @@ decide, and either go on (waiting for \\else, \\or or \\fi) or skip."
                   do (let ((code (skip-until (constantly t))))
                        (if (eq code :or)
                            (decf n)
-                           (return-from conditional (common-ending code)))))
+                           (progn (common-ending code)
+                                  (return-from begin-conditional (values))))))
             (setf (conditional-limit ours) :or))
           (if (test-condition expander name)
               (setf (conditional-limit ours) :else)
@@ -249,7 +260,7 @@ test is still being read; otherwise `Extra \\fi' and the like."
     (define-expandable name
       (lambda (expander token)
         (declare (ignore token))
-        (conditional expander name)))))
+        (begin-conditional expander name)))))
 
 (dolist (code '(:fi :else :or))
   (let ((code code)

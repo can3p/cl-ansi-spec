@@ -30,6 +30,8 @@
   ;; A conditional opened by the test is closed on the way.
   (check-expansion "\\ifnum\\iftrue 1\\else 2\\fi=1 a\\fi" "a")
   (check-expansion "\\ifnum\\iffalse 2\\else 1\\fi=1 a\\fi" "a")
+  ;; The later \else ends the outer conditional's true branch.
+  (check-expansion "\\ifnum\\iftrue1\\else2\\fi=1 a\\else b\\fi c" "ac")
   (let ((expander (make-test-expander "\\iftrue\\iffalse\\else")))
     (expansion-of expander)
     (is equal '("iffalse" "iftrue")
@@ -43,6 +45,10 @@
   (check-expansion "\\ifcase 5 a\\or b\\else d\\fi" "d")
   (check-expansion "\\ifcase 5 a\\or b\\fi c" "c")
   (check-expansion "\\ifcase -1 a\\or b\\fi c" "c")
+  (check-expansion "\\ifcase -1 a\\else b\\fi" "b")
+  ;; \fi while the number is read inserts \relax; case 1 is skipped to
+  ;; by that \fi, so the \or after it is extra.
+  (check-expansion "\\ifcase 1\\fi a\\or b" "ab" :errors ("Extra"))
   (check-expansion "\\ifcase 1 a\\or b\\else c\\fi" "b")
   ;; Only the \or of this \ifcase counts.
   (check-expansion "\\ifcase 1 \\ifcase 0 x\\or y\\fi\\or z\\fi" "z")
@@ -106,7 +112,9 @@
   ;; \outer macros may be compared.
   (check-expansion "\\ifx\\o\\o x\\fi" "x"
                    :setup ((define-test-macro expander "o" "" "O" :outer t)))
-  ;; A \noexpand-ed macro is not \relax for \ifx (§507).
+  ;; \noexpand changes nothing for a token that does not expand...
+  (check-expansion "\\expandafter\\ifx\\noexpand\\relax\\relax x\\fi" "x")
+  ;; ...but a \noexpand-ed macro is not \relax for \ifx (§507).
   (check-expansion "\\expandafter\\ifx\\noexpand\\a\\relax x\\else y\\fi" "y"
                    :setup ((define-test-macro expander "a" "" "A"))))
 
@@ -147,6 +155,11 @@
   :parent conditionals
   ;; An \outer macro while skipping: a \fi is inserted before it.
   (check-expansion "\\iffalse \\o\\fi" "O" :errors ("Incomplete" "Extra")
+                   :setup ((define-test-macro expander "o" "" "O" :outer t)))
+  ;; Nested: the first inserted \fi only closes the inner conditional,
+  ;; so \o is met again; both \fi's after it are extra.
+  (check-expansion "\\iffalse \\iftrue \\o\\fi\\fi" "O"
+                   :errors ("Incomplete" "Incomplete" "Extra" "Extra")
                    :setup ((define-test-macro expander "o" "" "O" :outer t)))
   ;; The end of the file while skipping.
   (check-expansion "\\iffalse a" "" :errors ("Incomplete"))
