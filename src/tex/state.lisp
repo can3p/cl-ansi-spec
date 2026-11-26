@@ -181,6 +181,13 @@ otherwise locally to the current group.  Returns VALUE."
            (store-equivalent table key value level))))
   value)
 
+(defun replace-equivalent (table key value)
+  "Set KEY in TABLE to VALUE at the level it was last assigned at, outside
+the save stack: TeX's direct writes to eqtb, as when \\box makes its
+register void (§1079).  Returns VALUE."
+  (store-equivalent table key value (equivalent-level table key))
+  value)
+
 ;;; Typed accessors.
 
 (deftype character-code () `(integer 0 (,char-code-limit)))

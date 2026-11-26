@@ -6,7 +6,8 @@
 ;;;; that takes that way.  A handler decides: log and recover (what every
 ;;;; job does, see CALL-RECOVERING-TEX-ERRORS) or stop.  Errors TeX cannot
 ;;;; recover from (a missing input file in nonstop mode) are
-;;;; TEX-FATAL-ERRORs, with no restart.
+;;;; TEX-FATAL-ERRORs, with no restart.  What TeX only reports, without
+;;;; counting it as an error (final_cleanup's notes), is a TEX-REPORT.
 
 (in-package #:cl-ansi-spec/expand)
 
@@ -42,6 +43,23 @@ does."
 (defun tex-fatal-error (message &key context span)
   "Signal a TEX-FATAL-ERROR; there is no way to continue."
   (error 'tex-fatal-error :message message :context context :span span))
+
+(define-condition tex-report (condition)
+  ((message :initarg :message :reader tex-report-message
+            :documentation "What TeX prints, e.g. \"\\end occurred\".")
+   (context :initarg :context :initform nil :reader tex-report-context
+            :documentation "The detail printed with it, or NIL."))
+  (:report (lambda (condition stream)
+             (format stream "(~A~@[ ~A~])" (tex-report-message condition)
+                     (tex-report-context condition))))
+  (:documentation "A note TeX prints that is no error: the job's history
+stays as it was (§1335)."))
+
+(defun tex-report (message &key context)
+  "Signal a TEX-REPORT with MESSAGE and CONTEXT; returns NIL whether or
+not it is handled."
+  (signal 'tex-report :message message :context context)
+  nil)
 
 (defun call-recovering-tex-errors (function &optional (report (constantly nil)))
   "Call FUNCTION; every TEX-ERROR it signals is passed to REPORT and then

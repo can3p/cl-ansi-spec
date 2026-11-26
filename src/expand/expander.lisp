@@ -55,7 +55,21 @@ end-of-file checks."
   (conditionals '() :type list)
   (skip-line 0 :type integer)
   ;; TeX's read_open (§480): the state of the sixteen \read streams.
-  (read-streams (make-array 16 :initial-element :closed) :read-only t))
+  (read-streams (make-array 16 :initial-element :closed) :read-only t)
+  ;; The token \afterassignment saved (after_token, §1266), or NIL.
+  (after-token nil)
+  ;; The interaction mode last set (§1264); recorded only: every job
+  ;; recovers from errors as in \batchmode.
+  (interaction :error-stop :type (member :batch :nonstop :scroll :error-stop))
+  ;; Hyphenation data kept as read (§§934-963): \patterns as (language
+  ;; letters levels) lists, \hyphenation exceptions as (language letters
+  ;; positions) lists, newest first; TeX's trie_not_ready.
+  (patterns '() :type list)
+  (hyphenation-exceptions '() :type list)
+  (trie-not-ready t :type boolean)
+  ;; How the job ended: NIL while it runs, :END after \end, :DUMP after
+  ;; \dump (§1335).
+  (ended nil :type (member nil :end :dump)))
 
 (defstruct (dont-expand-token (:include cs-token)
                               (:constructor make-dont-expand-token

@@ -13,14 +13,15 @@
                      (:copier nil))
   "A font loaded by \\font.  FILE is the font's file name (\"cmr10\"),
 SIZE its size specification as NORMALIZE-FONT-SIZE returns it, and
-IDENTIFIER the name of the control sequence \\font first defined (TeX's
-font_id_text, shown by \\meaning).  DIMENS holds the \\fontdimen values
-assigned so far: without metrics every other parameter is 0.
+IDENTIFIER the name of the control sequence \\font last defined with it
+(TeX's font_id_text, shown by \\meaning; §1260).  DIMENS holds the
+\\fontdimen values assigned so far: without metrics every other
+parameter is 0.
 PARAMETER-COUNT is TeX's font_params: known only for \\nullfont (7,
 §552), NIL (any number) for a font loaded without its metrics."
   (file "" :type string :read-only t)
   (size nil :read-only t)
-  (identifier "" :type string :read-only t)
+  (identifier "" :type string)
   (dimens (make-array 0 :adjustable t :initial-element 0) :read-only t)
   (hyphen-char 0 :type integer)
   (skew-char 0 :type integer)
