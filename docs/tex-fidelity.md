@@ -40,6 +40,85 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     metrics, a font loaded `scaled` shows no size.
   - Marks expand to nothing until boxes and `\vsplit` set them.  Tracing
     (`\tracingmacros` and the like) writes no log.
+- Scanning (`src/expand/`: `scan.lisp`, `internal.lisp`,
+  `dimen-scan.lisp`, `toks.lisp`, `nest.lisp`), §§402-479:
+  - *Tokens are compared as TeX compares them*: signs, digits, `=`, the
+    decimal point and keyword letters only as character tokens (a `\let`
+    copy does not count; keyword letters of any category do); blanks,
+    braces and `\relax` by meaning, so `\let` copies count.  A keyword
+    that fails to match puts back what it read, but not the blanks
+    before its first letter.
+  - *Integers*: decimal, octal, hexadecimal (`A`–`F` of category 11 or
+    12), alphabetic constants (a character, active character or
+    one-character control sequence, else `Improper alphabetic constant`
+    and 48), one optional space after a constant, `Number too big` (the
+    value is 2³¹−1), `Missing number, treated as zero`; the bounded
+    scanners (register, character, family, math character, delimiter)
+    report TeX's message and give 0.
+  - *Dimensions and glue*: every unit in TeX's order of trial, `true`
+    through `prepare_mag` (its errors reset `\mag` globally), em/ex from
+    the current font's `\fontdimen` 6 and 5, an internal quantity as the
+    unit, mu, fil/fill/filll, the units TeX inserts after `Illegal unit
+    of measure`, `Dimension too large`.  Glue reads `plus` and `minus`;
+    a mu/non-mu mismatch is `Incompatible glue units`, and the value
+    keeps the kind that was asked for.
+  - *Internal quantities* (scan_something_internal) at their level, with
+    TeX's coercion (glue to its width, mu glue after an error, dimen to
+    sp) and negation: registers and their shorthands, parameters, codes,
+    `\parshape`, font identifiers and family fonts, `\fontdimen`,
+    `\hyphenchar`, `\skewchar`, `\inputlineno`, and what belongs to lists
+    and pages.  Those last read TeX's semantic nest, kept without its
+    lists (`nest.lisp`): mode, `\prevdepth` (−1000pt at first),
+    `\spacefactor` (each "Improper" outside its mode), `\prevgraf`, and
+    the last node of the list (penalty, kern, glue or other), which the
+    event layer records; an empty main vertical list shows the page
+    builder's last values.  No page is ever started, so `\pagegoal` is
+    `\maxdimen` and the other page totals 0; `\badness` is 0.  `\wd`,
+    `\ht` and `\dp` go through the generic function `box-dimension` and
+    its setter (a void box reads 0 and ignores assignments); the box
+    layer adds the methods for its boxes.
+  - *`\fontdimen` without metrics*: `\nullfont` has TeX's 7 parameters
+    and grows only while no font has been loaded; a font loaded by
+    `\font` has unknown parameters, so any number from 1 is accepted
+    (TeX would know the count from the TFM; the sources, typeset by TeX,
+    never take that error path).  An unassigned parameter is 0, so
+    `\kern\fontdimen2\font` is 0pt.
+  - *`\the`* of a font gives a frozen identifier token whose meaning is
+    always that font; `\fontname` shows the `at` size only, as `\meaning`
+    does.
+  - *Token lists* (`scan-toks`): a definition's parameter text (match
+    tokens, `#{`, `Parameters must be numbered consecutively`, `You
+    already have nine parameters`) and body (`#n`, `##`, `Illegal
+    parameter number`), or a general text after its left brace; with
+    expansion, `\noexpand`-ed tokens stay and what `\the` gives is not
+    expanded again.  Every definition and general text of main control
+    goes through it.
+- Conditionals (`src/expand/conditionals.lisp`), §§487-510:
+  - *The condition stack* holds one entry per open conditional, innermost
+    first: its test, the line it began on, and its limit (what may end
+    it next: `\else`/`\fi` after a true test, `\or` in `\ifcase`,
+    `\fi` after `\else`).  A test may leave conditionals of its own open
+    (`\ifnum\iftrue 1\else 2\fi=1`); skipping closes them by their `\fi`.
+  - *Skipping* reads without expansion and counts nested conditionals,
+    with the scanner status `:skipping`: an `\outer` macro or the end of
+    a file there is "Incomplete \ifx; all text was ignored after line N"
+    and a `\fi` is inserted.
+  - *`\fi`, `\else`, `\or`* end the innermost conditional (skipping to
+    its `\fi`); met while its test is still read they insert `\relax`
+    before themselves; otherwise they are "Extra" and dropped, as is an
+    `\or` that ends the false branch of a test that is not `\ifcase`.
+  - *The tests*: `\if`/`\ifcat` expand and compare code or category, a
+    control sequence `\let` to a character counting as it and a
+    `\noexpand`-ed active character as itself, anything else as
+    (\relax, 256); `\ifx` reads two tokens unexpanded (an `\outer` macro
+    allowed) and compares meanings, a `\noexpand`-ed token equalling only
+    another; `\ifnum`/`\ifdim` with "Missing = inserted"; `\ifcase` counts
+    only its own `\or`s.  Modes come from the nest (`\ifinner`: internal
+    vertical, restricted horizontal, inline math; mode `:none` makes all
+    four mode tests false).  `\ifvoid`/`\ifhbox`/`\ifvbox` ask the
+    generic function `box-kind` (void is NIL); `\ifeof` reads the
+    expander's table of the sixteen read streams, all closed until
+    `\openin` opens one.
 - Assignments and grouping: the save stack, `\global`, `\globaldefs`,
   `\afterassignment` and `\aftergroup`; registers and parameters with
   INITEX defaults; TeX's integer, dimension and glue arithmetic.

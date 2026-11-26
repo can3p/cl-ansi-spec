@@ -39,4 +39,5 @@
    #:input-stack-file-end-hook #:end-current-file
    #:push-source #:push-file #:push-tokens #:back-input
    #:next-token #:peek-token #:input-depth #:current-file-name
+   #:current-line-number
    #:input-file-missing #:input-file-missing-name))

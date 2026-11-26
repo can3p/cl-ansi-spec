@@ -107,13 +107,17 @@ macro\" (§1295)."
         ((macro-outer-p macro) (esc expander "outer macro"))
         (t "macro")))
 
-(defun font-meaning-text (font)
-  "TeX's print_cmd_chr for a font (§1261): `select font', the file, and
-the size when it is not the design size.  Without metrics a `scaled' size
-cannot be turned into points, so only `at' sizes are shown."
+(defun font-name-text (font)
+  "The file of FONT and its size when it is not the design size, as
+\\fontname shows them (§1261).  Without metrics a `scaled' size cannot be
+turned into points, so only `at' sizes are shown."
   (let ((size (tex-font-size font)))
-    (format nil "select font ~A~@[ at ~A~]" (tex-font-file font)
+    (format nil "~A~@[ at ~A~]" (tex-font-file font)
             (and (eq (first size) :at) (format-dimen (second size))))))
+
+(defun font-meaning-text (font)
+  "TeX's print_cmd_chr for a font (§1261): `select font' and its name."
+  (concatenate 'string "select font " (font-name-text font)))
 
 (defun meaning-text (expander token meaning)
   "TeX's print_meaning (§296) for TOKEN with MEANING, as \\meaning shows it."

@@ -38,7 +38,24 @@ end-of-file checks."
   ;; every token read while matching arguments.
   (par nil)
   ;; Frozen control sequences by name, made on first use.
-  (frozen (make-hash-table :test 'equal) :read-only t))
+  (frozen (make-hash-table :test 'equal) :read-only t)
+  ;; The frozen font identifier of each font \the has shown (TeX's
+  ;; font_id_base + f), made on first use.
+  (font-identifiers (make-hash-table :test 'equal) :read-only t)
+  ;; The semantic nest, innermost list first (nest.lisp), and the page.
+  (nest (list (make-list-state)) :type cons)
+  (page (make-page-state) :type page-state :read-only t)
+  ;; TeX's mag_set (§286): the \mag a `true' dimension first used, or 0.
+  (mag-set 0 :type integer)
+  ;; TeX's last_badness (§646): no box is packaged, so it stays 0.
+  (last-badness 0 :type integer)
+  ;; The condition stack, innermost conditional first (conditionals.lisp,
+  ;; TeX's cond_ptr list with if_limit, cur_if and if_line, §489), and
+  ;; the line where the current skipping began (skip_line, §493).
+  (conditionals '() :type list)
+  (skip-line 0 :type integer)
+  ;; TeX's read_open (§480): the state of the sixteen \read streams.
+  (read-streams (make-array 16 :initial-element :closed) :read-only t))
 
 (defstruct (dont-expand-token (:include cs-token)
                               (:constructor make-dont-expand-token
@@ -202,8 +219,8 @@ read again.  Returns the token to use instead: a space (or NIL)."
           (insert-tokens expander
                          (list (make-cs-token
                                 (frozen-control-sequence expander "fi") span)))
-          (tex-error "Incomplete conditional; all text was ignored"
-                     :context (if token "before an \\outer macro" "before the end of a file")
+          (tex-error "Incomplete"
+                     :context (incomplete-conditional-text expander)
                      :span span))
         (let ((brace (make-character-token (char-code #\}) +end-group+ span)))
           (insert-tokens
@@ -228,3 +245,7 @@ read again.  Returns the token to use instead: a space (or NIL)."
                                         (if cs (cs-name-text expander cs) "?")))
                      :span span)))
     (and token (make-character-token 32 +space+ span))))
+
+(defun current-list (expander)
+  "The innermost level of EXPANDER's semantic nest, a LIST-STATE."
+  (first (expander-nest expander)))

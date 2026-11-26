@@ -9,7 +9,7 @@ rules; the history of how they were reached is in `docs/history/m0-m1.md`.
 | `token.lisp` | spans; control sequences and active characters, interned in one namespace per state, plus uninterned frozen ones (`make-frozen-control-sequence`); character and control-sequence tokens; `token=` ignores spans |
 | `line.lisp` | line sources, and line buffers that keep the file offset of every element |
 | `scanner.lisp` | TeX's states N, M and S, comments, `^^` notation, and control words and symbols, reading the *current* catcodes at every token |
-| `input-stack.lisp` | TeX's single input stack (files, token lists, backed-up tokens) and the pluggable file resolver (`directory-resolver` over the source search path by default); the file-end hook, `\endinput` (`end-current-file`), and the removal of exhausted token lists before a list is pushed |
+| `input-stack.lisp` | TeX's single input stack (files, token lists, backed-up tokens) and the pluggable file resolver (`directory-resolver` over the source search path by default); the file-end hook, `\endinput` (`end-current-file`), the removal of exhausted token lists before a list is pushed; the name and line number of the innermost file (`current-file-name`, `current-line-number`, TeX's `line` for `\inputlineno`) |
 
 Rules:
 
