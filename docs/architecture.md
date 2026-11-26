@@ -176,7 +176,7 @@ has the export formats, their JSON Schema and versioning.
 |-------|-------|
 | 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
-| 2–3 Expander, semantic layer | in progress: quantities, state and the expansion core done (`src/expand/`, `make expand`); the rest planned in [`docs/plan/m2.md`](plan/m2.md) |
+| 2–3 Expander, semantic layer | in progress: quantities, state, the expansion core and scanning done (`src/expand/`, `make expand`); the rest planned in [`docs/plan/m2.md`](plan/m2.md) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |
 
 Related: [process](process.md) explains how work advances.

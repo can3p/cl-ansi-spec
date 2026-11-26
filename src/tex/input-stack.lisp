@@ -135,3 +135,11 @@ Exhausted levels (finished token lists, files at their end) are removed."
   "Return the name of the innermost file being read, or NIL."
   (let ((reader (find-if #'file-reader-p (input-stack-levels stack))))
     (and reader (file-reader-name reader))))
+
+(defun current-line-number (stack)
+  "Return the number of the line last read from the innermost file being
+read (TeX's line, shown by \\inputlineno), or 0 when no file is open."
+  (let ((reader (find-if #'file-reader-p (input-stack-levels stack))))
+    (if reader
+        (line-source-line-number (file-reader-source reader))
+        0)))

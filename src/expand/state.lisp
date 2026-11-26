@@ -69,7 +69,8 @@ empty or void, parameters as INITEX sets them, every font \\nullfont.
 INITEX's nonzero integer parameters are assigned globally, so TEX should
 have no open group."
   (let ((state (%make-expander-state
-                tex (make-tex-font "nullfont" :identifier "nullfont"))))
+                tex (make-tex-font "nullfont" :identifier "nullfont"
+                                :parameter-count 7))))
     (loop for (name value) on (initex-integer-parameters) by #'cddr
           do (set-integer-parameter tex name value :global t))
     state))

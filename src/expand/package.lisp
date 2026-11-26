@@ -25,7 +25,7 @@
                 #:control-sequence-name #:control-sequence-active-p
                 #:input-stack #:make-input-stack #:input-stack-file-end-hook
                 #:next-token #:back-input #:push-tokens #:push-file
-                #:end-current-file #:input-file-missing)
+                #:end-current-file #:input-file-missing #:current-line-number)
   (:export
    ;; Integers and scaled values (arithmetic.lisp)
    #:+infinity+ #:+max-dimen+ #:+unity+
@@ -83,4 +83,26 @@
    #:expander-marks #:scanner-status
    #:get-next #:get-token #:get-x-token #:back-token #:insert-tokens
    #:expand #:expandable-p #:frozen-control-sequence #:dont-expand-meaning
-   #:cs-name-text #:token-list-text #:meaning-text #:string-tokens))
+   #:cs-name-text #:token-list-text #:meaning-text #:string-tokens
+   #:current-list
+   ;; The nest and the page (nest.lisp)
+   #:+ignore-depth+ #:mode #:mode-kind #:last-node-kind
+   #:list-state #:make-list-state #:list-state-p #:list-state-mode
+   #:list-state-prev-depth #:list-state-space-factor #:list-state-prev-graf
+   #:list-state-last-node
+   #:page-state #:page-state-so-far #:page-state-contents
+   #:page-state-output-active #:page-state-last-penalty
+   #:page-state-last-kern #:page-state-last-glue #:page-state-dead-cycles
+   #:page-state-insert-penalties
+   #:expander-nest #:expander-page #:expander-mag-set #:expander-last-badness
+   ;; Scanning (scan.lisp, internal.lisp, dimen-scan.lisp, toks.lisp)
+   #:scan-keyword #:scan-optional-equals #:scan-optional-space
+   #:scan-left-brace #:get-x-nonblank #:get-x-nonblank-nonrelax
+   #:scan-int #:scan-eight-bit-int #:scan-char-num #:scan-four-bit-int
+   #:scan-fifteen-bit-int #:scan-twenty-seven-bit-int
+   #:internal-command-p #:scan-something-internal
+   #:box-dimension #:scan-font-ident #:find-font-dimen #:font-identifier-token
+   #:prepare-mag #:scan-dimen #:scan-glue
+   #:scan-toks #:the-toks
+   #:format-roman #:font-name-text
+   #:tex-font-parameter-count))
