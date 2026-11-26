@@ -93,6 +93,32 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     expansion, `\noexpand`-ed tokens stay and what `\the` gives is not
     expanded again.  Every definition and general text of main control
     goes through it.
+- Conditionals (`src/expand/conditionals.lisp`), §§487-510:
+  - *The condition stack* holds one entry per open conditional, innermost
+    first: its test, the line it began on, and its limit (what may end
+    it next: `\else`/`\fi` after a true test, `\or` in `\ifcase`,
+    `\fi` after `\else`).  A test may leave conditionals of its own open
+    (`\ifnum\iftrue 1\else 2\fi=1`); skipping closes them by their `\fi`.
+  - *Skipping* reads without expansion and counts nested conditionals,
+    with the scanner status `:skipping`: an `\outer` macro or the end of
+    a file there is "Incomplete \ifx; all text was ignored after line N"
+    and a `\fi` is inserted.
+  - *`\fi`, `\else`, `\or`* end the innermost conditional (skipping to
+    its `\fi`); met while its test is still read they insert `\relax`
+    before themselves; otherwise they are "Extra" and dropped, as is an
+    `\or` that ends the false branch of a test that is not `\ifcase`.
+  - *The tests*: `\if`/`\ifcat` expand and compare code or category, a
+    control sequence `\let` to a character counting as it and a
+    `\noexpand`-ed active character as itself, anything else as
+    (\relax, 256); `\ifx` reads two tokens unexpanded (an `\outer` macro
+    allowed) and compares meanings, a `\noexpand`-ed token equalling only
+    another; `\ifnum`/`\ifdim` with "Missing = inserted"; `\ifcase` counts
+    only its own `\or`s.  Modes come from the nest (`\ifinner`: internal
+    vertical, restricted horizontal, inline math; mode `:none` makes all
+    four mode tests false).  `\ifvoid`/`\ifhbox`/`\ifvbox` ask the
+    generic function `box-kind` (void is NIL); `\ifeof` reads the
+    expander's table of the sixteen read streams, all closed until
+    `\openin` opens one.
 - Assignments and grouping: the save stack, `\global`, `\globaldefs`,
   `\afterassignment` and `\aftergroup`; registers and parameters with
   INITEX defaults; TeX's integer, dimension and glue arithmetic.

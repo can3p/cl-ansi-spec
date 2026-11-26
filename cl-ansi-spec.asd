@@ -39,7 +39,8 @@ Lisp draft standard (dpANS3)."
                              (:file "scan")
                              (:file "internal")
                              (:file "dimen-scan")
-                             (:file "toks")))
+                             (:file "toks")
+                             (:file "conditionals")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
@@ -65,7 +66,8 @@ Lisp draft standard (dpANS3)."
                 :components ((:file "quantities")
                              (:file "state")
                              (:file "expander")
-                             (:file "scan")))
+                             (:file "scan")
+                             (:file "conditionals")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

@@ -48,7 +48,14 @@ end-of-file checks."
   ;; TeX's mag_set (§286): the \mag a `true' dimension first used, or 0.
   (mag-set 0 :type integer)
   ;; TeX's last_badness (§646): no box is packaged, so it stays 0.
-  (last-badness 0 :type integer))
+  (last-badness 0 :type integer)
+  ;; The condition stack, innermost conditional first (conditionals.lisp,
+  ;; TeX's cond_ptr list with if_limit, cur_if and if_line, §489), and
+  ;; the line where the current skipping began (skip_line, §493).
+  (conditionals '() :type list)
+  (skip-line 0 :type integer)
+  ;; TeX's read_open (§480): the state of the sixteen \read streams.
+  (read-streams (make-array 16 :initial-element :closed) :read-only t))
 
 (defstruct (dont-expand-token (:include cs-token)
                               (:constructor make-dont-expand-token
@@ -212,8 +219,8 @@ read again.  Returns the token to use instead: a space (or NIL)."
           (insert-tokens expander
                          (list (make-cs-token
                                 (frozen-control-sequence expander "fi") span)))
-          (tex-error "Incomplete conditional; all text was ignored"
-                     :context (if token "before an \\outer macro" "before the end of a file")
+          (tex-error "Incomplete"
+                     :context (incomplete-conditional-text expander)
                      :span span))
         (let ((brace (make-character-token (char-code #\}) +end-group+ span)))
           (insert-tokens

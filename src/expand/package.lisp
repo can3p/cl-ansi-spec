@@ -105,4 +105,8 @@
    #:prepare-mag #:scan-dimen #:scan-glue
    #:scan-toks #:the-toks
    #:format-roman #:font-name-text
-   #:tex-font-parameter-count))
+   #:tex-font-parameter-count
+   ;; Conditionals (conditionals.lisp)
+   #:conditional #:conditional-p #:conditional-kind #:conditional-line
+   #:conditional-limit #:expander-conditionals #:expander-skip-line
+   #:expander-read-streams #:if-limit #:if-test-names #:pass-text #:box-kind))
