@@ -139,11 +139,140 @@ the quantity is read outside its mode; it is 0."
              (values (current-line-number (expander-input expander)) :int))
             (t (values (expander-last-badness expander) :int))))))
 
+(defvar *internal-commands* (make-hash-table :test 'equal)
+  "TeX's internal commands (min_internal to max_internal, §209) by
+primitive name: a function of the expander, the command's token and the
+level wanted, returning the value and its level (§413).  Global data,
+filled while the system loads by DEFINE-INTERNAL; never rebound.")
+
+(defmacro define-internal (names (expander token level) &body body)
+  "Register BODY as the reader of the internal command(s) NAMES (a string
+or a list of strings); inside it NAME is bound to the command's name."
+  `(dolist (name ',(if (listp names) names (list names)))
+     (setf (gethash name *internal-commands*)
+           (let ((name name))
+             (declare (ignorable name))
+             (lambda (,expander ,token ,level)
+               (declare (ignorable ,expander ,token ,level))
+               ,@body)))))
+
+(defun missing-number (expander token)
+  "TeX's `Missing number, treated as zero' for a token list or font where
+a number is wanted (§428): TOKEN is put back; the value is 0."
+  (back-token expander token)
+  (tex-error "Missing number, treated as zero" :span (token-span token))
+  (values 0 :dimen))
+
+(defun token-list-value (expander token level value)
+  "VALUE, a token list, when LEVEL asks for one; else `Missing number'."
+  (if (eq level :tok)
+      (values value :tok)
+      (missing-number expander token)))
+
+;;; Every parameter reads its value.
+(dolist (kind '(:integer :dimen :glue :muglue :tokens))
+  (dolist (parameter (parameter-names kind))
+    (let ((parameter parameter)
+          (level (ecase kind
+                   (:integer :int) (:dimen :dimen) (:glue :glue)
+                   (:muglue :mu) (:tokens :tok))))
+      (setf (gethash (string-downcase (symbol-name parameter)) *internal-commands*)
+            (lambda (expander token wanted)
+              (let ((value (parameter (expander-state expander) parameter)))
+                (if (eq level :tok)
+                    (token-list-value expander token wanted value)
+                    (values value level))))))))
+
+(define-internal ("catcode" "lccode" "uccode" "sfcode" "mathcode" "delcode")
+    (expander token level)
+  (values (code (expander-state expander) (intern (string-upcase name) :keyword)
+                (scan-char-num expander))
+          :int))
+
+(define-internal ("count" "dimen" "skip" "muskip") (expander token level)
+  (let ((kind (intern (string-upcase name) :keyword)))
+    (values (register (expander-state expander) kind (scan-eight-bit-int expander))
+            (ecase kind (:count :int) (:dimen :dimen) (:skip :glue) (:muskip :mu)))))
+
+(define-internal "toks" (expander token level)
+  (if (eq level :tok)
+      (values (register (expander-state expander) :toks (scan-eight-bit-int expander))
+              :tok)
+      (missing-number expander token)))
+
+(define-internal ("font" "textfont" "scriptfont" "scriptscriptfont")
+    (expander token level)
+  (cond ((eq level :tok)
+         (back-token expander token)
+         (values (scan-font-ident expander) :ident))
+        (t (missing-number expander token))))
+
+(define-internal "spacefactor" (expander token level)
+  (let ((list (current-list expander)))
+    (if (eq (mode-kind (list-state-mode list)) :horizontal)
+        (values (list-state-space-factor list) :int)
+        (list-quantity-error expander token level))))
+
+(define-internal "prevdepth" (expander token level)
+  (let ((list (current-list expander)))
+    (if (eq (mode-kind (list-state-mode list)) :vertical)
+        (values (list-state-prev-depth list) :dimen)
+        (list-quantity-error expander token level))))
+
+(define-internal "prevgraf" (expander token level)
+  (values (if (eq (list-state-mode (current-list expander)) :none)
+              0
+              (list-state-prev-graf (enclosing-vertical-list expander)))
+          :int))
+
+(define-internal "deadcycles" (expander token level)
+  (values (page-state-dead-cycles (expander-page expander)) :int))
+
+(define-internal "insertpenalties" (expander token level)
+  (values (page-state-insert-penalties (expander-page expander)) :int))
+
+(define-internal ("pagegoal" "pagetotal" "pagestretch" "pagefilstretch"
+                  "pagefillstretch" "pagefilllstretch" "pageshrink" "pagedepth")
+    (expander token level)
+  (let ((page (expander-page expander))
+        (index (page-dimen-index name)))
+    (values (cond ((or (not (eq (page-state-contents page) :empty))
+                       (page-state-output-active page))
+                   (aref (page-state-so-far page) index))
+                  ((zerop index) +max-dimen+)
+                  (t 0))
+            :dimen)))
+
+(define-internal "parshape" (expander token level)
+  (values (length (par-shape (expander-state expander))) :int))
+
+(define-internal ("wd" "ht" "dp") (expander token level)
+  (values (box-dimension (register (expander-state expander) :box
+                                   (scan-eight-bit-int expander))
+                         (cdr (assoc name '(("wd" . :width) ("ht" . :height)
+                                            ("dp" . :depth))
+                                     :test #'string=)))
+          :dimen))
+
+(define-internal "fontdimen" (expander token level)
+  (multiple-value-bind (font n) (find-font-dimen expander)
+    (values (if font (font-dimen font n) 0) :dimen)))
+
+(define-internal "hyphenchar" (expander token level)
+  (values (tex-font-hyphen-char (scan-font-ident expander)) :int))
+
+(define-internal "skewchar" (expander token level)
+  (values (tex-font-skew-char (scan-font-ident expander)) :int))
+
+(define-internal ("lastpenalty" "lastkern" "lastskip" "inputlineno" "badness")
+    (expander token level)
+  (last-item expander name))
+
 (defun read-internal (expander token meaning level)
   "The value and level of the internal command TOKEN with MEANING
 (§413), before coercion; NIL and NIL when MEANING is not internal."
   (let ((state (expander-state expander)))
-    (etypecase meaning
+    (typecase meaning
       (tex-font (if (eq level :tok)
                     (values meaning :ident)
                     (missing-number expander token)))
@@ -155,131 +284,21 @@ the quantity is read outside its mode; it is 0."
            (:dimen (values (register state :dimen value) :dimen))
            (:skip (values (register state :skip value) :glue))
            (:muskip (values (register state :muskip value) :mu))
-           (:toks (if (eq level :tok)
-                      (values (register state :toks value) :tok)
-                      (missing-number expander token))))))
+           (:toks (token-list-value expander token level
+                                    (register state :toks value))))))
       (primitive
-       (let* ((name (primitive-name meaning))
-              (parameter (parameter-keyword name)))
-         (cond
-           (parameter
-            (let ((value (parameter state parameter)))
-              (ecase (parameter-kind parameter)
-                (:integer (values value :int))
-                (:dimen (values value :dimen))
-                (:glue (values value :glue))
-                (:muglue (values value :mu))
-                (:tokens (if (eq level :tok)
-                             (values value :tok)
-                             (missing-number expander token))))))
-           ((code-command-kind name)
-            (values (code state (code-command-kind name) (scan-char-num expander))
-                    :int))
-           ((member name '("count" "dimen" "skip" "muskip") :test #'string=)
-            (let ((kind (intern (string-upcase name) :keyword)))
-              (values (register state kind (scan-eight-bit-int expander))
-                      (ecase kind
-                        (:count :int) (:dimen :dimen) (:skip :glue) (:muskip :mu)))))
-           ((string= name "toks")
-            (if (eq level :tok)
-                (values (register state :toks (scan-eight-bit-int expander)) :tok)
-                (missing-number expander token)))
-           ((or (string= name "font") (family-size name))
-            (cond ((eq level :tok)
-                   (back-token expander token)
-                   (values (scan-font-ident expander) :ident))
-                  (t (missing-number expander token))))
-           ((string= name "spacefactor")
-            (let ((list (current-list expander)))
-              (if (eq (mode-kind (list-state-mode list)) :horizontal)
-                  (values (list-state-space-factor list) :int)
-                  (list-quantity-error expander token level))))
-           ((string= name "prevdepth")
-            (let ((list (current-list expander)))
-              (if (eq (mode-kind (list-state-mode list)) :vertical)
-                  (values (list-state-prev-depth list) :dimen)
-                  (list-quantity-error expander token level))))
-           ((string= name "prevgraf")
-            (values (if (eq (list-state-mode (current-list expander)) :none)
-                        0
-                        (list-state-prev-graf (enclosing-vertical-list expander)))
-                    :int))
-           ((string= name "deadcycles")
-            (values (page-state-dead-cycles (expander-page expander)) :int))
-           ((string= name "insertpenalties")
-            (values (page-state-insert-penalties (expander-page expander)) :int))
-           ((page-dimen-index name)
-            (let ((page (expander-page expander))
-                  (index (page-dimen-index name)))
-              (values (cond ((or (not (eq (page-state-contents page) :empty))
-                                 (page-state-output-active page))
-                             (aref (page-state-so-far page) index))
-                            ((zerop index) +max-dimen+)
-                            (t 0))
-                      :dimen)))
-           ((string= name "parshape")
-            (values (length (par-shape state)) :int))
-           ((box-dimension-keyword name)
-            (values (box-dimension (register state :box (scan-eight-bit-int expander))
-                                   (box-dimension-keyword name))
-                    :dimen))
-           ((string= name "fontdimen")
-            (multiple-value-bind (font n) (find-font-dimen expander)
-              (values (if font (font-dimen font n) 0) :dimen)))
-           ((string= name "hyphenchar")
-            (values (tex-font-hyphen-char (scan-font-ident expander)) :int))
-           ((string= name "skewchar")
-            (values (tex-font-skew-char (scan-font-ident expander)) :int))
-           ((member name '("lastpenalty" "lastkern" "lastskip" "inputlineno"
-                           "badness")
-                    :test #'string=)
-            (last-item expander name))
-           (t (values nil nil)))))
-      ((or null meaning) (values nil nil)))))
-
-(defun missing-number (expander token)
-  "TeX's `Missing number, treated as zero' for a token list or font where
-a number is wanted (§428): TOKEN is put back; the value is 0."
-  (back-token expander token)
-  (tex-error "Missing number, treated as zero" :span (token-span token))
-  (values 0 :dimen))
-
-(defun parameter-keyword (name)
-  "The parameter keyword of the primitive NAME (:TOLERANCE for
-\"tolerance\"), or NIL."
-  (let ((keyword (find-symbol (string-upcase name) :keyword)))
-    (and keyword (parameter-kind keyword) keyword)))
-
-(defun code-command-kind (name)
-  "The code kind \\catcode, \\lccode, ... reads, or NIL."
-  (cdr (assoc name '(("catcode" . :catcode) ("lccode" . :lccode)
-                     ("uccode" . :uccode) ("sfcode" . :sfcode)
-                     ("mathcode" . :mathcode) ("delcode" . :delcode))
-              :test #'string=)))
-
-(defun box-dimension-keyword (name)
-  "The dimension \\wd, \\ht or \\dp reads, or NIL."
-  (cdr (assoc name '(("wd" . :width) ("ht" . :height) ("dp" . :depth))
-              :test #'string=)))
+       (let ((reader (gethash (primitive-name meaning) *internal-commands*)))
+         (if reader
+             (funcall reader expander token level)
+             (values nil nil))))
+      (t (values nil nil)))))
 
 (defun internal-command-p (meaning)
   "True when MEANING is one of TeX's internal quantities (min_internal to
 max_internal, §209): what scan_int and scan_dimen read as a value."
   (typecase meaning
     ((or tex-font shorthand) t)
-    (primitive
-     (let ((name (primitive-name meaning)))
-       (or (parameter-keyword name)
-           (code-command-kind name)
-           (family-size name)
-           (page-dimen-index name)
-           (box-dimension-keyword name)
-           (member name '("count" "dimen" "skip" "muskip" "toks" "font"
-                          "spacefactor" "prevdepth" "prevgraf" "deadcycles"
-                          "insertpenalties" "parshape" "fontdimen"
-                          "hyphenchar" "skewchar" "lastpenalty" "lastkern"
-                          "lastskip" "inputlineno" "badness")
-                   :test #'string=))))))
+    (primitive (and (gethash (primitive-name meaning) *internal-commands*) t))))
 
 (defun retag-glue (glue mu-p)
   "GLUE as glue (MU-P false) or mu glue: TeX does not tell them apart once

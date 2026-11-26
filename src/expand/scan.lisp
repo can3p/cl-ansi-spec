@@ -70,9 +70,9 @@ expansion (§404).  A \\noexpand-ed token counts as \\relax."
 (defun scan-keyword (expander keyword)
   "TeX's scan_keyword (§407): true, having read it, when the next
 character tokens spell KEYWORD (a lowercase string) in either case,
-with expansion and after any blanks.  Otherwise the tokens read are put
-back (the blanks before a partial match too, those before no match are
-lost) and the result is NIL."
+with expansion and after any blanks.  Otherwise the result is NIL and
+the letters matched so far and the token that failed are put back; the
+blanks before the first letter are lost."
   (let ((matched '())
         (k 0))
     (loop while (< k (length keyword))
