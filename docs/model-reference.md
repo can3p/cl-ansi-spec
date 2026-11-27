@@ -343,6 +343,12 @@ Categories: `:inline`.
 | `sense` | integer | no | The glossary sense meant, from the \meaning that follows; absent when none does. |
 | `target` | reference (target `:glossary`) | no | The glossary entry of the term; absent while unresolved. |
 
+Example:
+
+```lisp
+(:term-ref :text "dotted lists" :target (:glossary "dotted list"))
+```
+
 ### Node kind `:operator-ref`
 
 A reference to a defined name: \clref and its wrappers.
@@ -355,6 +361,12 @@ Categories: `:inline`.
 | `via` | enumeration `reference-kind` | yes | The macro the reference was written with. |
 | `target` | reference (target `:entry`) | no | The dictionary entry of the name; absent while unresolved. |
 
+Example:
+
+```lisp
+(:operator-ref :text "endp" :via :function :target (:entry "endp"))
+```
+
 ### Node kind `:section-ref`
 
 A reference to a section or a chapter: \secref.
@@ -365,6 +377,13 @@ Categories: `:inline`.
 |---|---|---|---|
 | `label` | string | yes | The label referred to, as written after \secref. |
 | `target` | reference (target `:section`, `:chapter`) | no | The section or chapter of the label; absent while unresolved. |
+
+Example:
+
+```lisp
+(:section-ref :label "OrdinaryLambdaLists" :target
+ (:section "OrdinaryLambdaLists"))
+```
 
 ### Node kind `:figure-ref`
 
@@ -377,6 +396,12 @@ Categories: `:inline`.
 | `label` | string | yes | The label referred to, as written after \figref. |
 | `target` | reference (target `:figure`) | no | The figure of the label; absent while unresolved. |
 
+Example:
+
+```lisp
+(:figure-ref :label "FigConses" :target (:figure "14-1"))
+```
+
 ### Node kind `:this-section`
 
 The words `this section': \thissection, \Thissection, a reference to
@@ -387,6 +412,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `target` | reference (target `:section`) | no | The section the words are in; absent while unresolved. |
+
+Example:
+
+```lisp
+(:this-section :target (:section "Conses"))
+```
 
 ### Node kind `:next-figure`
 
@@ -399,6 +430,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `target` | reference (target `:figure`) | no | The next figure; absent while unresolved. |
 
+Example:
+
+```lisp
+(:next-figure :target (:figure "14-1"))
+```
+
 ### Node kind `:param`
 
 A parameter of the operator described: \param.
@@ -408,6 +445,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The parameter's name. |
+
+Example:
+
+```lisp
+(:param :name "list")
+```
 
 ### Node kind `:metavariable`
 
@@ -419,6 +462,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The metavariable's name. |
 
+Example:
+
+```lisp
+(:metavariable :name "var")
+```
+
 ### Node kind `:format-directive`
 
 A format directive: \formatOp, \formatdirective.
@@ -428,6 +477,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The directive after its tilde, e.g. "A". |
+
+Example:
+
+```lisp
+(:format-directive :name "A")
+```
 
 ### Node kind `:lambda-list-keyword`
 
@@ -440,6 +495,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The keyword with its ampersand, e.g. "&optional". |
 
+Example:
+
+```lisp
+(:lambda-list-keyword :name "&optional")
+```
+
 ### Node kind `:code`
 
 Code within text: \f, \ff, and text in the typewriter font outside
@@ -451,6 +512,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The code's text. |
 
+Example:
+
+```lisp
+(:code :content ("(endp nil)"))
+```
+
 ### Node kind `:emphasis`
 
 Emphasis: \i, \j, and italic text outside vocabulary entries.
@@ -460,6 +527,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | The emphasised text. |
+
+Example:
+
+```lisp
+(:emphasis :content ("true"))
+```
 
 ### Node kind `:strong`
 
@@ -471,6 +544,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The text set in bold. |
 
+Example:
+
+```lisp
+(:strong :content ("Examples:"))
+```
+
 ### Node kind `:evaluates-to`
 
 The arrow `evaluates to' of an example: \EV.
@@ -478,6 +557,12 @@ The arrow `evaluates to' of an example: \EV.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:evaluates-to)
+```
 
 ### Node kind `:may-evaluate-to`
 
@@ -488,6 +573,12 @@ Categories: `:inline`.
 
 _No fields._
 
+Example:
+
+```lisp
+(:may-evaluate-to)
+```
+
 ### Node kind `:does-not-evaluate-to`
 
 The arrow `does not evaluate to' of an example: \NV.
@@ -495,6 +586,12 @@ The arrow `does not evaluate to' of an example: \NV.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:does-not-evaluate-to)
+```
 
 ### Node kind `:equivalent`
 
@@ -504,6 +601,12 @@ Categories: `:inline`.
 
 _No fields._
 
+Example:
+
+```lisp
+(:equivalent)
+```
+
 ### Node kind `:output`
 
 The triangle that marks the output of an example, which follows it:
@@ -512,6 +615,12 @@ The triangle that marks the output of an example, which follows it:
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:output)
+```
 
 ### Node kind `:input`
 
@@ -523,6 +632,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The input. |
 
+Example:
+
+```lisp
+(:input :content ("(read)"))
+```
+
 ### Node kind `:citation`
 
 The title of a work the standard cites: \CLtL, \CLtLTwo and the
@@ -533,6 +648,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | The title as set. |
+
+Example:
+
+```lisp
+(:citation :content ("CLtL"))
+```
 
 ### Node kind `:index-entry`
 
@@ -546,6 +667,12 @@ Categories: `:inline`, `:block`.
 | `index-kind` | enumeration `index-kind` | yes | What is indexed. |
 | `text` | string | yes | The indexed text, as written. |
 
+Example:
+
+```lisp
+(:index-entry :index-kind :ref :text "endp")
+```
+
 ### Node kind `:issue-start`
 
 Where the text an X3J13 issue brought begins: \issue.  Issues are
@@ -557,6 +684,12 @@ Categories: `:inline`, `:block`.
 |---|---|---|---|
 | `name` | string | yes | The issue's name, e.g. "DOTTED-LIST-ARGUMENTS:CLARIFY". |
 
+Example:
+
+```lisp
+(:issue-start :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
+```
+
 ### Node kind `:issue-end`
 
 Where the text an X3J13 issue brought ends: \endissue, the one end
@@ -567,6 +700,12 @@ Categories: `:inline`, `:block`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The issue's name. |
+
+Example:
+
+```lisp
+(:issue-end :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
+```
 
 ### Enumeration `reference-kind`
 
