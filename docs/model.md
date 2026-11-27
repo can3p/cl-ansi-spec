@@ -166,6 +166,64 @@ vocabulary key and every event kind of [events.md](events.md) exactly one
 owner, a step of the milestone and its handler file in `src/model/`
 (`tests/model/owners.lisp` checks it).
 
+The builder core (`src/model/build.lisp`) reads a job's events
+([events.md](events.md)) in order and hands each to its **handler**; the
+handlers of an area live in its own file and build the nodes.
+
+- **Events.** `event-type` (`:begin`, `:text`, `:glue`, …), `event-key`
+  (the key of a `:begin`, `:end` or `:mark`, else `nil`), `event-text`,
+  `event-property`, `event-span`, `event-arguments`; `argument-text` gives
+  an argument's token list as TeX shows it (`token-list-text`, so the
+  builder keeps the job's expander), `event-argument-texts` all of them.
+- **Cursor.** The events of a build are a cursor; `next-event` and
+  `peek-event` give the next event and its span, so a handler may take the
+  events that follow its own.
+- **Handlers** are keyed on the pair (event type, key), since `:begin`,
+  `:end` and `:mark` share keys: `(define-handler (:begin :com) (builder
+  event span) …)`, key `nil` for a type without keys (`(:text nil)`).  A
+  handler table (`make-handler-table`) is passed to the build like the
+  registry; the model's is `*handlers*`, tests use their own.  An `:end`
+  without a handler of its own closes its key's container when the key
+  has a `:begin` handler.
+- **Containers.** A handler opens a container for a key with
+  `open-container` (the node it builds and the field that receives its
+  items, or no node: its items then go to the container below), adds
+  nodes and strings to the innermost one with `add-item`, and closes it
+  with `close-container`.  When a container closes, its items fill the
+  field, its node's span **joins** the span of its beginning and that of
+  its end (`join-spans`: from the start of one to the end of the other
+  when both lie in one file, else the beginning's; spans are
+  `cl-ansi-spec/tex` spans, which the package imports with
+  `make-span` and their readers), its node is checked with
+  `node-problems`, and the node is added to the container below.  Nodes
+  are made from the build's registry (`make-builder-node`).
+- **Build report.** Nothing is dropped silently: every problem goes into
+  the report with its span (`*problem-kinds*`): an event no handler takes
+  (`:unhandled`); an `:end` whose key has no open container (`:underflow`
+  when none is open, `:unmatched-end` otherwise); a container still open
+  when one below it closes, or at the end of the build, which is closed
+  there (`:unclosed`); a node that does not match its declaration
+  (`:node`); a `:diagnostic` event or log entry; a TeX error the job
+  recovered from (`:tex-error`) or that stopped it (`:fatal-error`).
+- **Builds.** `build-events` builds a list of events; `build-job` runs a
+  chapter job from plain TeX's format, observing the spec's vocabulary,
+  and builds its events; `build-model` builds the chapter jobs it is given
+  (the model does not list them: `cl-ansi-spec/inventory` does).
+  `build-fixture` builds the nodes a job appended while the reader was at
+  some lines of a file (`dict-conses.tex` 1702–1759 is `endp`): a
+  composite node appended then whole, and of one appended later the
+  nodes inside it appended then.  It places nodes by the reader's line,
+  not by their spans as `make events` does, because a vocabulary entry
+  called from a setup macro (`\begincom` calls `\dobegincom`) has the
+  span of that call, in `setup-aux.tex`.  Each job runs once per session
+  for fixtures (`forget-job-runs`), so the builders' tests stay fast.
+- **Printing.** `node-sexp` writes a node as `(kind :field value … :span
+  span)`, its fields in declaration order, empty ones left out;
+  `print-node` prints it.  `make model FILE=… LINES=… [JOB=…]` prints the
+  nodes `build-fixture` builds from those lines (the job: `FILE` itself
+  when it is a chapter job, else `JOB`, else the chapter job that inputs
+  it), then the report, unhandled events counted by type and key.
+
 ### Text
 
 *Step 3.12.* Not written yet.
