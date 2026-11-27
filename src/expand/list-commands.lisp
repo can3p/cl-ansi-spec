@@ -88,20 +88,28 @@ which extends the text node that ends the list when it can."
     (fix-language expander span))
   (let* ((list (current-list expander))
          (style (font-style-name (current-font (expander-state expander))))
-         ;; Not across a marker: it sits between the characters.
-         (last (let ((node (last-node list)))
-                 (and (eq node (first (list-state-contents list))) node)))
          (char (code-char code)))
-    (if (and last (text-continues-p last style span))
-        (progn
-          (vector-push-extend char (node-value last))
-          (when span
-            (let ((old (node-span last)))
-              (setf (node-span last)
-                    (make-span (span-file old) (span-start old) (span-end span)
-                               (span-line old) (span-column old)))))
-          (signal 'job-output :item last))
-        (append-node expander (character-node code span style)))))
+    (flet ((joinable ()
+             ;; Not across a marker: it sits between the characters.
+             (let ((node (last-node list)))
+               (and node (eq node (first (list-state-contents list)))
+                    (text-continues-p node style span)
+                    node))))
+      (let ((last (joinable)))
+        (when last
+          ;; The observer may append markers, which end the text node.
+          (notify-append expander last list)
+          (setf last (joinable)))
+        (if last
+            (progn
+              (vector-push-extend char (node-value last))
+              (when span
+                (let ((old (node-span last)))
+                  (setf (node-span last)
+                        (make-span (span-file old) (span-start old) (span-end span)
+                                   (span-line old) (span-column old)))))
+              (signal 'job-output :item last))
+            (append-node expander (character-node code span style)))))))
 
 (define-command "char" (expander token meaning)
   ;; §§1038, 1154: in math, a math character.

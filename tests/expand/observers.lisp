@@ -139,3 +139,24 @@ indentation and text styles of plain paragraphs."
   ;; A paragraph holding only markers is dropped; they stay.
   (check-observed "\\def\\m{}\\noindent\\m\\par" ("m")
                   ((:begin "m") (:end "m"))))
+
+(define-test appends-are-observed
+  :parent observers
+  ;; The append observer sees each node before it is appended, and the
+  ;; text node a character is about to extend; a marker it appends then
+  ;; ends that text node.
+  (let ((expander (make-test-expander "ab\\kern1pt c\\par\\end"))
+        (seen '()))
+    (setf (expand:expander-append-observer expander)
+          (lambda (expander node list)
+            (push (expand:node-kind node) seen)
+            ;; A text node already in LIST is about to be extended.
+            (when (and (eq (expand:node-kind node) :text)
+                       (eq node (first (expand:list-state-contents list))))
+              (expand:append-marker expander (list :begin "m")))))
+    (run-job expander)
+    (is equal '(:glue :indent :text :text :marker :text :kern :text :paragraph)
+        (reverse seen))
+    (is equal '((:begin :paragraph) (:text "a") (:begin "m") (:text "b")
+                (:kern :width "1.0pt") (:text "c") (:end :paragraph))
+        (observed-events expander))))

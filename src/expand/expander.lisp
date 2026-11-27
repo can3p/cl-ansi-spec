@@ -88,10 +88,12 @@ end-of-file checks."
   ;; matched macro's body is read, returning an action (NIL or :REPLACE)
   ;; and a tag; LEVEL-END-OBSERVER (expander tag) when the body of a call
   ;; given a tag ends; DEFINITION-OBSERVER (expander control-sequence
-  ;; meaning span) after a definition.
+  ;; meaning span) after a definition; APPEND-OBSERVER (expander node list)
+  ;; before NODE is appended to LIST.
   (call-observer nil :type (or null function))
   (level-end-observer nil :type (or null function))
-  (definition-observer nil :type (or null function)))
+  (definition-observer nil :type (or null function))
+  (append-observer nil :type (or null function)))
 
 (defstruct (dont-expand-token (:include cs-token)
                               (:constructor make-dont-expand-token

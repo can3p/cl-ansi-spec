@@ -9,8 +9,8 @@ next.
 
 | Event | Meaning |
 |-------|---------|
-| `(:begin <entry> . args)` / `(:end <entry> . args)` | A vocabulary entry starts or ends. `args` are its arguments, as parsed by the macro's own parameter text (strings for names, nested event lists for content). |
-| `(:mark <entry> . args)` | A vocabulary entry with no extent (`\label`, `\DefineSection`). |
+| `(:begin <key> :arguments args)` / `(:end <key>)` | A vocabulary entry starts or ends (`docs/vocabulary.md`). `args` are its arguments as the macro's own parameter text matched them, one token list each, with their spans; phase 4 reads names and content from them. The `:end` of an environment, a `:close` entry's call, has that call's `:arguments`. A replace handler emits events of its own making. |
+| `(:mark <key> :arguments args)` | A vocabulary entry with no extent (`\label`, `\DefineSection`). |
 | `(:text "…" :style s)` | A run of characters in one font. `s` names the font by its file and size (`"cmr10"`, `"cmr10 at 12.0pt"`, `"cmr10 scaled 1200"`), whatever control sequence selected it; phase 4 maps fonts to meaning only outside vocabulary entries. |
 | `(:space)` | An interword space (a blank in horizontal mode, or `\ `). |
 | `(:begin :paragraph)` … `(:end :paragraph)` | A paragraph: what was appended in horizontal mode until `\par`, without its final glue. An indented one begins with `(:indent)` (as does `\indent` inside a paragraph). A display ends the paragraph; the text after it is a new one. |

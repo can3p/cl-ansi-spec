@@ -2,32 +2,69 @@
 
 The vocabulary is how meaning survives expansion. It is a declared table of
 the macros that carry meaning. Most come from `setup-*.tex`; a few come from
-plain TeX. It is a data file with one entry per macro. Each entry states its
-mode and why it is in the table.
+plain TeX. It is a data file (planned, step 13 of `docs/plan/m2.md`) with one entry per macro
+(`make-entry`, `src/semantic/vocabulary.lisp`): the macro's name, the key
+of its events, its kind and placement, a handler when it replaces the call,
+and why it is in the table.
 
 ## Rules
 
-- **Keyed on meanings, not names.** An entry is attached to the macro
-  *meaning* it names. Aliases are therefore recognised
-  (`\def\funref{\clref}`, setup-document.tex:61-75). Tokens inserted from
-  `\halign` templates are recognised too (`\misc{##}`, setup-tables.tex:8-9).
-  Redefining a vocabulary macro is reported (`\caption` is defined twice,
-  setup-aux.tex:706 and :737).
-- **Observe (default).** The semantic layer emits `:begin` with the
-  arguments, parsed by the macro's own parameter text. It then lets the macro
-  expand normally, so counters, `\gdef`s and flags stay exact (section
-  numbers come from `\startSection`). It emits `:end` once the expansion is
-  done. An entry may name a later macro in a chain as its *observation
-  point*. For example, `\begincom` first changes catcodes and is observed at
+- **Keyed on meanings, not names.** An entry names a macro; the macro
+  *meaning* that name has is attached to the entry: the format's at job
+  start, then each one a definition gives it (`observe-vocabulary`,
+  `src/semantic/observe.lisp`). A call is recognised by its meaning, so
+  `\let` copies, `\csname`-built calls and tokens inserted from
+  `\halign` templates (`\misc{##}`, setup-tables.tex:8-9) are recognised.
+  A `\def` wrapper (`\def\funref{\clref}`, setup-document.tex:75) is
+  another macro and no entry by itself: the entry it calls is observed,
+  after it (a tail call) or nested in it.
+- **Reports.** Defining an entry's macro again is reported by name, with
+  the span of the new definition and of the last one seen (none for the
+  format's): `\caption` is defined twice, setup-aux.tex:706 and :737. The
+  new meaning is attached too, and the old one stays. A meaning that
+  already belongs to another entry (`\let` of one entry's macro to
+  another's name) is reported and stays with the first entry. Reports
+  are compared with the last definition *seen*: a group's end restoring
+  a meaning is not one, and a definition run again (one a macro makes each
+  time it is called, `\defsecrefs`) is not another one. A `:call` entry
+  whose `:end` goes to another list than its `:begin` (a body that ends a
+  paragraph or opens a box it does not close) is reported `:unbalanced`:
+  such an entry must be `:block` or observed at another macro.
+- **Kinds.** A `:call` entry (the default) is a `:begin` with the call's
+  arguments when it is called and an `:end` when its body ends (see
+  "Observers"), its span the body's last token. A `:mark` entry is one
+  `:mark` event. Environments are pairs: an `:open` entry's call is a
+  `:begin`, a `:close` entry's call the `:end` of the `:open` entry it
+  names, both with their arguments. `\code`…`\endcode` (through
+  `\screen!`), `\begincom`…`\endcom`, `\issue`…`\endissue` are
+  environments; issues are ranges that may cross section boundaries.
+- **Observe (default).** The macro expands as usual, so counters,
+  `\gdef`s and flags stay exact (section numbers come from
+  `\startSection`). The macro an entry names is its *observation point*,
+  the one whose body holds the content, not necessarily the one the
+  sources call: `\begincom` first changes catcodes, so its entry names
   `\dobegincom`.
-- **Replace (exception).** A Lisp handler reads the arguments and emits
-  events itself. This is used only where expansion would hide content, for
-  example editor notes that the options suppress. Each use is justified in
-  the table.
-- **Environments** are begin/end pairs: `\code`…`\endcode` (through
-  `\screen!`), `\begincom`…`\endcom`, `\issue`…`\endissue`. Issues are
-  ranges that may cross section boundaries. Code keeps its exact characters,
-  spaces and lines; this is checked by golden round-trip tests.
+- **Replace (exception).** An entry with a handler, a function
+  `(observer expander token arguments)`, replaces the call: the body is
+  not read, and the handler emits the events itself (`emit-event`) and
+  does what the macro must still do. It is used only where expansion
+  would hide content, for example editor notes that the options suppress.
+  Each use is justified in the table.
+- **Placement.** The `:begin` of an `:inline` `:call` entry waits until
+  the first node of its content: it is placed just before the next node
+  appended, or the next character added to a text node, in whatever
+  list, except for what TeX adds by itself when a paragraph begins
+  (`\parskip` glue, the indentation); so an inline entry used in vertical
+  mode begins inside the paragraph it starts. With no such node it is
+  placed with its end. A `:block` entry's `:begin`, and every other
+  marker, is placed at once in the current list, after the begins still
+  waiting. A body whose last token is the character that starts a
+  paragraph ends before the paragraph begins (TeX reads that character
+  again, from below the body): such an entry is empty.
+- **Code** keeps its exact characters, spaces and lines: under
+  `\obeylines` and `\obeyspaces` each line is a paragraph and each blank
+  an interword space, checked by a round-trip test
+  (`tests/semantic/observe.lisp`).
 - **Cross-references** are entries: `\secref`, `\figref`/`\Figref`,
   `\DefineSection`, `\DefineFigure`, `\deffigrefs`/`\defsecrefs`, `\funref`,
   `\term`, …. Phase 4 resolves them from the `\Define*` events, not from the
@@ -56,6 +93,11 @@ markers, nodes that carry an event (`src/expand/nodes.lisp`):
 - **`definition-observer`** `(expander control-sequence meaning span)` is
   called after `\def`, `\gdef`, `\edef`, `\xdef`, `\let`, `\futurelet`
   and the shorthand definitions (`\chardef`, …).
+- **`append-observer`** `(expander node list)` is called before a node is
+  appended to a list (`append-node`), and before a character extends the
+  text node ending a list (that node is passed). Markers it appends
+  come first; a text node then no longer ends the list, so the character
+  begins a new one.
 - **Markers** (`append-marker`) are appended to a list like any node, but
   TeX never sees them, so observing never changes what TeX does: every
   read of a list's tail (`\lastskip` and friends, `\unskip`, `\unkern`,

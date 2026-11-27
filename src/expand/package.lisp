@@ -98,7 +98,7 @@
    #:expander-job-name #:expander-scanner-status #:expander-align-state
    #:expander-marks #:scanner-status
    #:expander-call-observer #:expander-level-end-observer
-   #:expander-definition-observer
+   #:expander-definition-observer #:expander-append-observer
    #:get-next #:get-token #:get-x-token #:back-token #:insert-tokens
    #:expand #:expandable-p #:frozen-control-sequence #:dont-expand-meaning
    #:cs-name-text #:token-list-text #:meaning-text #:string-tokens

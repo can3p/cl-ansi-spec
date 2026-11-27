@@ -60,6 +60,11 @@ Lisp draft standard (dpANS3)."
                              (:file "math-lists")
                              (:file "alignments")
                              (:file "format")))
+               (:module "semantic"
+                :serial t
+                :components ((:file "package")
+                             (:file "vocabulary")
+                             (:file "observe")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
@@ -96,6 +101,9 @@ Lisp draft standard (dpANS3)."
                              (:file "alignments")
                              (:file "format")
                              (:file "observers")))
+               (:module "semantic"
+                :serial t
+                :components ((:file "observe")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

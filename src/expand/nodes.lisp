@@ -114,9 +114,19 @@ page builder took them all (BUILD-PAGE)."
   "The outer vertical list, the bottom of EXPANDER's nest."
   (car (last (expander-nest expander))))
 
+(defun notify-append (expander node list)
+  "Call EXPANDER's append observer, if any: NODE is about to be appended
+to LIST, or, a text node ending LIST, about to be extended by a
+character."
+  (let ((observer (expander-append-observer expander)))
+    (when observer
+      (funcall observer expander node list))))
+
 (defun append-node (expander node &key (list (current-list expander)))
   "TeX's tail_append: NODE becomes the last node of LIST, the current list
-unless given.  It is signalled as a JOB-OUTPUT."
+unless given, after EXPANDER's append observer, if any, has seen it.  It
+is signalled as a JOB-OUTPUT."
+  (notify-append expander node list)
   (push node (list-state-contents list))
   (signal 'job-output :item node)
   node)
