@@ -350,7 +350,64 @@ events into strings, and font runs into inlines.
 
 ### Structure
 
-*Step 3.8.* Not written yet.
+`src/model/build-structure.lisp` (step 3.8) builds the chapters, the
+sections and the standard. Its handlers are the functions of
+`install-structure-handlers`, registered in `*handlers*` at load.
+
+- **No ends.** A chapter and a section are marks (`\beginchapter`,
+  `\beginSection`, …); `\endSection` and its relatives are `\let` to
+  `\empty`, so nothing closes them. The handlers keep one container per
+  chapter and section, keyed by the mark's key, and a mark of level *L*
+  closes the open sections of level *L* or more (a chapter closes them
+  all) and opens its node in the nearest open one of a lower level. These
+  closings are not problems; any other container still open then is
+  reported `:unclosed`. At the end of a job the last chapter and its open
+  sections are closed by the core, which reports each `:unclosed` (the
+  job has no event for `\endchapter`): a build of a whole job has exactly
+  those, no others, until step 3.16 closes them or filters them from
+  its pinned report.
+- **Headings.** After a section's mark the handler takes the events up
+  to the end of the heading paragraph (`\HeadII`…): what comes before is
+  handled as usual, the empty math of the hang is skipped, the first box
+  is the number TeX typeset, and the rest is the title, in a container
+  whose text is not read by font (a heading is bold and the title is not
+  `:strong`). A mark, a text or another container before the paragraph is
+  reported (`:node`, "No heading follows"). A dictionary section has no
+  heading: its title is its chapter's title and "Dictionary", as
+  `\includeDictionary` has the table of contents show it. A chapter's
+  title is the mark's argument, run through the ligatures of its font
+  (`convert-text`); its two heading paragraphs (the running head and the
+  title) are consumed and dropped.
+- **Numbers are counted** (`counted-number`) as TeX's counters are: the
+  parent's number, a `.0` for each level skipped, then one more than the
+  sections of the level since the last one of a higher level (the
+  `\ssecn`… registers). They are **checked** twice: against the number
+  TeX typeset in the heading's box, and against the line `\DefineSection`
+  writes to the section file (`!<label> Section <number>\ <title>`,
+  consumed by the handler of the mark, `parse-reference-write`); a
+  mismatch is a `:node` problem ("counted … but TeX wrote …"). In a build
+  that starts inside a chapter (a fixture) the parent has no number and
+  the typeset one is used unchecked. `\DefineChapter` is checked in the
+  same way: its reference name is the chapter's id, and the two lines it
+  writes give its number.
+- **Ids.** A chapter's id is the reference name of `\beginchapter`
+  (`ChapOne`), a simple chapter's its title. A section's is the label of
+  the `\DefineSection` in it (set when the mark comes, which must be
+  before any subsection of its own: reported else), until then and for a
+  section none names `<parent-id>/<n>`, its *n*-th among its parent's
+  sections; with no parent in the build, `section-<number>`.
+- **Other writes.** The `:write` handler is this step's, whose one owner
+  drops every `\write` the handlers above do not take: the table of
+  contents, the index and the issue files are data the model rebuilds from
+  events.
+- **The standard.** `build-standard` makes the `:document` of the chapter
+  nodes of the jobs in order: those with no number (`\beginSimpleChapter`,
+  chap-0.tex) are the front matter. `job-version` reads `\rev`, the draft's
+  revision, from a job's expander. Calling both for the whole spec is
+  step 3.16's.
+- **Not yet.** Paragraphs, entries and the other blocks of a section's
+  children come from their own steps; until they land they are reported
+  as unhandled events.
 
 ### Entries
 

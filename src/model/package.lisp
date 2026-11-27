@@ -62,5 +62,8 @@
    #:*fonts* #:font-entry #:register-handler #:*layout-codes* #:*ligatures* #:font-file #:font-class
    #:convert-text #:install-text-handlers #:*plain-text-containers*
    #:plain-text-container-p
+   ;; Structure (build-structure.lisp)
+   #:install-structure-handlers #:job-version #:build-standard
+   #:parse-reference-write #:counted-number
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))
