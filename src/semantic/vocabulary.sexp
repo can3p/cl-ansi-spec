@@ -321,8 +321,8 @@
  :why "Several accessors: lambda list, values, new value, then their \\entry lines, set twice, as readers and as setf forms (setup-document.tex:137).")
 (:entry "DefsetfMulti" :defsetf-multi :placement :block
  :why "Several setf forms: lambda list, new value, then their \\entry lines (setup-document.tex:150).")
-(:entry "entry" :syntax-entry :kind :mark :local t
- :why "One name of a \\DefunMulti... or \\DefsetfMulti, a line of its alignment; each of those macros defines it anew (setup-document.tex:132).")
+(:entry "entry" :entry :kind :mark :local t
+ :why "A line of the alignment of the macro that defines it, anew each time (setup-document.tex:132): a name of \\DefunMulti... or \\DefsetfMulti (:139-152), a row of \\tabletwo (setup-tables.tex:137).")
 (:entry "Deftype" :deftype :kind :mark
  :why "A type specifier: its name, then the lines of its compound syntax, set as an alignment and then a paragraph begun by \\hfill, so a mark (setup-document.tex:211).")
 
@@ -412,6 +412,13 @@
 (:entry "pronounced" :pronunciation
  :why "How a glossary term is pronounced, in brackets (setup-document.tex:450).")
 
+
+;;; Figures: the content goes to box 1, which \\endfig unboxes
+
+(:entry "endfig" :figure :placement :block
+ :why "A figure (setup-aux.tex:734): its \\ifcase stays open while \\finishboxfig unboxes box 1, the content \\boxfig set aside with its events, and sets the caption.")
+(:entry "docaption" :caption :placement :block
+ :why "A caption, `Figure N--M. text', as set (setup-aux.tex:744); empty when none was given.")
 
 ;;; The other macros
 
@@ -520,9 +527,15 @@
  :names ("\\Qfont" "\\alfa" "\\subOne" "\\subN" "\\Result" "\\starY" "\\starN")
  :why "Fonts, symbols and table marks a chapter defines for itself (\\starY is an asterisk, its text kept; \\starN its blank width) (concept-numbers.tex:575, dict-characters.tex:553, dict-flow.tex:5436-5437, dict-numbers.tex:1486-1488).")
 
-(:class :unreviewed
- :files ("setup-document.tex" "setup-aux.tex" "concept-glossary.tex"
-         "setup-tables.tex" "setup-title.tex" "setup-version.tex" "concept-numbers.tex"
-         "dict-characters.tex" "dict-conses.tex" "dict-environment.tex" "dict-flow.tex"
-         "dict-numbers.tex" "dict-printer.tex" "dict-streams.tex")
- :why "Not yet classified (step 13c).")
+(:class :phrase
+ :names ("\\displaytwo" "\\displaythree" "\\displayfour" "\\displayfive"
+         "\\showtwo" "\\showthree" "\\showfive" "\\tabletwo" "\\tablefigtwo"
+         "\\tablefigthree" "\\tablefigfour" "\\tablefigsix")
+ :why "Figures of setup-tables.tex: \\boxfig, an alignment of their cells (\\misc references in the \\display... templates), \\caption and \\endfig; \\tabletwo is a displayed alignment of \\entry rows (:137).")
+(:class :phrase
+ :names ("\\caption" "\\simplecaption")
+ :why "\\caption keeps its text for \\docaption (setup-aux.tex:706, again at :737); \\simplecaption calls both (:756).")
+(:class :presentational
+ :names ("\\boxfig" "\\fig" "\\rulefig" "\\cboxfig")
+ :why "They set a figure's content aside in box 1 (setup-aux.tex:637-690); \\endfig is the figure.")
+

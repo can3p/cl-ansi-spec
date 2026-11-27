@@ -46,9 +46,8 @@ or :REPLACE (its handler stands for the call)."
 the survey spells them, \"\\\\tt\" or an active \"~\") and those defined in FILES (file names such as \"setup-terms.tex\").
 KIND is :PRESENTATIONAL (layout and fonts, no meaning), :PHRASE (it
 expands to text and entries only), :REFERENCE-NAME (a name references take as
-argument), :OPTION (a flag of the options) or :UNREVIEWED (not yet
-classified)."
-  (kind nil :type (member :presentational :phrase :reference-name :option :unreviewed)
+argument) or :OPTION (a flag of the options)."
+  (kind nil :type (member :presentational :phrase :reference-name :option)
         :read-only t)
   (names '() :type list :read-only t)
   (files '() :type list :read-only t)

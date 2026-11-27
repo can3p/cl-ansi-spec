@@ -280,15 +280,15 @@ REPORTS (a form, by default *SETUP-REDEFINITIONS*)."
   (check-vocabulary (spec-lines "dict-arrays" 2521 2526)
                     ((:begin :defun-multi :arguments
                       ("bit-array {\\rest } subscripts" "bit" "\\entry {bit} \\entry {sbit}"))
-                     (:mark :syntax-entry :arguments ("bit"))
-                     (:mark :syntax-entry :arguments ("sbit"))
+                     (:mark :entry :arguments ("bit"))
+                     (:mark :entry :arguments ("sbit"))
                      (:end :defun-multi)
                      (:begin :defsetf-multi :arguments
                       ("bit-array {\\rest } subscripts" "new-bit" "\\entry {bit} \\entry {sbit}"))
-                     (:mark :syntax-entry :arguments ("bit"))
-                     (:mark :syntax-entry :arguments ("sbit"))
+                     (:mark :entry :arguments ("bit"))
+                     (:mark :entry :arguments ("sbit"))
                      (:end :defsetf-multi))
-                    :keys (:defun-multi :defsetf-multi :syntax-entry)))
+                    :keys (:defun-multi :defsetf-multi :entry)))
 
 (define-test bnf-events
   :parent spec-vocabulary
@@ -434,6 +434,29 @@ REPORTS (a form, by default *SETUP-REDEFINITIONS*)."
                      (:end :term)
                      (:begin :sense :arguments ("1"))
                      (:end :sense))))
+
+(define-test figure-events
+  :parent spec-vocabulary
+  ;; concept-conses.tex:6-9: a figure of references; its content, set
+  ;; aside in box 1, and its caption come between its ends.
+  (check-vocabulary (spec-lines "concept-conses" 6 9)
+                    ((:begin :figure :arguments ())
+                     (:begin :misc :arguments ("car") :through :clref) (:end :misc)
+                     (:begin :misc :arguments ("cons") :through :clref) (:end :misc)
+                     (:begin :misc :arguments ("rplacd") :through :clref) (:end :misc)
+                     (:begin :misc :arguments ("cdr") :through :clref) (:end :misc)
+                     (:begin :misc :arguments ("rplaca") :through :clref) (:end :misc)
+                     (:begin :misc :arguments ("") :through :clref) (:end :misc)
+                     (:begin :caption :arguments ())
+                     (:end :caption)
+                     (:end :figure)))
+  ;; concept-glossary.tex:138-140: \\tabletwo's rows are \\entry marks.
+  (check-vocabulary (concatenate 'string (spec-lines "concept-glossary" 49 67)
+                                 (spec-lines "concept-glossary" 138 140) "}
+")
+                    ((:mark :entry :arguments ("\\Adjective " "adjective"))
+                     (:mark :entry :arguments ("\\Adverb " "adverb")))
+                    :keys (:entry)))
 
 (defun why-place (why)
   "The first FILE.tex:LINE that WHY names, as (FILE LINE), or NIL: the

@@ -21,7 +21,7 @@ classifies every other macro (see "Choosing entries").
   after it (a tail call) or nested in it.
 - **Reports.** Defining an entry's macro again is reported by name, with
   the span of the new definition and of the last one seen (none for the
-  format's): `\caption` is defined twice, setup-aux.tex:706 and :737. The
+  format's): setup-aux.tex:563 defines plain's `\item` again. The
   new meaning is attached too, and the old one stays. A meaning that
   already belongs to another entry (`\let` of one entry's macro to
   another's name) is reported and stays with the first entry. Reports
@@ -150,7 +150,9 @@ marks keyed by the kind of entry), cited works (`\CLtL`, `:cite`),
 self-references (`\thissection`), the glossary (`\gentry` marks an
 entry, which runs to the next one or to its group's end; `\Noun` and
 the other parts of speech and usages are wrappers of the `\i` they
-call) and the structure; font changes written
+call), figures (`\endfig`, whose extent holds the content `\boxfig`
+set aside in box 1 and the caption `\docaption` sets with its number)
+and the structure; font changes written
 directly (`{\tt …}`) stay presentational and phase 4 reads them outside
 entries only.  A macro of plain TeX the setup files redefine as an entry
 (`\b`, `\i`, `\j`, `\hat`, `\star`, `\item`, `\itemitem`, and the
@@ -161,8 +163,7 @@ sources define and use in text (on a certain line, in the survey below)
 is an entry or is classified in the data file by a `(:class kind …)`
 form, naming it or the file that defines it: `:presentational` (layout,
 fonts with no meaning), `:phrase`, `:reference-name` (the generated
-names `\secref` and `\figref` take), `:option` (flags), or `:unreviewed`
-while the vocabulary is being written. An entry or a class naming a
+names `\secref` and `\figref` take) or `:option` (flags). An entry or a class naming a
 macro wins over a class naming its file; a test
 (`tests/semantic/vocabulary.lisp`) checks that every macro is classified,
 once, and that every entry names a macro that exists. Plain's macros and

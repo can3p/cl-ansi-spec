@@ -105,23 +105,35 @@ Source (`dict-conses.tex:1702`, abridged):
 \endcom
 ```
 
-Event stream, as phase 3 emits it (spans omitted):
+Event stream, as phase 3 emits it (spans and fonts omitted; each
+argument, a token list, shown as its tokens' text, as `make events`
+shows them; the paragraphs, `(:text …)`
+and `(:space)` events of the typeset text abridged):
 
 ```lisp
-(:begin :com :names ("endp") :kind "Function")
-(:mark :label :title "Syntax")
-(:begin :defun :name "endp" :lambda-list ("list") :values ("generalized-boolean"))
+(:begin :com :arguments ("endp" "Function"))
+(:mark :index-ref :arguments ("endp"))
+(:mark :label :arguments ("Syntax" ":"))
+(:begin :paragraph)
+(:begin :defun :arguments ("endp" "list" "generalized-boolean"))
+(:text "endp") (:space) (:text "list")
+(:begin :evaluates-to :arguments ()) … (:end :evaluates-to)
+(:space) (:text "generalized") (:text "-") (:text "boolean")
 (:end :defun)
-(:mark :label :title "Arguments and Values")
-(:begin :param) (:text "list") (:end :param)
-(:text "---a ") (:begin :term) (:text "list") (:end :term) (:text ",")
-(:begin :issue :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
-(:text " which might be a ") (:begin :term) (:text "dotted list") (:end :term) ...
-(:end :issue :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
-...
-(:mark :label :title "Side Effects" :none t)
-...
-(:end :com)
+(:end :paragraph)
+(:mark :label :arguments ("Arguments and Values" ":"))
+(:begin :paragraph)
+(:begin :param :arguments ("list")) (:text "list") (:end :param)
+(:text "-") (:text "-") (:text "-") (:text "a") (:space)
+(:begin :term :arguments ("list")) (:text "list") (:end :term) (:text ",") (:space)
+(:begin :issue :arguments ("DOTTED-LIST-ARGUMENTS:CLARIFY"))
+(:text "which") … (:begin :term :arguments ("dotted list")) … (:end :term) …
+(:end :issue :arguments ("DOTTED-LIST-ARGUMENTS:CLARIFY"))
+…
+(:mark :label :arguments ("Side Effects" "\\None "))
+(:mark :label-confidence :arguments ("."))
+…
+(:end :com :arguments ())
 ```
 
 Document model, as phase 4 builds it (spans and most content omitted):
@@ -177,7 +189,7 @@ has the export formats, their JSON Schema and versioning.
 | 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | in progress: quantities, state, the expansion core, scanning, conditionals and main control's assignments, groups, modes, input, output, messages, and the lists of text, paragraphs, glue, kerns, penalties, rules, boxes, leaders, marks, discretionaries, accents, inserts, the
-whatsits, `\shipout`, math lists, alignments and plain TeX's format done (`src/expand/`, `make expand`, `make events`); the vocabulary mechanism done (`src/semantic/`), the vocabulary itself and the whole spec planned in [`docs/plan/m2.md`](plan/m2.md) |
+whatsits, `\shipout`, math lists, alignments and plain TeX's format done (`src/expand/`, `make expand`, `make events`); the vocabulary mechanism and the spec's vocabulary done (`src/semantic/`, every macro the sources use in text an entry or classified); the whole spec planned in [`docs/plan/m2.md`](plan/m2.md) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |
 
 Related: [process](process.md) explains how work advances.
