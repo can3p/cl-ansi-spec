@@ -75,7 +75,7 @@ Lisp draft standard (dpANS3)."
                 :serial t
                 :components ((:file "package")
                              (:file "digest")
-                             (:file "api"))))
+                             (:file "api")))
                (:module "json"
                 :serial t
                 :components ((:file "package")
@@ -119,7 +119,7 @@ Lisp draft standard (dpANS3)."
                              (:file "vocabulary")
                              (:file "spec-jobs")))
                (:file "inventory")
-               (:file "sha256"))
+               (:file "sha256")
                (:file "json"))
   :perform (test-op (operation component)
              (declare (ignore operation component))
