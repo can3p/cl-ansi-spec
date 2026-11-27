@@ -25,9 +25,13 @@ A step is done when code, tests and docs agree (`docs/process.md`).
    Docs hold no history and no milestone names ("since step 4…", "in M2");
    history goes to `docs/history/` when the milestone closes.
 2. **Plan.** Tick the step in `docs/plan/<id>.md`. Adjust later steps only
-   where this step taught something.
+   where this step taught something. In a parallel wave
+   (`docs/process.md`, "Parallel waves") tick only your own step and put
+   proposed changes to other steps, `PLAN.md`, `AGENTS.md` or the skills
+   in the pull request's description instead.
 3. **Review.** Run the `lisp-review` skill (it includes the build gate) on
-   the whole diff: code, tests, docs and plan. Fix or justify every finding.
+   the whole diff: code, tests, docs and plan, with the step's *Review*
+   tier. Fix or justify every finding.
 4. **Commit.** Make one commit: code, tests, docs and the plan tick. List
    skipped review findings in the message. Push to the session branch.
    (Milestone closing commits its docs separately; a step never does.)
