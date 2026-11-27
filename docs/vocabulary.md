@@ -69,12 +69,26 @@ classifies every other macro (see "Choosing entries").
   appended, or the next character added to a text node, in whatever
   list, except for what TeX adds by itself when a paragraph begins
   (`\parskip` glue, the indentation); so an inline entry used in vertical
-  mode begins inside the paragraph it starts. With no such node it is
-  placed with its end. A `:block` entry's `:begin`, and every other
+  mode begins inside the paragraph it starts, and one whose first content
+  is in an alignment cell (TeX expands the first cell's macros before it
+  opens the cell) begins in the cell. A formula begun since the call is
+  the exception: a body that opens with one (`{$\langle$}`, `\EV`'s arrow)
+  begins in the list that will hold the formula, before it, so that it
+  ends in the same list (`begin-list`). A body that opens with a box
+  (`\ff`) is `:block`. With no such node it is placed with its end. A `:block` entry's `:begin`, and every other
   marker, is placed at once in the current list, after the begins still
   waiting. A body whose last token is the character that starts a
   paragraph ends before the paragraph begins (TeX reads that character
   again, from below the body): such an entry is empty.
+- **Local macros.** An entry with `:local t` names a macro that the macros
+  using it define anew, in several places (`\entry`, setup-document.tex:132-152):
+  each meaning attaches as it is defined, and its redefinitions are not
+  reported. A macro defined by one macro only (`\CR` in `\auxbnf`) needs
+  no flag: a definition run again is not another one.
+- **Discarded boxes.** Markers appended to a box that is never placed
+  (`\setbox0=\hbox{…}` in `\more`, whose `\xbrac` spacers are as wide as
+  `\lbrac`) never reach the stream, so an entry inside one leaves no
+  event.
 - **Code** keeps its exact characters, spaces and lines: under
   `\obeylines` and `\obeyspaces` each line is a paragraph and each blank
   an interword space, checked by a round-trip test

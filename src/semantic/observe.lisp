@@ -41,15 +41,17 @@ span tail), TAIL the first token of the body it is read from, or NIL; and REPORT
   (held nil :type list)
   (report-list '() :type list))
 
-(defstruct (activation (:constructor make-activation (entry key span end-span))
+(defstruct (activation (:constructor make-activation (entry key span end-span home))
                        (:copier nil))
   "A call of a :CALL ENTRY (or of the wrapper that called it) at SPAN,
-keyed KEY, whose body ends at END-SPAN; LIST is the list its begin went
-to, once placed.  The expander's tag for it."
+keyed KEY, whose body ends at END-SPAN; HOME is the list current when it
+was called, LIST the list its begin went to, once placed.  The
+expander's tag for it."
   (entry nil :type entry :read-only t)
   (key nil :type keyword :read-only t)
   (span nil :read-only t)
   (end-span nil :read-only t)
+  (home nil :read-only t)
   (list nil))
 
 (defun observer-reports (observer)
@@ -95,12 +97,13 @@ observers are set; none may be set already.  Returns the OBSERVER."
 
 (defun note-definition (observer entry meaning span)
   "ENTRY's macro got MEANING at SPAN (NIL: in the format): report a
-redefinition, and attach MEANING to ENTRY when it is a macro."
+redefinition, unless ENTRY is local, and attach MEANING to ENTRY when
+it is a macro."
   (let* ((name (entry-name entry))
          (previous (gethash name (observer-definitions observer))))
     ;; A definition run again (one a macro makes when called) is not
     ;; another one.
-    (when (and previous (not (eq (car previous) meaning))
+    (when (and previous (not (entry-local entry)) (not (eq (car previous) meaning))
                (not (equalp span (cdr previous))))
       (push (make-report :redefined name span :previous-span (cdr previous))
             (observer-report-list observer)))
@@ -170,7 +173,7 @@ return the expander's action and tag."
                     (list :begin key :arguments arguments)))
          (placement (entry-placement (if held (first held) entry)))
          (span (if held (third held) span))
-         (activation (make-activation entry key span end-span)))
+         (activation (make-activation entry key span end-span (current-list expander))))
     (if (eq placement :inline)
         (push (list event span activation) (observer-pending observer))
         (setf (activation-list activation)
@@ -228,14 +231,35 @@ inside the paragraph it starts."
       (and (eq (node-kind node) :glue)
            (equal (getf (node-properties node) :command) "parskip"))))
 
+(defun begin-list (expander home list)
+  "The list a pending begin goes to when a node is appended to LIST, the
+call having been made in HOME: LIST itself, unless a formula begun since
+the call encloses LIST (the body opens with one, `{$\\langle$}'): then
+the list holding the outermost such formula, where the formula will be
+appended after the begin.  Paragraphs, boxes and alignment cells begun
+since the call take the begin (TeX expands the first cell's macros
+before the cell is opened).  When HOME is no longer in the nest, or LIST
+not in it, LIST takes the begin."
+  (let* ((nest (expander-nest expander))
+         (inner (member list nest))
+         (outer (member home nest))
+         (levels (and outer (ldiff inner outer)))
+         (formula (position :math levels :from-end t
+                            :key (lambda (level) (mode-kind (list-state-mode level))))))
+    (if formula
+        (nth (1+ formula) inner)
+        list)))
+
 (defun place-pending (observer expander list)
-  "Append OBSERVER's pending begins to LIST, oldest first."
+  "Append OBSERVER's pending begins, oldest first, to LIST, a node being
+appended to it, or to the list BEGIN-LIST says.  Every pending begin has
+its activation (BEGIN-CALL)."
   (let ((pending (reverse (observer-pending observer))))
     (setf (observer-pending observer) '())
     (loop for (event span activation) in pending
-          do (append-marker expander event :span span :list list)
-             (when activation
-               (setf (activation-list activation) list)))))
+          for target = (begin-list expander (activation-home activation) list)
+          do (append-marker expander event :span span :list target)
+             (setf (activation-list activation) target))))
 
 (defun emit-event (observer expander event &key span)
   "Append a marker for EVENT at SPAN to EXPANDER's current list, after

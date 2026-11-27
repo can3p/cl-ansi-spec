@@ -12,14 +12,15 @@
                 #:token #:token-span #:cs-token-control-sequence)
   (:import-from #:cl-ansi-spec/expand
                 #:expander-state #:es-tex #:meaning #:macro-p #:macro-body
-                #:current-list #:node-kind #:node-properties #:marker-p #:append-marker
+                #:current-list #:expander-nest #:list-state-mode #:mode-kind
+                #:node-kind #:node-properties #:marker-p #:append-marker
                 #:expander-call-observer #:expander-level-end-observer
                 #:expander-definition-observer #:expander-append-observer
                 #:insert-tokens)
   (:export
    ;; Entries and vocabularies (vocabulary.lisp)
    #:entry #:make-entry #:entry-name #:entry-key #:entry-kind
-   #:entry-placement #:entry-closes #:entry-handler #:entry-why
+   #:entry-placement #:entry-closes #:entry-handler #:entry-local #:entry-why
    #:entry-mode
    #:vocabulary #:make-vocabulary #:vocabulary-entries #:vocabulary-classes
    #:find-entry

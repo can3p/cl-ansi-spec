@@ -122,6 +122,30 @@ text only) and the kinds and names of its REPORTS."
                   ((:begin :paragraph) (:text "x") (:begin :pp :arguments ("y"))
                    (:text "y") (:end :paragraph) (:end :pp))
                   :reports ((:unbalanced "pp")))
+  ;; A body that opens with a formula begins before it, in the list
+  ;; that holds it, in a paragraph or in the paragraph it starts.
+  (check-semantic "\\def\\an#1{{$<$}#1}x\\an{y}\\par\\an{z}\\par"
+                  (("an" :an))
+                  ((:begin :paragraph) (:text "x")
+                   (:begin :an :arguments ("y"))
+                   (:begin :math) (:begin :noad :class :rel) (:begin :nucleus)
+                   (:math-char :fam 1 :code 60) (:end :nucleus) (:end :noad) (:end :math)
+                   (:text "y") (:end :an) (:end :paragraph)
+                   (:begin :paragraph)
+                   (:begin :an :arguments ("z"))
+                   (:begin :math) (:begin :noad :class :rel) (:begin :nucleus)
+                   (:math-char :fam 1 :code 60) (:end :nucleus) (:end :noad) (:end :math)
+                   (:text "z") (:end :an) (:end :paragraph)))
+  ;; A macro of an alignment's first cell is expanded before the row
+  ;; and the cell open; its begin goes into the cell.
+  (check-semantic "\\def\\tm#1{{\\it #1\\/}}\\halign{#\\cr\\tm{a}\\cr}"
+                  (("tm" :term))
+                  ((:begin :alignment :command "halign" :tabskip "0.0pt"
+                    :preamble (("" "" "0.0pt")))
+                   (:begin :row) (:begin :cell :column 1)
+                   (:begin :term :arguments ("a")) (:text "a")
+                   (:kern :width "0.0pt" :italic t) (:end :term)
+                   (:end :cell) (:end :row) (:end :alignment)))
   ;; The end's span is the body's last token, here an argument's.
   (multiple-value-bind (expander) (semantic-job "\\def\\tm#1{(#1}\\tm{ab}\\par" '(("tm" :t)))
     (run-job expander)

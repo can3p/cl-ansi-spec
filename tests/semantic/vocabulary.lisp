@@ -98,9 +98,9 @@ vocabulary, or by one of KEYS when given, as SEMANTIC-EVENTS shows them."
 
 (defparameter *setup-redefinitions*
   '((:redefined "item") (:redefined "itemitem") (:redefined "b")
-    (:redefined "i") (:redefined "j") (:redefined "hat"))
+    (:redefined "i") (:redefined "j") (:redefined "hat") (:redefined "star"))
   "The reports of every job: the setup files redefine plain's \\item,
-\\itemitem, \\b, \\i, \\j and \\hat, which are entries.")
+\\itemitem, \\b, \\i, \\j, \\hat and \\star, which are entries.")
 
 (defmacro check-vocabulary (text events &key (reports '*setup-redefinitions*) keys)
   "Run TEXT after the setup files; check its vocabulary EVENTS (only
@@ -222,10 +222,14 @@ REPORTS (a form, by default *SETUP-REDEFINITIONS*)."
                      (:end :emphasis)
                      (:begin :emphasis :arguments ("var"))
                      (:end :emphasis)
+                     (:begin :optional :arguments ("\\i {default} \\brac {\\i {svar}}"))
                      (:begin :emphasis :arguments ("default"))
                      (:end :emphasis)
+                     (:begin :optional :arguments ("\\i {svar}"))
                      (:begin :emphasis :arguments ("svar"))
                      (:end :emphasis)
+                     (:end :optional)
+                     (:end :optional)
                      (:end :inline-code)
                      (:begin :lambda-list-keyword :arguments ())
                      (:end :lambda-list-keyword)
@@ -249,6 +253,142 @@ REPORTS (a form, by default *SETUP-REDEFINITIONS*)."
                   (:begin :new-term :arguments ("local precedence order"))
                   (:text "local"))
           (subseq (member '(:begin :paragraph) events :test #'equal) 0 3)))))
+
+(define-test syntax-events
+  :parent spec-vocabulary
+  ;; dict-conses.tex:1123, a signature with a BNF operator in a formula;
+  ;; dict-conditions.tex:370-374, its values on a second line;
+  ;; dict-arrays.tex:2521-2526, several names (\\entry, defined anew by
+  ;; each macro, is not reported).
+  (check-vocabulary (spec-lines "dict-conses" 1123 1123)
+                    ((:begin :defun :arguments ("list*" "{\\rest } \\plus {objects}" "result"))
+                     (:begin :one-or-more :arguments ("objects"))
+                     (:end :one-or-more)
+                     (:end :defun))
+                    :keys (:defun :one-or-more))
+  (check-vocabulary (spec-lines "dict-conditions" 370 374)
+                    ((:begin :defmac :arguments
+                      ("assert"
+                       "test-form \\brac {\\paren {\\starparam {place}} \\brac {datum-form \\starparam {argument-form}}}"
+                       "\\nil "))
+                     (:begin :evaluates-to :arguments ())
+                     (:end :evaluates-to)
+                     (:end :defmac))
+                    :keys (:defmac :evaluates-to))
+  (check-vocabulary (spec-lines "dict-arrays" 2521 2526)
+                    ((:begin :defun-multi :arguments
+                      ("bit-array {\\rest } subscripts" "bit" "\\entry {bit} \\entry {sbit}"))
+                     (:mark :syntax-entry :arguments ("bit"))
+                     (:mark :syntax-entry :arguments ("sbit"))
+                     (:end :defun-multi)
+                     (:begin :defsetf-multi :arguments
+                      ("bit-array {\\rest } subscripts" "new-bit" "\\entry {bit} \\entry {sbit}"))
+                     (:mark :syntax-entry :arguments ("bit"))
+                     (:mark :syntax-entry :arguments ("sbit"))
+                     (:end :defsetf-multi))
+                    :keys (:defun-multi :defsetf-multi :syntax-entry)))
+
+(define-test bnf-events
+  :parent spec-vocabulary
+  ;; concept-bvl.tex:545-550: a rule split over lines by \\CR, literal
+  ;; parentheses opened and closed in different cells; the \\xparen
+  ;; spacers leave no event.
+  (check-vocabulary (spec-lines "concept-bvl" 545 550)
+                    ((:begin :bnf-rule :arguments
+                      ("lambda-list"
+                       "\\lparen \\star {\\SpecializedVar }\\CR \\xparen \\ttbrac {{\\opt } \\star {\\VarValueSuppliedP }}\\CR \\xparen \\ttbrac {{\\rest } \\param {var}}\\CR \\xparen \\ttbrac {{\\key } \\star {\\KeyVarValueSuppliedP } \\brac {\\allowotherkeys }}\\CR \\xparen \\ttbrac {{\\aux } \\star {\\VarValue }}\\rparen \\CR "))
+                     (:begin :parenthesized :arguments ())
+                     (:begin :parenthesized :arguments ("{\\TVar } \\brac {\\param {specializer}}"))
+                     (:end :parenthesized)
+                     (:mark :bnf-break :arguments ())
+                     (:begin :bracketed :arguments ("{\\opt } \\star {\\VarValueSuppliedP }"))
+                     (:begin :parenthesized :arguments
+                      ("{\\TVar } \\brac {init-form \\brac {supplied-p-parameter}}"))
+                     (:end :parenthesized)
+                     (:end :bracketed)
+                     (:mark :bnf-break :arguments ())
+                     (:begin :bracketed :arguments ("{\\rest } \\param {var}"))
+                     (:end :bracketed)
+                     (:mark :bnf-break :arguments ())
+                     (:begin :bracketed :arguments
+                      ("{\\key } \\star {\\KeyVarValueSuppliedP } \\brac {\\allowotherkeys }"))
+                     (:begin :parenthesized :arguments
+                      ("\\curly {\\param {var} | \\paren {\\param {keyword-name} {\\TVar }}} \\brac {init-form \\brac {supplied-p-parameter}}"))
+                     (:begin :parenthesized :arguments ("\\param {keyword-name} {\\TVar }"))
+                     (:end :parenthesized)
+                     (:end :parenthesized)
+                     (:end :bracketed)
+                     (:mark :bnf-break :arguments ())
+                     (:begin :bracketed :arguments ("{\\aux } \\star {\\VarValue }"))
+                     (:begin :parenthesized :arguments ("{\\TVar } \\brac {\\param {init-form}}"))
+                     (:end :parenthesized)
+                     (:end :bracketed)
+                     (:end :parenthesized :arguments ())
+                     (:mark :bnf-break :arguments ())
+                     (:end :bnf-rule))
+                    :keys (:bnf-rule :bnf-break :bracketed :parenthesized))
+  ;; dict-arrays.tex:47-49: a type specifier (a mark: its alignment is
+  ;; followed by a paragraph) and a rule; the first cell's macros are
+  ;; expanded before the cell opens, their begins go into it.
+  (check-vocabulary (spec-lines "dict-arrays" 47 49)
+                    ((:mark :deftype :arguments
+                      ("array" "\\ttbrac {\\curly {element-type | \\misc {*}} \\brac {dimension-spec}}"))
+                     (:begin :bracketed :arguments
+                      ("\\curly {element-type | \\misc {*}} \\brac {dimension-spec}"))
+                     (:begin :group :arguments ("element-type | \\misc {*}"))
+                     (:end :group)
+                     (:begin :optional :arguments ("dimension-spec"))
+                     (:end :optional)
+                     (:end :bracketed)
+                     (:begin :bnf-rule :arguments
+                      ("dimension-spec" "rank | \\misc {*} | \\paren {\\star {\\curly {dimension | \\misc {*}}}}"))
+                     (:begin :parenthesized :arguments ("\\star {\\curly {dimension | \\misc {*}}}"))
+                     (:begin :zero-or-more :arguments ("\\curly {dimension | \\misc {*}}"))
+                     (:begin :group :arguments ("dimension | \\misc {*}"))
+                     (:end :group)
+                     (:end :zero-or-more)
+                     (:end :parenthesized)
+                     (:end :bnf-rule))
+                    :keys (:deftype :bnf-rule :bracketed :group :optional :parenthesized
+                           :zero-or-more))
+  ;; dict-iteration.tex:658-663: indirections; an interleaving split over
+  ;; lines, then repeated (its \\extrainterleave spacers leave no event).
+  (check-vocabulary (spec-lines "dict-iteration" 658 663)
+                    ((:begin :bnf-rule :arguments
+                      ("for-as-arithmetic-subclause"
+                       "\\down {arithmetic-up} | \\down {arithmetic-downto} | \\down {arithmetic-downfrom}"))
+                     (:begin :indirection :arguments ("arithmetic-up"))
+                     (:end :indirection)
+                     (:begin :indirection :arguments ("arithmetic-downto"))
+                     (:end :indirection)
+                     (:begin :indirection :arguments ("arithmetic-downfrom"))
+                     (:end :indirection)
+                     (:end :bnf-rule)
+                     (:begin :bnf-rule :arguments
+                      ("arithmetic-up"
+                       "\\begininterleave \\curly {\\loopref {from} | \\loopref {upfrom}} \\param {form1} | \\extrainterleave \\curly {\\loopref {to} | \\loopref {upto} | \\loopref {below}} \\param {form2} | \\extrainterleave \\loopref {by} \\param {form3}\\endinterleave \\prevplus "))
+                     (:begin :interleave :arguments ())
+                     (:end :interleave :arguments ())
+                     (:mark :repeat-previous :arguments ())
+                     (:end :bnf-rule))
+                    :keys (:bnf-rule :indirection :interleave :repeat-previous)))
+
+(define-test formula-first-bodies
+  :parent spec-vocabulary
+  ;; concept-definitions.tex:354-360 and :378: bodies that open with a
+  ;; formula (\\IN, \\OUT, \\ang) begin before it, in the list that
+  ;; holds it, so they end in the same list: no :unbalanced report.
+  (check-vocabulary (concatenate 'string (spec-lines "concept-definitions" 354 360)
+                                 (spec-lines "concept-definitions" 378 378))
+                    ((:begin :input :arguments ("this notation"))
+                     (:end :input)
+                     (:begin :code :arguments ())
+                     (:begin :output :arguments ())
+                     (:end :output)
+                     (:begin :input :arguments ("9 16 "))
+                     (:end :input)
+                     (:begin :angle :arguments ("Newline"))
+                     (:end :angle))))
 
 (defun why-place (why)
   "The first FILE.tex:LINE that WHY names, as (FILE LINE), or NIL: the

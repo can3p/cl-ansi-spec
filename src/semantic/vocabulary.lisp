@@ -11,7 +11,7 @@
 
 (defstruct (entry (:constructor make-entry
                       (name key &key (kind :call) (placement :inline)
-                                     closes handler why))
+                                     closes handler local why))
                   (:copier nil))
   "A vocabulary entry: the macro NAME (a string, without escape) whose
 calls become events keyed KEY (a keyword).  KIND is :CALL (a :BEGIN when
@@ -21,14 +21,17 @@ follow them), :MARK (one :MARK event), :OPEN (a :BEGIN; the extent runs
 to the call of a :CLOSE entry) or :CLOSE (the :END of the :OPEN entry
 keyed CLOSES).  PLACEMENT, for a :CALL entry, is :INLINE (its :BEGIN waits for the first node of its content) or :BLOCK
 (placed at once).  HANDLER, when given, replaces the call: a function
-(observer expander entry token arguments) that emits the events itself.  WHY
-says why the macro is an entry."
+(observer expander entry token arguments) that emits the events itself.
+LOCAL is true for a macro that the macros using it define anew, in
+several places (\\entry, setup-document.tex:132-152): its
+redefinitions are not reported.  WHY says why the macro is an entry."
   (name "" :type string :read-only t)
   (key nil :type keyword :read-only t)
   (kind :call :type (member :call :wrapper :mark :open :close) :read-only t)
   (placement :inline :type (member :inline :block) :read-only t)
   (closes nil :type (or null keyword) :read-only t)
   (handler nil :type (or null function symbol) :read-only t)
+  (local nil :type boolean :read-only t)
   (why "" :type string :read-only t))
 
 (defun entry-mode (entry)

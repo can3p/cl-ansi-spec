@@ -105,8 +105,8 @@
  :why "Strong emphasis: the authors' bold markup (setup-document.tex:7); it redefines plain's \\b.")
 (:entry "f" :inline-code
  :why "Code within text, in a box (setup-document.tex:10).")
-(:entry "ff" :inline-code
- :why "Code within a formula, in a box with a trailing space (setup-document.tex:12).")
+(:entry "ff" :inline-code :placement :block
+ :why "Code within a formula, in a box with a trailing space, which its begin must precede (setup-document.tex:12).")
 (:entry "ang" :angle
  :why "A name in angle brackets: a character (\\NewlineChar), no arguments (\\noargs) (setup-document.tex:18).")
 (:entry "hat" :caret
@@ -270,6 +270,109 @@
 (:entry "CLOSPaper" :cite
  :why "The title of a work the standard cites (setup-terms.tex:66).")
 
+;;; Syntax of dictionary entries: the signature paragraph each \\Def...
+;;; macro sets (not the entry after it).  Arguments: the name, the
+;;; lambda list, then the values when the macro has them; the key says
+;;; the kind of operator and whether it returns.
+
+(:entry "Defun" :defun
+ :why "A function (setup-document.tex:113).")
+(:entry "DefunWithValues" :defun
+ :why "A function and its values (setup-document.tex:116).")
+(:entry "DefunWithValuesNewline" :defun
+ :why "A function and its values, on a second line (setup-document.tex:120).")
+(:entry "DefunNoReturn" :defun-no-return
+ :why "A function that does not return (setup-document.tex:125).")
+(:entry "Defmac" :defmac
+ :why "A macro (setup-document.tex:98).")
+(:entry "DefmacWithValues" :defmac
+ :why "A macro and its values (setup-document.tex:109).")
+(:entry "DefmacWithValuesNewline" :defmac
+ :why "A macro and its values, on a second line (setup-document.tex:104).")
+(:entry "DefmacNoReturn" :defmac-no-return
+ :why "A macro that does not return (setup-document.tex:101).")
+(:entry "Defspec" :defspec
+ :why "A special operator (setup-document.tex:188).")
+(:entry "DefspecWithValues" :defspec
+ :why "A special operator and its values (setup-document.tex:197).")
+(:entry "DefspecWithValuesNewline" :defspec
+ :why "A special operator and its values, on a second line (setup-document.tex:201).")
+(:entry "DefspecNoReturn" :defspec-no-return
+ :why "A special operator that does not return (setup-document.tex:192).")
+(:entry "Defgen" :defgen
+ :why "A generic function (setup-document.tex:157).")
+(:entry "DefgenWithValues" :defgen
+ :why "A generic function and its values (setup-document.tex:161).")
+(:entry "DefgenWithValuesNewline" :defgen
+ :why "A generic function and its values, on a second line (setup-document.tex:165).")
+(:entry "Defmeth" :defmeth
+ :why "A method: its generic function and specialized lambda list (setup-document.tex:172).")
+(:entry "Defsetf" :defsetf
+ :why "A setf form: the accessor, its lambda list and the new value (setup-document.tex:146).")
+(:entry "Defvar" :defvar
+ :why "A variable, between asterisks (setup-document.tex:176).")
+(:entry "Defvarnoast" :defvar
+ :why "A variable whose name has no asterisks (setup-document.tex:180).")
+(:entry "Defcon" :defcon
+ :why "A constant variable (setup-document.tex:184).")
+(:entry "DefunMultiWithValues" :defun-multi :placement :block
+ :why "Several functions with one lambda list and values: the lambda list, the values, then their \\entry lines (setup-document.tex:130).")
+(:entry "DefunMultiAccessorWithValues" :defun-multi-accessor :placement :block
+ :why "Several accessors: lambda list, values, new value, then their \\entry lines, set twice, as readers and as setf forms (setup-document.tex:137).")
+(:entry "DefsetfMulti" :defsetf-multi :placement :block
+ :why "Several setf forms: lambda list, new value, then their \\entry lines (setup-document.tex:150).")
+(:entry "entry" :syntax-entry :kind :mark :local t
+ :why "One name of a \\DefunMulti... or \\DefsetfMulti, a line of its alignment; each of those macros defines it anew (setup-document.tex:132).")
+(:entry "Deftype" :deftype :kind :mark
+ :why "A type specifier: its name, then the lines of its compound syntax, set as an alignment and then a paragraph begun by \\hfill, so a mark (setup-document.tex:211).")
+
+;;; BNF (setup-document.tex:280-345): rules and their operators
+
+(:entry "auxbnf" :bnf-rule :placement :block
+ :why "A BNF rule: the non-terminal, then its right side, set as an alignment (setup-document.tex:323).")
+(:entry "CR" :bnf-break :kind :mark
+ :why "A line break within a BNF rule's right side; \\auxbnf defines it (setup-document.tex:323).")
+(:entry "star" :zero-or-more
+ :why "Its argument, zero or more times: a star after it (setup-document.tex:283).")
+(:entry "plus" :one-or-more :placement :block
+ :why "Its argument, one or more times: a plus after it, in a formula (setup-document.tex:303).")
+(:entry "prevplus" :repeat-previous :kind :mark
+ :why "What precedes, one or more times: a plus alone, after a group split over lines (setup-document.tex:304).")
+(:entry "one" :required :placement :block
+ :why "Its argument, which must appear once in the interleaving around it (setup-document.tex:306; concept-definitions.tex:104).")
+(:entry "brac" :optional
+ :why "Its argument, optional: in brackets (setup-document.tex:290).")
+(:entry "lbrac" :optional :kind :open
+ :why "An optional part split over lines: its opening bracket (setup-document.tex:291).")
+(:entry "rbrac" :end-optional :kind :close :closes :optional
+ :why "The closing bracket of an optional part split over lines (setup-document.tex:293).")
+(:entry "curly" :group
+ :why "A group, usually of alternatives: in braces (setup-document.tex:299).")
+(:entry "lcurly" :group :kind :open
+ :why "A group split over lines: its opening brace (setup-document.tex:300).")
+(:entry "rcurly" :end-group :kind :close :closes :group
+ :why "The closing brace of a group split over lines (setup-document.tex:302).")
+(:entry "paren" :parenthesized
+ :why "Its argument in literal parentheses, part of the syntax (setup-document.tex:286).")
+(:entry "lparen" :parenthesized :kind :open
+ :why "Literal parentheses split over lines: the opening one (setup-document.tex:287).")
+(:entry "rparen" :end-parenthesized :kind :close :closes :parenthesized
+ :why "The closing literal parenthesis split over lines (setup-document.tex:289).")
+(:entry "ttbrac" :bracketed
+ :why "Its argument in literal brackets, in the code font (setup-document.tex:295).")
+(:entry "lttbrac" :bracketed :kind :open
+ :why "Literal brackets split over lines: the opening one (setup-document.tex:296).")
+(:entry "rttbrac" :end-bracketed :kind :close :closes :bracketed
+ :why "The closing literal bracket split over lines (setup-document.tex:298).")
+(:entry "interleave" :interleave
+ :why "Its alternatives in any order, each at most once (setup-document.tex:311; concept-definitions.tex:88-96).")
+(:entry "begininterleave" :interleave :kind :open
+ :why "An interleaving split over lines: its opening double bracket (setup-document.tex:308).")
+(:entry "endinterleave" :end-interleave :kind :close :closes :interleave
+ :why "The closing double bracket of an interleaving split over lines (setup-document.tex:310).")
+(:entry "down" :indirection
+ :why "A non-terminal whose definition is spliced in place (setup-document.tex:316; concept-definitions.tex:188-197).")
+
 ;;; The other macros
 
 (:class :reference-name
@@ -334,6 +437,18 @@
          "\\lbracket" "\\rbracket" "\\minussign" "\\CRLF" "\\ssso" "\\ssst"
          "\\ssse" "\\ssss" "\\sssn" "\\sssx" "\\sssy" "\\empty")
  :why "One character or symbol each, or a subscript (setup-document.tex:225-278); \\empty is `()' in the code font (setup-terms.tex:93), but plain's \\empty, called everywhere, cannot be an entry.")
+
+(:class :phrase
+ :names ("\\specparam" "\\starparam" "\\stardown" "\\starparen" "\\plusparam"
+         "\\plusdown" "\\plusparen" "\\placeplus" "\\DeclsAndDoc" "\\LocalDeclsAndDoc"
+         "\\TVar" "\\starTVar" "\\SpecializedVar" "\\JustVar" "\\VarValue"
+         "\\VarValueSuppliedP" "\\KeyVarValueSuppliedP" "\\JustKey" "\\VarInitStep"
+         "\\NoReturn")
+ :why "BNF and syntax made of entries (setup-document.tex:92, 170, 313-366): \\starparam is \\star{\\curly{\\param{...}}}, \\NoReturn an arrow and a bar.")
+(:class :presentational
+ :names ("\\Vtop" "\\vtop" "\\blankline" "\\more" "\\xparen" "\\xbrac" "\\xttbrac"
+         "\\xcurly" "\\extrainterleave")
+ :why "Layout of syntax (setup-document.tex:94-98, 133, 282-309): \\Vtop aligns a signature's lines; \\x... are spacers as wide as an opening bracket, set in a box that is thrown away, so the entries inside them leave no event.")
 
 (:class :unreviewed
  :files ("setup-document.tex" "setup-aux.tex" "concept-glossary.tex"
