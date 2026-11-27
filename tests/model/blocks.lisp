@@ -126,6 +126,9 @@ that holds the label box and the text."
   (is equal '((:item-list :items ((:item :label ("x") :content ((:paragraph :content ("b")))))))
       (strip-spans (built (list-events '(2 "x" "b"))))
       "an \\itemitem straight in a list is an item of it (concept-args.tex:15)")
+  (is equal '((:item-list :items ((:item :label ("y") :content ((:paragraph :content ("c")))))))
+      (strip-spans (built (list-events '(3 "y" "c"))))
+      "an \\itemitemitem straight in a list is an item of it")
   (true (member :node
                 (nth-value 1 (built '((:mark :item :arguments ("x")) (:begin :paragraph) (:text "a")
                                       (:end :paragraph)))))

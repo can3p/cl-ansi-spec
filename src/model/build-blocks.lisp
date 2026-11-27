@@ -67,7 +67,8 @@ on-close function of the container (END-SPAN)."
 (defun end-span (container)
   "The span at which CONTAINER is being closed (its beginning's if
 unknown)."
-  (gethash container *end-spans* (container-span container)))
+  (prog1 (gethash container *end-spans* (container-span container))
+    (remhash container *end-spans*)))
 
 (defun open-paragraph-p (builder)
   "True when the innermost container is a paragraph or a line of code."
@@ -147,9 +148,11 @@ line)."
     ((:item-1) 1) ((:item-2 :sublist-2) 2) ((:item-3 :sublist-3) 3)))
 
 (defun item-container-key-p (key)
+  "True when KEY is the key of an item's container."
   (member key '(:item-1 :item-2 :item-3)))
 
 (defun sublist-container-key-p (key)
+  "True when KEY is the key of the list of an item's sub-items."
   (member key '(:sublist-2 :sublist-3)))
 
 (defun close-items-from (builder level span)
@@ -278,6 +281,7 @@ options hide it."
 
 (install-block-handlers *handlers*)
 
-;; Text directly in a line of code is code, not a font run.
+;; Text directly in a line of code is code, not a font run.  The call
+;; computes the list on first use, so that the push below is kept.
 (plain-text-container-p :code)
 (pushnew :code-line *plain-text-containers*)
