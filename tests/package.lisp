@@ -6,7 +6,7 @@
                 #:define-test #:test #:status #:is #:true #:false #:fail)
   (:local-nicknames (#:expand #:cl-ansi-spec/expand)
                     (#:semantic #:cl-ansi-spec/semantic))
-  (:export #:run-tests))
+  (:export #:run-tests #:write-snapshots))
 
 (in-package #:cl-ansi-spec/tests)
 

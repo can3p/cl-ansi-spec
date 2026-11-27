@@ -33,13 +33,21 @@ an EQ table from the macros attached to an entry to that entry;
 DEFINITIONS, from an entry's name to (meaning . span) of its last
 definition seen; PENDING inline begins, (event span activation) newest
 first; HELD, the wrapper call waiting for its tail call, (entry arguments
-span tail), TAIL the first token of the body it is read from, or NIL; and REPORT-LIST, newest first."
+span tail), TAIL the first token of the body it is read from, or NIL;
+REPORT-LIST, newest first; and CALLS, from an entry's name to the number
+of calls of its macro observed."
   (vocabulary nil :type vocabulary :read-only t)
   (meanings (make-hash-table :test #'eq) :type hash-table :read-only t)
   (definitions (make-hash-table :test #'equal) :type hash-table :read-only t)
   (pending '() :type list)
   (held nil :type list)
-  (report-list '() :type list))
+  (report-list '() :type list)
+  (calls (make-hash-table :test #'equal) :type hash-table :read-only t))
+
+(defun observer-call-count (observer name)
+  "How many calls of the macro of the entry named NAME OBSERVER saw, by
+its meaning (\\let copies included), replaced or not."
+  (values (gethash name (observer-calls observer) 0)))
 
 (defstruct (activation (:constructor make-activation (entry key span end-span home))
                        (:copier nil))
@@ -123,6 +131,8 @@ it is a macro."
 events and return the expander's action and tag (see OBSERVE-VOCABULARY)."
   (let ((entry (gethash macro (observer-meanings observer)))
         (span (token-span token)))
+    (when entry
+      (incf (gethash (entry-name entry) (observer-calls observer) 0)))
     (cond ((null entry) nil)
           ((entry-handler entry)
            (funcall (entry-handler entry) observer expander entry token arguments)

@@ -57,10 +57,23 @@ keeps its original spans and gets the command's span in its `:via` list
 
 ## Properties tests rely on
 
-- The stream for a job is deterministic. A hash of it is a snapshot test.
-- `:begin` and `:end` are balanced per entry.
-- For each vocabulary entry, the number of events equals the number of its
-  uses in the source (counted by `make vocab`, for the uses its survey does not flag as uncertain).
+All in `tests/semantic/spec-jobs.lisp`, which runs every chapter job once:
+
+- The stream for a job is deterministic. Each job's event count and the
+  FNV-1a hash of its events printed canonically (token lists as text,
+  spans as file:line:col) are kept in `tests/snapshots.sexp`;
+  `make snapshots` rewrites it, printing the jobs whose events changed.
+- Per job, each key has as many `:end` events as `:begin` events (a
+  `:close` entry's call ends the key it closes), but where the sources
+  leave something open (listed with the reason).
+- Each vocabulary entry is called at least as often as the survey of
+  `make vocab` counts its uses in text on certain lines (macros call
+  entries too), but uses the options skip (a `\reviewer` note's body),
+  listed with the reason.
+- No job stops; the only TeX errors are the sources' own
+  (`docs/tex-fidelity.md`, "Jobs"); every job reports the setup files'
+  redefinitions of plain's macros and nothing else, but the reports
+  listed with their reasons.
 
 `make events FILE=… LINES=…` prints the events of the nodes appended
 while the lines were read, one per line, nested ones indented, and the

@@ -68,6 +68,9 @@
   still open (`-- open <mode> list`), observing the spec's vocabulary
   (`src/semantic/vocabulary.sexp`; its reports last, `-- report …`).  Errors as for `make expand`.  Same
   rules: always pass `LINES` and a timeout.
+* `make snapshots` — rewrite `tests/snapshots.sexp`, the event count and
+  hash of every chapter job, printing the jobs whose events changed. Run
+  it in the commit that changes the events, after checking why they did.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine

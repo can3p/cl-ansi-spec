@@ -31,6 +31,6 @@
    #:hidden-note
    ;; Observing a job (observe.lisp)
    #:observer #:observe-vocabulary #:observer-vocabulary
-   #:observer-reports #:emit-event
+   #:observer-reports #:observer-call-count #:emit-event
    #:report #:report-kind #:report-name #:report-span #:report-previous-span
    #:report-previous-name))

@@ -60,6 +60,9 @@ blocks and `docs/history/` (the past) are not checked.
    - Tick the step in `docs/plan/<id>.md` (the first unticked step is the
      current one; `PLAN.md` names only the milestone).
    - Make one commit containing code, tests, docs and the plan tick.
+     A change of the events of the whole spec is meant: say in the
+     message why they changed, and regenerate `tests/snapshots.sexp`
+     (`make snapshots`) in that commit.
 
 `main` stays usable after every step.
 

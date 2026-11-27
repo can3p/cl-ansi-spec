@@ -189,7 +189,7 @@ has the export formats, their JSON Schema and versioning.
 | 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | in progress: quantities, state, the expansion core, scanning, conditionals and main control's assignments, groups, modes, input, output, messages, and the lists of text, paragraphs, glue, kerns, penalties, rules, boxes, leaders, marks, discretionaries, accents, inserts, the
-whatsits, `\shipout`, math lists, alignments and plain TeX's format done (`src/expand/`, `make expand`, `make events`); the vocabulary mechanism and the spec's vocabulary done (`src/semantic/`, every macro the sources use in text an entry or classified); the whole spec planned in [`docs/plan/m2.md`](plan/m2.md) |
+whatsits, `\shipout`, math lists, alignments and plain TeX's format done (`src/expand/`, `make expand`, `make events`); the vocabulary mechanism and the spec's vocabulary done (`src/semantic/`, every macro the sources use in text an entry or classified); every chapter job runs, its events checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |
 
 Related: [process](process.md) explains how work advances.
