@@ -31,9 +31,10 @@ with END-SPAN (the span of what ended it) when known.  VIA are the spans
 of the commands that replayed the node, newest first.  The text of a
 :TEXT node is its VALUE, a string that grows while characters are
 appended.  The CHILDREN of a :DISCRETIONARY grow while its lists are
-read (§1119)."
+read (§1119), and so do a noad's fields; an op noad's PROPERTIES change
+with \\limits (math-lists.lisp)."
   (kind :other :type keyword :read-only t)
-  (properties '() :type list :read-only t)
+  (properties '() :type list)
   (value nil)
   (children '() :type list)
   (composite nil :type boolean :read-only t)

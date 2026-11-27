@@ -146,7 +146,7 @@ accented character in the font they leave, if one comes."
         (setf (list-state-space-factor (current-list expander)) 1000)))))
 
 (define-command "accent" (expander token meaning)
-  ;; §1122: in math, \mathaccent's (step 9d).
+  ;; §1165: in math, \mathaccent's.
   (if (eq (mode-kind (current-mode expander)) :math)
-      (hand-on expander token meaning :event)
+      (math-accent expander token meaning)
       (make-accent expander token)))

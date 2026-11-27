@@ -93,12 +93,17 @@ can't use x in y mode' (§1048).")
 
 (defun character-command (expander key token meaning)
   "Main control for a character command KEY: braces, `$', characters and
-spaces of text, and what is handed on (math characters, `&', `^' and
-`_')."
+spaces of text, math characters and scripts, and what is handed on
+(`&')."
   (let ((kind (mode-kind (current-mode expander))))
     (ecase key
       (:left-brace (if (eq kind :math)
-                       (push-math expander :math (token-span token))
+                       ;; §1154: an ord noad of the subformula.
+                       (progn (back-token expander token)
+                              (scan-math expander
+                                         (append-node expander
+                                                      (make-noad :ord (token-span token)))
+                                         :nucleus))
                        (new-save-level expander :simple)))
       (:right-brace (handle-right-brace expander token))
       (:math-shift (if (eq kind :horizontal)
@@ -111,15 +116,10 @@ spaces of text, and what is handed on (math characters, `&', `^' and
                  (append-space expander token nil)))
       ((:letter :other-char :char-given)
        (if (eq kind :horizontal)
-           (append-character expander
-                             (cond ((eq key :char-given) (shorthand-value meaning))
-                                   ((character-meaning-p meaning)
-                                    (character-meaning-code meaning))
-                                   (t (character-token-code token)))
-                             (token-span token))
-           (hand-on expander token meaning :event)))
-      ((:math-given :sup-mark :sub-mark)
-       (hand-on expander token meaning :event))
+           (append-character expander (character-code token meaning) (token-span token))
+           (math-character expander key token meaning)))
+      (:math-given (math-character expander key token meaning))
+      ((:sup-mark :sub-mark) (sub-sup expander token key))
       (:tab-mark (hand-on expander token meaning :alignment)))))
 
 (defun dispatch (expander token meaning)
@@ -196,18 +196,21 @@ Returns how the job ended, :END or :DUMP."
   (cond ((eq (mode-kind (current-mode expander)) :vertical)
          (new-graf expander (string= name "indent") (token-span token)))
         ((string= name "indent")
-         ;; indent_in_hmode (§1093); in math the box is a noad (9d).
-         (let ((list (current-list expander)))
-           (when (eq (mode-kind (list-state-mode list)) :horizontal)
-             (setf (list-state-space-factor list) 1000))
-           (append-node expander (make-node :indent :span (token-span token)))))))
+         ;; indent_in_hmode (§1093); in math the box is a noad.
+         (let ((list (current-list expander))
+               (indent (make-node :indent :span (token-span token))))
+           (if (eq (mode-kind (list-state-mode list)) :horizontal)
+               (progn (setf (list-state-space-factor list) 1000)
+                      (append-node expander indent))
+               (append-node expander (box-noad indent)))))))
 
 (define-command ("eqno" "leqno") (expander token meaning)
-  ;; §1140: outside math the mode case reports it; inline math is not
-  ;; privileged.  In a display it begins an equation number: an event.
+  ;; §§1140-1142: outside math the mode case reports it; inline math is
+  ;; not privileged.  In a display it begins an equation number, inline
+  ;; math in the display's group, ended by AFTER-MATH.
   (when (privileged-p expander token meaning)
     (if (eq (current-group-code expander) :math-shift)
-        (hand-on expander token meaning :event)
+        (enter-math expander (token-span token) name)
         (off-save expander token meaning))))
 
 (define-command "par" (expander token meaning)

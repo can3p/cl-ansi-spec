@@ -126,9 +126,10 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
   `nodes.lisp`, `list-commands.lisp`), §§1029-1298, 1335, 1340-1375:
   - *Every primitive has one disposition* (`command-disposition`):
     expandable, main control's own, an event, or an alignment command.
-    What main control does not carry out yet is handed on as the
-    condition `unhandled-command` (with its token, disposition and
-    mode), which `make expand` prints; nothing is dropped unseen.
+    What main control does not carry out yet (the alignment commands)
+    is handed on as the condition `unhandled-command` (with its token,
+    disposition and mode), which `make expand` prints; nothing is
+    dropped unseen.
   - *TeX's cases by mode* come first: in vertical mode a character,
     `\char`, `$`, `\hskip`, `\unhbox`, `\vrule`, `\valign`, ... back up
     and begin a paragraph; in a paragraph `\vskip`, `\hrule`, `\end`,
@@ -169,9 +170,9 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
   - *Groups* are group records on the reader's save stack, with TeX's
     group codes (§269) and the line they began on.  Main control opens
     simple, semi-simple, box (`\hbox`, adjusted `\hbox` in vertical
-    mode, `\vbox`, `\vtop`), math-shift and math (braces in math)
-    groups; the others are opened by the commands of events and
-    alignments.  `}` ends each as handle_right_brace does ("Too many }'s",
+    mode, `\vbox`, `\vtop`), math-shift and math (subformulas)
+    groups; the others are opened by the commands that need them
+    (disc, insert, vcenter, math-choice, math-left) and by alignments.  `}` ends each as handle_right_brace does ("Too many }'s",
     "Extra }, or forgotten \endgroup/$/\right"); `\endgroup` and `$`
     ending the wrong group go through off_save ("Extra x", "Missing }
     inserted", "Missing \endgroup inserted", "Missing $ inserted").
@@ -283,7 +284,7 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     TeX's `\parfillskip`, `\leftskip`, `\rightskip` and interline glue
     are layout and not kept.  Math is a `:math` node (`:display t` in
     the vertical list for a display), its nodes those of the math list
-    (noads are not built yet).
+    (see *Math lists*).
   - *Glue, kerns, penalties, rules*: `\hskip`, `\vskip` and the
     `fil`/`fill`/`ss`/`filneg` commands make `:glue` nodes, `\kern`
     `:kern`, `\penalty` `:penalty`, `\hrule`/`\vrule` `:rule` with
@@ -362,7 +363,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     list's last node, while `\unskip`, `\unkern`, `\unpenalty` and
     `\lastbox` do not take it (§§424, 1080, 1105, 1113), and characters
     after the node begin a new `:text` node.
-  - *`\accent`* (§§1122-1125) in horizontal mode (in math it is 9d's):
+  - *`\accent`* (§§1122-1125) in horizontal mode (in math it is
+    `\mathaccent`'s, see *Math lists*):
     the accent's code, then do_assignments (blanks, `\relax` and
     assignments, `\setbox` "Improper"), then a character, `\chardef` or
     `\char` is the accented character, anything else read again.  An
@@ -401,6 +403,43 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     `\deadcycles` is 0.  With `\tracingoutput` positive the box is
     shown in a `:diagnostic` log entry.  The `[\count0]` TeX prints on
     the terminal is not kept.
+  - *Math lists* (`math-lists.lisp`, §§1136-1199) hold TeX's noads,
+    never converted to boxes (mlist_to_hlist needs metrics).  A
+    character, `\char`, `\mathchar`, a `\mathchardef` or `\delimiter`
+    (its code divided by 4096) is a noad of its math code's class whose
+    nucleus is a `:math-char`; the family is `\fam` for a variable code
+    (class 7, an ord noad) when `\fam` is 0-15, as set_math_char
+    resolves it; math code `"8000` reads the character again as active.
+    A field (scan_math, after blanks and `\relax`) is a math character
+    or a subformula in braces ("Missing { inserted" otherwise), read in a
+    math group; at its `}` a subformula of one ord noad without scripts
+    gives its nucleus, and one accent noad as the nucleus of the ord noad
+    ending the list replaces it (§1187).  `{` in math is an ord noad of
+    its subformula.  `^`/`_` script the noad or fraction ending the list,
+    else a new ord noad ("Double superscript"/"Double subscript" when the
+    script is there, even `{}`).  `\mathord` … `\mathinner`,
+    `\underline`, `\overline` make a noad of their class; `\limits`,
+    `\nolimits`, `\displaylimits` set an op noad's limits ("Limit
+    controls must follow a math operator"); `\radical` scans a 27-bit
+    delimiter, `\mathaccent` (and `\accent`: "Please use \mathaccent
+    for accents in math mode") a 15-bit character; `\vcenter` reads a
+    vbox (as `\vbox`, in a vcenter group) for its nucleus; a box or
+    `\indent` is an ord noad of it.  Delimiters (scan_delimiter: a
+    character's `\delcode` or `\delimiter`; else, or negative, "Missing
+    delimiter (. inserted)", read again, and the null delimiter) are
+    four numbers.  `\over`, `\atop`, `\above` and the `withdelims`
+    forms make the list the numerator of the list's incompleat fraction,
+    whose denominator is the rest of the list (fin_mlist); a second is
+    "Ambiguous; you need another { and }", its operands scanned.
+    `\left` opens a math-left group whose list `\right` ends as an
+    inner noad (left delimiter, list, right delimiter; "Extra \right"
+    outside one, off_save in other groups).  `\mathchoice` reads four
+    lists in math-choice groups; the style commands, `\nonscript` (zero
+    glue), `\mskip` (mu glue) and `\mkern` (a mu kern) are nodes.  In a
+    display `\eqno`/`\leqno` (privileged, in the display's own group,
+    else off_save) begins inline math whose `$` ends the display too
+    ("Display math should end with $$"): the number is the display's
+    last child.  Math fonts are checked at each `$`, as before.
   - *`\showbox n`* and *`\showlists`* (§§180-198, 218-219, 1293-1298)
     are `:show` log entries, like `\show`'s (not errors).  The format
     is our own, since nodes have no dimensions: each node on a line, as

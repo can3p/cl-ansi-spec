@@ -171,9 +171,13 @@ contents."
 
 (defun append-box (expander box shift)
   "Append BOX to the current list, shifted by SHIFT when moved, and what
-that does to the list (§§1076, 679)."
-  (append-node expander (box-node box shift))
-  (let ((list (current-list expander)))
+that does to the list (§§1076, 679); in math the box is the nucleus of
+an ord noad."
+  (let ((list (current-list expander))
+        (node (box-node box shift)))
+    (append-node expander (if (eq (mode-kind (list-state-mode list)) :math)
+                              (box-noad node)
+                              node))
     (case (mode-kind (list-state-mode list))
       (:vertical (setf (list-state-prev-depth list) (tex-box-depth box))
        (when (eq (list-state-mode list) :vertical) (build-page expander)))

@@ -70,10 +70,10 @@ than \\showboxdepth is ` []', and the nodes of a list beyond
                          (if box (show-box-text expander (list (box-node box))) "void"))
                  :span (token-span token))))
 
-(defun nest-aux-text (list)
+(defun nest-aux-text (expander list)
   "TeX's display of LIST's auxiliary field (§219): \\prevdepth and
 \\prevgraf of a vertical list, \\spacefactor (and the language of a
-paragraph) of a horizontal one; nothing for math."
+paragraph) of a horizontal one, a math list's incompleat fraction."
   (let ((mode (list-state-mode list)))
     (case (mode-kind mode)
       (:vertical
@@ -86,7 +86,12 @@ paragraph) of a horizontal one; nothing for math."
        (format nil "spacefactor ~D~@[, current language ~D~]"
                (list-state-space-factor list)
                (and (eq mode :horizontal) (plusp (list-state-clang list))
-                    (list-state-clang list)))))))
+                    (list-state-clang list))))
+      (:math
+       (let ((fraction (list-state-incompleat list)))
+         (and fraction
+              (format nil "this will be denominator of:~A"
+                      (show-box-text expander (list fraction)))))))))
 
 (defun show-lists-text (expander)
   "TeX's show_activities (§218) in our format: each list of the nest,
@@ -112,7 +117,7 @@ Of the outer vertical list only the nodes not yet on the page are shown
              (when (and (null rest) nodes)
                (format out "~%### recent contributions:"))
              (write-string (show-box-text expander nodes) out)
-             (let ((aux (nest-aux-text list)))
+             (let ((aux (nest-aux-text expander list)))
                (when aux (format out "~%~A" aux))))))
 
 (define-command "showlists" (expander token meaning)

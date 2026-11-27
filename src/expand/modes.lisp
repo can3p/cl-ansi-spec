@@ -177,16 +177,17 @@ mode the box must end first (OFF-SAVE), and \\hrule is an error."
 
 ;;; Math (§§1136-1200)
 
-(defun push-math (expander code &optional span)
-  "TeX's push_math (§1136): inline math in a group of CODE, begun at
-SPAN."
+(defun push-math (expander code &key span context)
+  "TeX's push_math (§1136): a math list begun at SPAN, in a group of CODE
+with CONTEXT (see GROUP-RECORD)."
   (push-nest expander :math span)
-  (new-save-level expander code))
+  (new-save-level expander code :context context))
 
-(defun enter-math (expander span)
-  "Go into ordinary math mode (§1139) at SPAN."
+(defun enter-math (expander span &optional context)
+  "Go into ordinary math mode (§1139) at SPAN, in a math-shift group of
+CONTEXT (the command of an equation number)."
   (let ((state (expander-state expander)))
-    (push-math expander :math-shift span)
+    (push-math expander :math-shift :span span :context context)
     (set-parameter state :fam -1 :globaldefs nil)
     (begin-token-list expander (parameter state :everymath) :every-math)))
 
@@ -218,7 +219,7 @@ empty paragraph), \\displaywidth and \\displayindent are set."
                   (progn (break-paragraph expander span) 0)
                   (progn (pop-nest expander) (- +max-dimen+)))))
     (multiple-value-bind (length shift) (display-line expander)
-      (push-math expander :math-shift span)
+      (push-math expander :math-shift :span span)
       (setf (list-state-mode (current-list expander)) :display-math)
       (set-parameter state :fam -1 :globaldefs nil)
       (set-parameter state :predisplaysize size :globaldefs nil)
@@ -269,27 +270,45 @@ paragraph node begun at SPAN."
   (when (= (length (expander-nest expander)) 2)
     (build-page expander)))
 
+(defun check-display-end (expander span)
+  "§1197: the second `$' of a display's end; returns its span, else SPAN
+after `Display math should end with $$'."
+  (multiple-value-bind (token meaning) (get-x-token expander)
+    (if (eql (command-catcode token meaning) +math-shift+)
+        (token-span token)
+        (progn
+          (back-token expander token)
+          (tex-error "Display math should end with $$"
+                     :span (and token (token-span token)))
+          span))))
+
 (defun after-math (expander span)
   "TeX's after_math (§1194), for the `$' read at SPAN that ends the
 current formula (its group is :MATH-SHIFT); a display needs a second `$'.
 The formula becomes a math node: of the paragraph for inline math, of
-the enclosing vertical list for a display."
+the enclosing vertical list for a display.  An equation number ends with
+its display, and is the display's last child, an :EQNO node."
   (check-math-fonts expander)
-  (let* ((display (eq (current-mode expander) :display-math))
-         (math (pop-nest expander))
-         (end-span span))
-    (when display
-      (multiple-value-bind (token meaning) (get-x-token expander)
-        (if (eql (command-catcode token meaning) +math-shift+)
-            (setf end-span (token-span token))
-            (progn
-              (back-token expander token)
-              (tex-error "Display math should end with $$"
-                         :span (and token (token-span token)))))))
-    (append-node expander (make-node :math :properties (and display (list :display t))
-                                           :children (list-nodes math)
-                                           :span (list-state-span math)
-                                           :end-span end-span))
+  (let ((display (eq (current-mode expander) :display-math))
+        (end-span span)
+        (eqno nil))
+    (multiple-value-bind (nodes math) (fin-mlist expander)
+      (when (and (not display) (eq (current-mode expander) :display-math))
+        ;; The end of an equation number (§1194).
+        (setf end-span (check-display-end expander span)
+              eqno (make-node :eqno :properties (list :command (group-record-context
+                                                                (unsave expander)))
+                                    :children nodes :span (list-state-span math)
+                                    :end-span span)
+              display t)
+        (check-math-fonts expander)
+        (multiple-value-setq (nodes math) (fin-mlist expander)))
+      (when (and display (null eqno))
+        (setf end-span (check-display-end expander span)))
+      (append-node expander (make-node :math :properties (and display (list :display t))
+                                             :children (if eqno (append nodes (list eqno)) nodes)
+                                             :span (list-state-span math)
+                                             :end-span end-span)))
     (if display
         (resume-after-display expander end-span)
         (progn

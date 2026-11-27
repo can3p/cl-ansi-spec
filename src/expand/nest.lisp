@@ -40,7 +40,9 @@ and everything before it to the page.
 CLANG is TeX's clang, the language of the paragraph's characters so far
 (§1034); SPAN is where the list began (the token of the command that
 opened it), NIL for the outer vertical list; LINE the input line it began
-on (TeX's mode_line), shown by \\showlists."
+on (TeX's mode_line), shown by \\showlists; INCOMPLEAT the generalized
+fraction of a math list waiting for its denominator (TeX's
+incompleat_noad, §1178), or NIL."
   (mode :vertical :type mode)
   (prev-depth +ignore-depth+ :type integer)
   (space-factor 1000 :type integer)
@@ -49,7 +51,8 @@ on (TeX's mode_line), shown by \\showlists."
   (contents '() :type list)
   (contributed nil)
   (span nil)
-  (line 0 :type integer))
+  (line 0 :type integer)
+  (incompleat nil))
 
 (defstruct (page-state (:copier nil))
   "The page builder's variables the scanner reads (§§980-982, 991).  The

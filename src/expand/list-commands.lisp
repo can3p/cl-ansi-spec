@@ -6,7 +6,7 @@
 ;;;; spaces, glue, kerns, penalties, rules, the italic correction, the
 ;;;; commands that remove the last node (\unskip, \unkern, \unpenalty)
 ;;;; and marks.
-;;;; Math characters and math glue are math's (step 9d).
+;;;; Math characters and math glue are math's (math-lists.lisp).
 
 (in-package #:cl-ansi-spec/expand)
 
@@ -102,10 +102,10 @@ which extends the text node that ends the list when it can."
         (append-node expander (character-node code span style)))))
 
 (define-command "char" (expander token meaning)
-  ;; §1038: in math, a math character (step 9d).
+  ;; §§1038, 1154: in math, a math character.
   (if (eq (mode-kind (current-mode expander)) :horizontal)
       (append-character expander (scan-char-num expander) (token-span token))
-      (hand-on expander token meaning :event)))
+      (math-character expander "char" token meaning)))
 
 (define-command "noboundary" (expander token meaning)
   ;; §1034: it only cancels a boundary ligature, which needs metrics.

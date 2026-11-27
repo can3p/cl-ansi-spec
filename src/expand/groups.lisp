@@ -120,7 +120,7 @@ open."
 
 (defun handle-right-brace (expander token)
   "TeX's handle_right_brace (§1085) for the groups main control opens; the
-groups of events and alignments end in their own steps."
+groups of alignments end in their own step."
   (let ((code (current-group-code expander)))
     (ecase code
       (:simple (unsave expander))
@@ -133,9 +133,6 @@ groups of events and alignments end in their own steps."
       (:vtop (end-graf expander (token-span token)) (package-box expander :vtop))
       (:disc (build-discretionary expander token))
       (:insert (end-insert expander token))
-      ;; A math group's noad is 9d's; until then its nodes go on in the
-      ;; enclosing list.
-      (:math (unsave expander)
-       (let ((group (pop-nest expander)))
-         (dolist (node (list-nodes group))
-           (append-node expander node)))))))
+      (:math (end-math-group expander token))
+      (:math-choice (build-choices expander token))
+      (:vcenter (end-vcenter expander token)))))

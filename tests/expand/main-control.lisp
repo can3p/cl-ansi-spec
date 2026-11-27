@@ -26,7 +26,8 @@
 
 (defun run-main-control (expander)
   "Run EXPANDER's job with main control, recovering from TeX errors.
-Returns the characters, spaces and boxes ([hbox] ...) appended to lists,
+Returns the characters, spaces, boxes ([hbox] ...) and the math characters
+of noads appended to lists,
 with the handed-on commands, as a string, the error messages, their contexts, the modes of
 the handed-on commands, and the message of a fatal error or NIL."
   (let ((errors '()) (contexts '()) (modes '()) (fatal nil))
@@ -48,6 +49,12 @@ the handed-on commands, and the message of a fatal error or NIL."
                                                     (write-char (char text (1- (length text)))
                                                                 out)))
                                            (:space (write-char #\Space out))
+                                           (:noad (let* ((nucleus (first (expand:node-children node)))
+                                                         (char (and nucleus
+                                                                    (first (expand:node-children nucleus)))))
+                                                    (when (and char (eq (expand:node-kind char) :math-char))
+                                                      (write-char (code-char (getf (expand:node-properties char) :code))
+                                                                  out))))
                                            (:box (format out "[~A]"
                                                          (getf (expand:node-properties node)
                                                                :command)))))))))
@@ -96,13 +103,7 @@ needs no fonts' metrics.")
 ;;; Dispositions
 
 (defparameter *pending-event-commands*
-  '(;; Math (step 9d)
-    "above" "abovewithdelims" "atop" "atopwithdelims" "delimiter"
-    "displaylimits" "displaystyle" "left" "limits" "mathaccent" "mathbin"
-    "mathchar" "mathchoice" "mathclose" "mathinner" "mathop" "mathopen"
-    "mathord" "mathpunct" "mathrel" "mkern" "mskip" "nolimits" "nonscript"
-    "over" "overline" "overwithdelims" "radical" "right" "scriptscriptstyle"
-    "scriptstyle" "textstyle" "underline" "vcenter")
+  '()
   "The :EVENT primitives whose operations have not landed: they are still
 handed on.")
 
@@ -228,7 +229,7 @@ handed on.")
   (check-job "\\eqno" "" :errors ("You can't use"))
   (check-job (with-math-fonts "$\\eqno$") "" :errors ("You can't use")
              :contexts ("`\\eqno' in math mode"))
-  (check-job (with-math-fonts "$$\\eqno$$") "\\eqno "))
+  (check-job (with-math-fonts "$$\\eqno$$") ""))
 
 ;;; Boxes
 
@@ -267,22 +268,23 @@ handed on.")
 
 (define-test math-shifts
   :parent main-control
-  (check-job (with-math-fonts "a$b$$$c$$\\par d") "abcd"
-             :modes (:math :display-math))
+  (check-job (with-math-fonts "a$b$$$c$$\\par d") "abcd")
   (check-job (with-math-fonts "$$x$$\\par\\ifnum\\prevgraf=4 y\\fi") "xy")
   (check-job (with-math-fonts "$$x$y") "xy" :errors ("Display math should end with $$"))
   (check-job (with-math-fonts "\\noindent$$\\ifdim\\predisplaysize<-16000pt y\\fi$$") "y")
   (check-job (with-math-fonts "\\hsize=100pt \\hangindent=10pt \\hangafter=0
 \\noindent$$\\ifdim\\displaywidth=90pt w\\fi\\ifdim\\displayindent=10pt i\\fi$$")
              "wi")
-  (check-job (with-math-fonts "$\\ifinner a\\fi{\\ifinner b\\fi}$") "ab"
-             :modes (:math :math))
+  (check-job (with-math-fonts "$\\ifinner a\\fi{\\ifinner b\\fi}$") "ab")
   (check-job (with-math-fonts "$$\\ifinner\\else a\\fi{\\ifinner b\\fi}$$") "ab")
   (check-job (with-math-fonts "\\everymath{m}\\everydisplay{d}$x$$$y$$") "mxdy")
   ;; $$ in restricted horizontal mode is an empty formula.
   (check-job (with-math-fonts "\\hbox{$$x$$}") "x[hbox]")
   (check-job (with-math-fonts "\\fam=3 $\\ifnum\\fam=-1 y\\fi$\\ifnum\\fam=3 z\\fi") "yz")
-  (check-job (with-math-fonts "^") "^" :errors ("Missing $ inserted" "Missing $ inserted"))
+  ;; `^' then \end: no nucleus, so a subformula is begun (§1151).
+  (check-job (with-math-fonts "^") ""
+             :errors ("Missing $ inserted" "Missing { inserted" "Missing $ inserted"
+                      "Missing } inserted"))
   (check-job (with-math-fonts "$\\par$") "" :errors ("Missing $ inserted" "Missing $ inserted"))
   (check-job (with-math-fonts "$}$") "" :errors ("Extra }, or forgotten"))
   (check-job (with-math-fonts "$\\begingroup$") "" :errors ("Missing \\endgroup inserted"))
