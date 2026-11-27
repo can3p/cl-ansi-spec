@@ -19,7 +19,7 @@ introspection functions (`node-kinds`, `node-fields`, `enums`,
 |-----------|------------|
 | the model classes | the CLOS classes the model builder fills in |
 | `schema/model.schema.json` | a JSON Schema, draft 2020-12. It has one `$defs` entry per node kind, picked out by a constant `"kind"`, and `additionalProperties: false`. All the documentation (see below) is carried over as `title`, `description` and `examples`. |
-| `docs/model-reference.md` (planned) | the human reference: a field table for each node kind, plus one short example taken from the real spec |
+| `docs/model-reference.md` | the human reference, generated (see below): by area, each node kind with a field table and its example, then the enumerations, target kinds and categories |
 
 The generated files are committed. Each generator registers itself with
 `define-generator` (`src/export/generate.lisp`); `make generate` rewrites
@@ -79,8 +79,13 @@ rejects a declaration that lacks any of it.
 
   A test walks the generated schema and fails on any definition, property
   or enum value without a description.
-- **The reference doc** (`docs/model-reference.md` (planned)) is generated from the
-  same docstrings. Nothing about a node is written by hand anywhere else.
+- **The reference doc** (`docs/model-reference.md`) is generated from the
+  same declarations (`src/export/reference.lisp`, `make generate`). It has
+  one section per area, in the order of `*areas*`. Each node kind gets its
+  docstring, its categories, a field table (type, required, description),
+  and its example as an S-expression. Enumerations, target kinds and
+  categories get their docstrings and values. Nothing about a node is
+  written by hand anywhere else.
 
 ## Validation
 
