@@ -53,7 +53,7 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 
 | # | Phase | Input → output | Package | Milestone |
 |---|-------|----------------|-------------------|-----------|
-| 0 | Sources | files → named line sources; patched tree | `cl-ansi-spec` (source), later `…/patch` | M0 ✅, M4 |
+| 0 | Sources | files → named line sources; patched tree | `cl-ansi-spec` (source), `cl-ansi-spec/patch` | M0 ✅, M4 |
 | 1 | Reader | characters → tokens with spans, under the *current* catcodes | `cl-ansi-spec/tex` | M1 ✅ |
 | 2 | Expander | tokens → executed TeX: macros, conditionals, assignments, registers | `cl-ansi-spec/expand` | M2 ✅ |
 | 3 | Semantic layer | expander activity → **event stream** | `cl-ansi-spec/semantic` | M2 ✅ |
@@ -186,7 +186,7 @@ has the export formats, their JSON Schema and versioning.
 
 | Phase | State |
 |-------|-------|
-| 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
+| 0 Sources | pristine and vendored trees, search path and resolver done; unified diffs are read and applied strictly (`src/patch/`); the patch set and the patched resolver are M4 |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | done (M2): TeX below typesetting (`src/expand/`, `make expand`), plain TeX's format, the vocabulary and its observation (`src/semantic/`, `make events`); every chapter job runs and its events are checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |

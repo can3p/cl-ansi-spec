@@ -3,12 +3,26 @@
 Adjustments to the pristine sources in `spec/tex/` live here as a list of
 **independent** patches, applied in order on top of the pristine tree.
 
-Conventions (to be enforced by tooling once the first patch is needed):
+Conventions (the format and application are enforced by
+`cl-ansi-spec/patch`, `src/patch/`; names, headers and independence by the
+patch set, planned):
 
 - One concern per patch, named `NNNN-short-description.patch`
   (unified diff, paths relative to `spec/tex/`).
 - Each patch starts with a header explaining *why* (erratum, typo,
   markup fix) and, where possible, a reference.
+- Format: plain `diff -u` output, run from `spec/tex/`, so `--- FILE` and
+  `+++ FILE` name the same relative path (no `a/` or `b/` prefix: it would name a file that does not exist, no
+  rename, creation or deletion, no absolute or `..` path). The hunk
+  lines must be plain context, `-` or `+` lines; an empty line is an
+  error, as are text between hunks and a count that disagrees with the
+  hunk.
+- Every hunk's old line numbers are counted in the **pristine** file, even
+  when an earlier hunk or patch adds lines. Application is strict: the
+  context and deleted lines must be exactly the file's lines at those
+  numbers (no fuzz, no offset), and no two hunks of a file, from any
+  patches, may overlap or touch (context included). A failure names the
+  patch, the hunk and the line.
 - Patches must apply independently of each other; no patch may depend on
   another's context.
 
