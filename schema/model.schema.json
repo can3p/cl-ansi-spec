@@ -1222,7 +1222,10 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The entry's id: its first name, or <name>/<entry-kind> when two\nentries share a first name (docs/exports.md, \"Ids\")."
+          "description": "The entry's id: its first name, or <name>/<entry-kind> when two\nentries share a first name (docs/exports.md, \"Ids\").",
+          "examples": [
+            "endp"
+          ]
         },
         "names": {
           "type": "array",
@@ -1230,12 +1233,20 @@
             "type": "string"
           },
           "title": "names",
-          "description": "The names the entry describes, the comma-separated list of\n\\begincom's first argument, in order."
+          "description": "The names the entry describes, the comma-separated list of\n\\begincom's first argument, in order.",
+          "examples": [
+            [
+              "endp"
+            ]
+          ]
         },
         "entry-kind": {
           "$ref": "#/$defs/enum-entry-kind",
           "title": "entry-kind",
-          "description": "What the names are, from the entry's \\ftype."
+          "description": "What the names are, from the entry's \\ftype.",
+          "examples": [
+            "function"
+          ]
         },
         "parts": {
           "type": "array",
@@ -1243,7 +1254,42 @@
             "$ref": "#/$defs/part"
           },
           "title": "parts",
-          "description": "The entry's parts, one per \\label, in order."
+          "description": "The entry's parts, one per \\label, in order.",
+          "examples": [
+            [
+              {
+                "kind": "part",
+                "title": "Syntax",
+                "content": [
+                  {
+                    "kind": "operator-signature",
+                    "operator": "function",
+                    "names": [
+                      "endp"
+                    ],
+                    "lambda-list": [
+                      {
+                        "kind": "text",
+                        "text": "list"
+                      }
+                    ],
+                    "values": [
+                      {
+                        "kind": "text",
+                        "text": "generalized-boolean"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "part",
+                "title": "Side Effects",
+                "none": true,
+                "confidence": "."
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -1253,7 +1299,50 @@
         "names",
         "entry-kind"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "dictionary-entry",
+          "id": "endp",
+          "names": [
+            "endp"
+          ],
+          "entry-kind": "function",
+          "parts": [
+            {
+              "kind": "part",
+              "title": "Syntax",
+              "content": [
+                {
+                  "kind": "operator-signature",
+                  "operator": "function",
+                  "names": [
+                    "endp"
+                  ],
+                  "lambda-list": [
+                    {
+                      "kind": "text",
+                      "text": "list"
+                    }
+                  ],
+                  "values": [
+                    {
+                      "kind": "text",
+                      "text": "generalized-boolean"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "part",
+              "title": "Side Effects",
+              "none": true,
+              "confidence": "."
+            }
+          ]
+        }
+      ]
     },
     "part": {
       "type": "object",
@@ -1270,12 +1359,26 @@
         "title": {
           "type": "string",
           "title": "title",
-          "description": "The heading, the text of the \\label before its colon."
+          "description": "The heading, the text of the \\label before its colon.",
+          "examples": [
+            "Side Effects"
+          ]
         },
         "none": {
           "type": "boolean",
           "title": "none",
-          "description": "True when the part says only \"None.\" (\\None after the\n\\label)."
+          "description": "True when the part says only \"None.\" (\\None after the\n\\label).",
+          "examples": [
+            true
+          ]
+        },
+        "confidence": {
+          "type": "string",
+          "title": "confidence",
+          "description": "For a part that says None: the punctuation after it in the\nsource (\".\", \"!\" or \"?\"), how sure the authors are that the part\nis empty; absent otherwise.",
+          "examples": [
+            "."
+          ]
         },
         "content": {
           "type": "array",
@@ -1332,7 +1435,30 @@
             ]
           },
           "title": "content",
-          "description": "The part's blocks; absent when NONE is true."
+          "description": "The part's blocks; absent when NONE is true.",
+          "examples": [
+            [
+              {
+                "kind": "operator-signature",
+                "operator": "function",
+                "names": [
+                  "endp"
+                ],
+                "lambda-list": [
+                  {
+                    "kind": "text",
+                    "text": "list"
+                  }
+                ],
+                "values": [
+                  {
+                    "kind": "text",
+                    "text": "generalized-boolean"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -1340,7 +1466,15 @@
         "span",
         "title"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "part",
+          "title": "Side Effects",
+          "none": true,
+          "confidence": "."
+        }
+      ]
     },
     "operator-signature": {
       "type": "object",
@@ -1357,7 +1491,10 @@
         "operator": {
           "$ref": "#/$defs/enum-operator",
           "title": "operator",
-          "description": "The kind of operator, by the macro."
+          "description": "The kind of operator, by the macro.",
+          "examples": [
+            "function"
+          ]
         },
         "names": {
           "type": "array",
@@ -1365,7 +1502,12 @@
             "type": "string"
           },
           "title": "names",
-          "description": "The operator's name, or the names of the \\entry lines of a\n-Multi form, which share the lambda list and values."
+          "description": "The operator's name, or the names of the \\entry lines of a\n-Multi form, which share the lambda list and values.",
+          "examples": [
+            [
+              "endp"
+            ]
+          ]
         },
         "lambda-list": {
           "type": "array",
@@ -1494,7 +1636,15 @@
             ]
           },
           "title": "lambda-list",
-          "description": "The lambda list as written, with its parameters and lambda list\nkeywords; absent when empty."
+          "description": "The lambda list as written, with its parameters and lambda list\nkeywords; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "list"
+              }
+            ]
+          ]
         },
         "values": {
           "type": "array",
@@ -1623,12 +1773,23 @@
             ]
           },
           "title": "values",
-          "description": "The values as written after the arrow; absent for a form\nwithout values (\\Defun, \\Defmeth) and when NO-RETURN is true."
+          "description": "The values as written after the arrow; absent for a form\nwithout values (\\Defun, \\Defmeth) and when NO-RETURN is true.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "generalized-boolean"
+              }
+            ]
+          ]
         },
         "no-return": {
           "type": "boolean",
           "title": "no-return",
-          "description": "True for a NoReturn form: the operator never returns normally."
+          "description": "True for a NoReturn form: the operator never returns normally.",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -1637,7 +1798,28 @@
         "operator",
         "names"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "operator-signature",
+          "operator": "function",
+          "names": [
+            "endp"
+          ],
+          "lambda-list": [
+            {
+              "kind": "text",
+              "text": "list"
+            }
+          ],
+          "values": [
+            {
+              "kind": "text",
+              "text": "generalized-boolean"
+            }
+          ]
+        }
+      ]
     },
     "setf-signature": {
       "type": "object",
@@ -1657,7 +1839,12 @@
             "type": "string"
           },
           "title": "names",
-          "description": "The accessor's name, or the names of the \\entry lines of a\n-Multi form."
+          "description": "The accessor's name, or the names of the \\entry lines of a\n-Multi form.",
+          "examples": [
+            [
+              "nth"
+            ]
+          ]
         },
         "lambda-list": {
           "type": "array",
@@ -1786,7 +1973,15 @@
             ]
           },
           "title": "lambda-list",
-          "description": "The accessor's lambda list as written; absent when empty."
+          "description": "The accessor's lambda list as written; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "n list"
+              }
+            ]
+          ]
         },
         "new-value": {
           "type": "array",
@@ -1915,7 +2110,15 @@
             ]
           },
           "title": "new-value",
-          "description": "The new value as written."
+          "description": "The new value as written.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "new-object"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -1924,12 +2127,32 @@
         "names",
         "new-value"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "setf-signature",
+          "names": [
+            "nth"
+          ],
+          "lambda-list": [
+            {
+              "kind": "text",
+              "text": "n list"
+            }
+          ],
+          "new-value": [
+            {
+              "kind": "text",
+              "text": "new-object"
+            }
+          ]
+        }
+      ]
     },
     "variable-signature": {
       "type": "object",
       "title": "variable-signature",
-      "description": "The syntax of a variable or a constant: \\Defvar, \\Defvarnoast,\n\\Defcon.",
+      "description": "The syntax of a variable or a constant: \\Defvar, \\Defvarnoast,\n\\Defcon.  No entry of the sources uses them (a variable's entry has\nno signature), so no node of the spec is an example of the builder's\noutput.",
       "properties": {
         "kind": {
           "const": "variable-signature",
@@ -1941,12 +2164,18 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The variable's name, with its asterisks when the source sets\nthem."
+          "description": "The variable's name, with its asterisks when the source sets\nthem.",
+          "examples": [
+            "*print-pretty*"
+          ]
         },
         "constant": {
           "type": "boolean",
           "title": "constant",
-          "description": "True for a constant variable (\\Defcon)."
+          "description": "True for a constant variable (\\Defcon).",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -1954,7 +2183,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "variable-signature",
+          "name": "*print-pretty*"
+        }
+      ]
     },
     "type-signature": {
       "type": "object",
@@ -1971,7 +2206,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The type specifier's symbol."
+          "description": "The type specifier's symbol.",
+          "examples": [
+            "cons"
+          ]
         },
         "syntax": {
           "type": "array",
@@ -2100,7 +2338,29 @@
             ]
           },
           "title": "syntax",
-          "description": "The lines of the compound form after the name, with their BNF\nnotation; absent when there are none."
+          "description": "The lines of the compound form after the name, with their BNF\nnotation; absent when there are none.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-bracketed",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "car-typespec "
+                  },
+                  {
+                    "kind": "bnf-optional",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "cdr-typespec"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -2108,7 +2368,33 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "type-signature",
+          "name": "cons",
+          "syntax": [
+            {
+              "kind": "bnf-bracketed",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "car-typespec "
+                },
+                {
+                  "kind": "bnf-optional",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "cdr-typespec"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "paragraph": {
       "type": "object",
