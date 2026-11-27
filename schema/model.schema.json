@@ -5527,7 +5527,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The non-terminal defined."
+          "description": "The non-terminal defined.",
+          "examples": [
+            "wholevar"
+          ]
         },
         "definition": {
           "type": "array",
@@ -5656,7 +5659,20 @@
             ]
           },
           "title": "definition",
-          "description": "The right side, with its notation and line breaks."
+          "description": "The right side, with its notation and line breaks; the name and\nthe glyphs the notation macros typeset (brackets, parentheses, stars) are\nnot repeated in it.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-bracketed",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "&whole var"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5665,7 +5681,24 @@
         "name",
         "definition"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-rule",
+          "name": "wholevar",
+          "definition": [
+            {
+              "kind": "bnf-bracketed",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "&whole var"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "bnf-break": {
       "type": "object",
@@ -5684,7 +5717,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-break"
+        }
+      ]
     },
     "bnf-optional": {
       "type": "object",
@@ -5825,7 +5863,15 @@
             ]
           },
           "title": "content",
-          "description": "The optional part."
+          "description": "The optional part.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "supplied-p-parameter"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5833,7 +5879,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-optional",
+          "content": [
+            {
+              "kind": "text",
+              "text": "supplied-p-parameter"
+            }
+          ]
+        }
+      ]
     },
     "bnf-zero-or-more": {
       "type": "object",
@@ -5974,7 +6031,20 @@
             ]
           },
           "title": "content",
-          "description": "What repeats."
+          "description": "What repeats.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-group",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "var"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5982,7 +6052,23 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-zero-or-more",
+          "content": [
+            {
+              "kind": "bnf-group",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "var"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "bnf-one-or-more": {
       "type": "object",
@@ -6123,7 +6209,15 @@
             ]
           },
           "title": "content",
-          "description": "What repeats."
+          "description": "What repeats.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6131,7 +6225,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-one-or-more",
+          "content": [
+            {
+              "kind": "text",
+              "text": "var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-repeat-previous": {
       "type": "object",
@@ -6150,7 +6255,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-repeat-previous"
+        }
+      ]
     },
     "bnf-group": {
       "type": "object",
@@ -6291,7 +6401,15 @@
             ]
           },
           "title": "content",
-          "description": "The group's content."
+          "description": "The group's content.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6299,7 +6417,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-group",
+          "content": [
+            {
+              "kind": "text",
+              "text": "var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-parenthesized": {
       "type": "object",
@@ -6440,7 +6569,15 @@
             ]
           },
           "title": "content",
-          "description": "What the parentheses hold."
+          "description": "What the parentheses hold.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "keyword-name var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6448,7 +6585,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-parenthesized",
+          "content": [
+            {
+              "kind": "text",
+              "text": "keyword-name var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-bracketed": {
       "type": "object",
@@ -6589,7 +6737,15 @@
             ]
           },
           "title": "content",
-          "description": "What the brackets hold."
+          "description": "What the brackets hold.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "&rest var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6597,7 +6753,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-bracketed",
+          "content": [
+            {
+              "kind": "text",
+              "text": "&rest var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-interleave": {
       "type": "object",
@@ -6738,7 +6905,24 @@
             ]
           },
           "title": "content",
-          "description": "The alternatives."
+          "description": "The alternatives.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-required",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "A"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": " B"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6746,7 +6930,40 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-interleave",
+          "content": [
+            {
+              "kind": "bnf-required",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "A"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "bnf-required",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "B"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " B"
+            }
+          ]
+        }
+      ]
     },
     "bnf-required": {
       "type": "object",
@@ -6887,7 +7104,15 @@
             ]
           },
           "title": "content",
-          "description": "What is required."
+          "description": "What is required.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "A"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6895,7 +7120,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-required",
+          "content": [
+            {
+              "kind": "text",
+              "text": "A"
+            }
+          ]
+        }
+      ]
     },
     "bnf-indirection": {
       "type": "object",
@@ -6912,7 +7148,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The non-terminal."
+          "description": "The non-terminal.",
+          "examples": [
+            "pattern"
+          ]
         }
       },
       "required": [
@@ -6920,7 +7159,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-indirection",
+          "name": "pattern"
+        }
+      ]
     },
     "bnf-caret": {
       "type": "object",
@@ -6939,7 +7184,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-caret"
+        }
+      ]
     },
     "angle-name": {
       "type": "object",
@@ -6956,7 +7206,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The name, e.g. \"Newline\"."
+          "description": "The name, e.g. \"Newline\".",
+          "examples": [
+            "Newline"
+          ]
         }
       },
       "required": [
@@ -6964,7 +7217,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "angle-name",
+          "name": "Newline"
+        }
+      ]
     },
     "math": {
       "type": "object",

@@ -64,5 +64,8 @@
    #:plain-text-container-p
    ;; Semantic inlines (build-inlines.lisp, step 3.13)
    #:install-inline-handlers
+   ;; Syntax (build-bnf.lisp)
+   #:install-bnf-handlers #:*bnf-containers* #:*bnf-leaves* #:*bnf-marks*
+   #:*bnf-glyphs* #:bnf-rule-name #:bnf-rule-definition
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))
