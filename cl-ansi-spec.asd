@@ -127,7 +127,6 @@ Lisp draft standard (dpANS3)."
                (:module "patch"
                 :serial t
                 :components ((:file "patch")))
-               (:file "inventory"))
                (:file "inventory")
                (:file "sha256")
                (:file "json"))
