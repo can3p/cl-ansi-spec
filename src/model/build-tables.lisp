@@ -60,12 +60,12 @@ the LOOP-th on (from 1; NIL for none) repeat, of the column COLUMN (from
 1) of a row; NIL when the row has more columns than a preamble that does
 not repeat."
   (cond ((<= column length) (1- column))
-        (loop (let ((start (1- loop)))
+        ((and loop (<= 1 loop length))
+         (let ((start (1- loop)))
                 (+ start (mod (- (1- column) start) (- length start)))))))
 
-(defun rule-template-p (builder template)
+(defun rule-template-p (template)
   "True when TEMPLATE, a token list, names \\vrule."
-  (declare (ignore builder))
   (some (lambda (token)
           (and (cl-ansi-spec/tex:cs-token-p token)
                (string= (cl-ansi-spec/tex:control-sequence-name
@@ -73,13 +73,13 @@ not repeat."
                         "vrule")))
         template))
 
-(defun alignment-rule-columns (builder event)
+(defun alignment-rule-columns (event)
   "The rule columns of the alignment EVENT (see *ALIGNMENT-COLUMNS*)."
   (let* ((preamble (event-property event :preamble))
          (loop (event-property event :loop)))
     (list (loop for column in preamble
                 for index from 0
-                when (rule-template-p builder (getf column :u))
+                when (rule-template-p (getf column :u))
                   collect index)
           (length preamble)
           loop)))
@@ -126,7 +126,7 @@ the alignment holds is reported."
                       :message (format nil "A ~A alignment is read as a table of rows."
                                        (event-property event :command))))
     (setf (gethash container *alignment-columns*)
-          (alignment-rule-columns builder event))))
+          (alignment-rule-columns event))))
 
 (defun begin-no-align-handler (builder event span)
   "The material between two rows is rules and spacing; it is dropped."
@@ -167,8 +167,7 @@ text, and one has: the heading row of a table (its first row)."
                   :on-close #'finish-row))
 
 (defun finish-cell (builder container)
-  "Trim the content of the cell CONTAINER; a cell in a rule column is
-dropped when it holds nothing but spaces."
+  "Trim the content of the cell CONTAINER."
   (declare (ignore builder))
   (let ((node (container-node container)))
     (let ((content (trim-inlines (container-contents container))))
@@ -176,7 +175,8 @@ dropped when it holds nothing but spaces."
             (node-field-value node :content) content))))
 
 (defun finish-rule-cell (builder container)
-  "A cell in a rule column holds no text; if it does, it is a cell."
+  "A cell in a rule column holds no text and is dropped; if it holds
+some, it is a cell."
   (let ((content (trim-inlines (container-contents container))))
     (setf (container-items container)
           (and content
@@ -312,7 +312,7 @@ it has one, else N."
 and its \\DefineFigure, check one against the other, and keep as its
 content the blocks."
   (destructuring-bind (label written &optional number text)
-      (gethash container *figure-states*)
+      (or (gethash container *figure-states*) '(nil nil))
     (let* ((node (container-node container))
            (content (remove-if #'blank-string-p (container-contents container))))
       (dolist (item content)
@@ -332,10 +332,11 @@ content the blocks."
             (node-field-value node :content) content
             (node-field-value node :number) number
             (node-field-value node :caption) text)
-      (when number
-        (setf (node-field-value node :id) (make-figure-id builder label number)))
-      (when (and (null number) label)
-        (setf (node-field-value node :id) label)))))
+      (unless (or number label)
+        (report-problem builder :node (container-span container)
+                        :message "A figure with neither a number nor a label."))
+      (setf (node-field-value node :id)
+            (or label (and number (make-figure-id builder label number)))))))
 
 (defun begin-figure-handler (builder event span)
   "A figure, with the label the \\DefineFigure before it gave."

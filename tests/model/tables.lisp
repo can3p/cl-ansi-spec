@@ -46,12 +46,12 @@ are the other steps')."
         when (eq (model:problem-kind problem) :node)
           collect (model:problem-message problem)))
 
-(defun cell (column &rest events)
+(defun tbl-cell (column &rest events)
   "The events of a cell in COLUMN holding EVENTS."
   (append (list (test-event :begin :cell :column column)) events
           (list (test-event :end :cell))))
 
-(defun row (&rest cells)
+(defun tbl-row (&rest cells)
   "The events of a row of CELLS."
   (append (list (test-event :begin :row)) (apply #'append cells)
           (list (test-event :end :row))))
@@ -61,7 +61,7 @@ are the other steps')."
   (cl-ansi-spec/tex:make-cs-token
    (cl-ansi-spec/tex:make-frozen-control-sequence "vrule")))
 
-(defun alignment (columns &rest rows)
+(defun tbl-alignment (columns &rest rows)
   "The events of an \halign whose COLUMNS are :TEXT or :RULE (a template
 with a \vrule), and ROWS."
   (append (list (test-event :begin :alignment :command "halign"
@@ -73,8 +73,8 @@ with a \vrule), and ROWS."
           (apply #'append rows)
           (list (test-event :end :alignment))))
 
-(defun bold (text) (txt text "cmbx10"))
-(defun italic (text) (txt text "cmti10"))
+(defun tbl-bold (text) (txt text "cmbx10"))
+(defun tbl-italic (text) (txt text "cmti10"))
 
 ;;; Tables
 
@@ -82,9 +82,9 @@ with a \vrule), and ROWS."
   :parent tables
   (multiple-value-bind (nodes report)
       (apply #'table-nodes
-             (alignment '(:text :text)
-                        (row (cell 1 (txt "one")) (cell 2 (txt "two")))
-                        (row (cell 1 (txt "three")) (cell 2))))
+             (tbl-alignment '(:text :text)
+                        (tbl-row (tbl-cell 1 (txt "one")) (tbl-cell 2 (txt "two")))
+                        (tbl-row (tbl-cell 1 (txt "three")) (tbl-cell 2))))
     (is equal '((:table :rows ((:row :cells ((:cell :content ("one"))
                                              (:cell :content ("two"))))
                                (:row :cells ((:cell :content ("three")) (:cell))))))
@@ -96,8 +96,8 @@ with a \vrule), and ROWS."
   :parent tables
   (is equal '((:table :rows ((:row :cells ((:cell :content ("a b") :columns 2))))))
       (apply #'table-nodes
-             (alignment '(:text :text)
-                        (row (append (list (test-event :begin :cell :column 1 :columns 2))
+             (tbl-alignment '(:text :text)
+                        (tbl-row (append (list (test-event :begin :cell :column 1 :columns 2))
                                      (list (test-event :space nil) (txt "a") (test-event :space nil)
                                            (txt "b") (test-event :space nil))
                                      (list (test-event :end :cell))))))
@@ -107,14 +107,14 @@ with a \vrule), and ROWS."
   :parent tables
   (multiple-value-bind (nodes report)
       (apply #'table-nodes
-             (alignment '(:text :text)
-                        (row (cell 1 (bold "Name")) (cell 2 (bold "Meaning")))
+             (tbl-alignment '(:text :text)
+                        (tbl-row (tbl-cell 1 (tbl-bold "Name")) (tbl-cell 2 (tbl-bold "Meaning")))
                         (list (test-event :begin :no-align)
                               (test-event :glue nil :glue "2.0pt" :command "vskip")
                               (test-event :end :no-align))
-                        (row (cell 1) (cell 2))
-                        (row (cell 1 (italic "adj.")) (cell 2 (txt "adjective")))
-                        (row (cell 1 (bold "bold")) (cell 2 (bold "too")))))
+                        (tbl-row (tbl-cell 1) (tbl-cell 2))
+                        (tbl-row (tbl-cell 1 (tbl-italic "adj.")) (tbl-cell 2 (txt "adjective")))
+                        (tbl-row (tbl-cell 1 (tbl-bold "bold")) (tbl-cell 2 (tbl-bold "too")))))
     (is equal '((:table :rows ((:row :header t
                                 :cells ((:cell :content ((:strong :content ("Name"))))
                                         (:cell :content ((:strong :content ("Meaning"))))))
@@ -131,8 +131,8 @@ with a \vrule), and ROWS."
   :parent tables
   (multiple-value-bind (nodes report)
       (apply #'table-nodes
-             (alignment '(:rule :text :rule :text :rule)
-                        (row (cell 1) (cell 2 (txt "a")) (cell 3) (cell 4 (txt "b")) (cell 5))))
+             (tbl-alignment '(:rule :text :rule :text :rule)
+                        (tbl-row (tbl-cell 1) (tbl-cell 2 (txt "a")) (tbl-cell 3) (tbl-cell 4 (txt "b")) (tbl-cell 5))))
     (is equal '((:table :rows ((:row :cells ((:cell :content ("a")) (:cell :content ("b")))))))
         nodes
         "the columns that draw a rule are no cells")
@@ -143,23 +143,42 @@ with a \vrule), and ROWS."
              (append (list (test-event :begin :alignment :command "halign" :loop 1
                                        :preamble (list (list :u (list (rule-token)))
                                                        (list :u '()))))
-                     (row (cell 1) (cell 2 (txt "a")) (cell 3) (cell 4 (txt "b")) (cell 5))
+                     (tbl-row (tbl-cell 1) (tbl-cell 2 (txt "a")) (tbl-cell 3) (tbl-cell 4 (txt "b")) (tbl-cell 5))
                      (list (test-event :end :alignment)))))
+  ;; A repeat that starts past the preamble is no repeat.
+  (multiple-value-bind (nodes report)
+      (apply #'table-nodes
+             (append (list (test-event :begin :alignment :command "halign" :loop 5
+                                       :preamble (list (list :u '()))))
+                     (tbl-row (tbl-cell 1 (txt "a")) (tbl-cell 2 (txt "b")))
+                     (list (test-event :end :alignment))))
+    (is equal '((:table :rows ((:row :cells ((:cell :content ("a")) (:cell :content ("b")))))))
+        nodes)
+    (is equal '() (table-problems report)))
   (is equal '((:table :rows ((:row :cells ((:cell :content ("kept")))))))
       (apply #'table-nodes
-             (alignment '(:rule) (row (cell 1 (txt "kept")))))
+             (tbl-alignment '(:rule) (tbl-row (tbl-cell 1 (txt "kept")))))
       "text in a rule column is kept"))
+
+(define-test tables-valign-reported
+  :parent tables
+  (multiple-value-bind (nodes report)
+      (apply #'table-nodes
+             (list (test-event :begin :alignment :command "valign")
+                   (test-event :end :alignment)))
+    (declare (ignore nodes))
+    (true (some (lambda (message) (search "valign" message)) (table-problems report)))))
 
 (define-test tables-reported
   :parent tables
   (multiple-value-bind (nodes report)
       (apply #'table-nodes
-             (alignment '(:text)
+             (tbl-alignment '(:text)
                         (list (test-event :begin :no-align)
                               (txt "oops")
                               (test-event :end :no-align))
                         (list (txt "stray"))
-                        (row (cell 1 (txt "a")))))
+                        (tbl-row (tbl-cell 1 (txt "a")))))
     (declare (ignore nodes))
     (is = 2 (length (model:build-report-problems report)))
     (true (search "\\noalign" (first (table-problems report))))
@@ -187,7 +206,7 @@ with a \vrule), and ROWS."
       (apply #'table-nodes
              (figure-events (caption-events (txt "Object" "cmbx9") (test-event :space nil)
                                             (txt "Classes" "cmbx9"))
-                            (alignment '(:text) (row (cell 1 (txt "class"))))))
+                            (tbl-alignment '(:text) (tbl-row (tbl-cell 1 (txt "class"))))))
     (is equal '((:figure :id "4/fig-7" :number "4-7" :caption ("Object Classes")
                  :content ((:table :rows ((:row :cells ((:cell :content ("class")))))))))
         nodes
@@ -199,7 +218,7 @@ with a \vrule), and ROWS."
              (append (list (test-event :mark :define-figure :arguments '("Classes"))
                            (test-event :write nil :stream 4 :tokens "!Classes 4--7"))
                      (figure-events (caption-events (txt "Classes" "cmbx9"))
-                                    (alignment '(:text) (row (cell 1 (txt "x")))))))
+                                    (tbl-alignment '(:text) (tbl-row (tbl-cell 1 (txt "x")))))))
     (is equal "Classes" (getf (rest (first nodes)) :id))
     (is equal '() (table-problems report)))
   ;; A number that is not the caption's is reported.
@@ -208,7 +227,7 @@ with a \vrule), and ROWS."
              (append (list (test-event :mark :define-figure :arguments '("Classes"))
                            (test-event :write nil :stream 4 :tokens "!Classes 4--9"))
                      (figure-events (caption-events (txt "Classes" "cmbx9"))
-                                    (alignment '(:text) (row (cell 1 (txt "x")))))))
+                                    (tbl-alignment '(:text) (tbl-row (tbl-cell 1 (txt "x")))))))
     (is equal "4-7" (getf (rest (first nodes)) :number) "the caption's number stands")
     (is = 1 (length (table-problems report)))
     (true (search "4-9" (first (table-problems report))))))
@@ -219,7 +238,7 @@ with a \vrule), and ROWS."
       (apply #'table-nodes
              (append (list (test-event :mark :define-figure :arguments '("Bare"))
                            (test-event :write nil :stream 4 :tokens "!Bare 4--3"))
-                     (figure-events '() (alignment '(:text) (row (cell 1 (txt "x")))))))
+                     (figure-events '() (tbl-alignment '(:text) (tbl-row (tbl-cell 1 (txt "x")))))))
     (is equal "4-3" (getf (rest (first nodes)) :number)
         "without a caption the number TeX wrote is used")
     (is equal "Bare" (getf (rest (first nodes)) :id))

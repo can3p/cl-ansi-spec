@@ -379,7 +379,8 @@ registered in `*handlers*` at load).
   Only `\halign` is read as a table; a `\valign` is reported.
 - **Figures.** `\DefineFigure` (a mark) gives the label, and the `:write`
   after it (left to 3.8, which drops it) the number TeX wrote; both wait
-  for the `:figure` that follows.  The `:caption` inside the figure is
+  for the `:figure` that follows (a `\DefineFigure` always precedes its
+  figure in the sources; one that does not would name the next).  The `:caption` inside the figure is
   `Figure N--M. text`: its paragraph and its bold runs (a caption is set
   in the bold font) are flattened, the number `N-M` is read from it and
   the text after it is the figure's `:caption`.  A figure with a caption
