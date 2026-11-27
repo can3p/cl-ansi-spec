@@ -2249,7 +2249,28 @@
             ]
           },
           "title": "content",
-          "description": "The paragraph's text and inlines, in order."
+          "description": "The paragraph's text and inlines, in order.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "The "
+              },
+              {
+                "kind": "emphasis",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "global environment"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": " is that part of an environment ..."
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -2257,7 +2278,44 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "paragraph",
+          "content": [
+            {
+              "kind": "text",
+              "text": "A "
+            },
+            {
+              "kind": "emphasis",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "call"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " is a "
+            },
+            {
+              "kind": "strong",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "safe call"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " if each of the following ..."
+            }
+          ]
+        }
+      ]
     },
     "code-block": {
       "type": "object",
@@ -2277,7 +2335,23 @@
             "$ref": "#/$defs/code-line"
           },
           "title": "lines",
-          "description": "The lines, in order, blank ones included."
+          "description": "The lines, in order, blank ones included.",
+          "examples": [
+            [
+              {
+                "kind": "code-line",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": " (let ((x 1))"
+                  }
+                ]
+              },
+              {
+                "kind": "code-line"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -2285,7 +2359,32 @@
         "span",
         "lines"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "code-block",
+          "lines": [
+            {
+              "kind": "code-line",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": " (let ((x 1))"
+                }
+              ]
+            },
+            {
+              "kind": "code-line",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "   (declare (special x))"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "code-line": {
       "type": "object",
@@ -2426,14 +2525,33 @@
             ]
           },
           "title": "content",
-          "description": "The line's text, its spaces kept, and its inlines (terms,\nexample notation); absent for a blank line."
+          "description": "The line's text, its spaces kept, and its inlines (terms,\nexample notation); absent for a blank line.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "   (declare (special x))"
+              }
+            ]
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "code-line",
+          "content": [
+            {
+              "kind": "text",
+              "text": "   (declare (special x))"
+            }
+          ]
+        }
+      ]
     },
     "item-list": {
       "type": "object",
@@ -2453,7 +2571,31 @@
             "$ref": "#/$defs/item"
           },
           "title": "items",
-          "description": "The list's items, in order."
+          "description": "The list's items, in order.",
+          "examples": [
+            [
+              {
+                "kind": "item",
+                "label": [
+                  {
+                    "kind": "text",
+                    "text": "•"
+                  }
+                ],
+                "content": [
+                  {
+                    "kind": "paragraph",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "bindings of functions."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -2461,7 +2603,54 @@
         "span",
         "items"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "item-list",
+          "items": [
+            {
+              "kind": "item",
+              "label": [
+                {
+                  "kind": "text",
+                  "text": "•"
+                }
+              ],
+              "content": [
+                {
+                  "kind": "paragraph",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "bindings of dynamic variables."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "item",
+              "label": [
+                {
+                  "kind": "text",
+                  "text": "•"
+                }
+              ],
+              "content": [
+                {
+                  "kind": "paragraph",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "bindings of functions."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "item": {
       "type": "object",
@@ -2602,7 +2791,15 @@
             ]
           },
           "title": "label",
-          "description": "The item's label, the macro's argument (a bullet, a number, a\nterm); absent when empty."
+          "description": "The item's label, the macro's argument (a bullet, a number, a\nterm); absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "•"
+              }
+            ]
+          ]
         },
         "content": {
           "type": "array",
@@ -2659,14 +2856,49 @@
             ]
           },
           "title": "content",
-          "description": "The item's blocks."
+          "description": "The item's blocks.",
+          "examples": [
+            [
+              {
+                "kind": "paragraph",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "bindings of dynamic variables."
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "item",
+          "label": [
+            {
+              "kind": "text",
+              "text": "•"
+            }
+          ],
+          "content": [
+            {
+              "kind": "paragraph",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "bindings of dynamic variables."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "editor-note": {
       "type": "object",
@@ -2807,12 +3039,23 @@
             ]
           },
           "title": "content",
-          "description": "The note's text."
+          "description": "The note's text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "KMP: ``derivatives??'' terminology to be worked on."
+              }
+            ]
+          ]
         },
         "hidden": {
           "type": "boolean",
           "title": "hidden",
-          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document."
+          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document.",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -2820,7 +3063,19 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "editor-note",
+          "content": [
+            {
+              "kind": "text",
+              "text": "KMP: ``derivatives??'' terminology to be worked on."
+            }
+          ],
+          "hidden": true
+        }
+      ]
     },
     "reviewer-note": {
       "type": "object",
@@ -2961,12 +3216,23 @@
             ]
           },
           "title": "content",
-          "description": "The note's text."
+          "description": "The note's text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Is the order of other things specified??"
+              }
+            ]
+          ]
         },
         "hidden": {
           "type": "boolean",
           "title": "hidden",
-          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document."
+          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document.",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -2974,7 +3240,19 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "reviewer-note",
+          "content": [
+            {
+              "kind": "text",
+              "text": "Is the order of other things specified??"
+            }
+          ],
+          "hidden": true
+        }
+      ]
     },
     "table": {
       "type": "object",

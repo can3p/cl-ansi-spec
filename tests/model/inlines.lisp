@@ -139,11 +139,23 @@ text CONTENT."
 
 ;;; Real lines
 
+(defun node-kinds-within (item)
+  "The kinds of the node ITEM (a node, a string or a list of them) and of
+every node its fields hold, in document order."
+  (typecase item
+    (model:node
+     (cons (model:node-kind item)
+           (loop for field in (model:node-fields (model:node-kind item))
+                 append (node-kinds-within
+                         (model:node-field-value item (model:field-name field))))))
+    (cons (mapcan #'node-kinds-within item))
+    (t '())))
+
 (defun fixture-kinds (job file first last)
   "The kinds of the nodes in the model of FILE's lines FIRST to LAST of
-JOB, in order."
-  (loop for node in (model:build-fixture job :file file :lines (list first last))
-        unless (stringp node) collect (model:node-kind node)))
+JOB, nested ones included (inlines sit in paragraphs), in order."
+  (node-kinds-within
+   (model:build-fixture job :file file :lines (list first last))))
 
 (define-test inlines-spec-lines
   :parent inlines
