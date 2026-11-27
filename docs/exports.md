@@ -6,10 +6,14 @@ exported in and how they are specified, documented and checked.
 
 ## One definition, everything generated
 
-Each node kind is declared once, in Lisp, with a `define-node` form (planned).
+Each node kind is declared once, in Lisp, with a `define-node` form
+(`src/model/define-node.lisp`; [model.md](model.md), "Declarations").
 The form gives the node's fields, each field's type, whether it is required
-or repeated, and documentation. Everything else is generated from these
-declarations:
+or repeated, and documentation; `define-enum`, `define-target-kind` and
+`define-category` declare what field types name. The declarations go into
+a registry, and everything else is generated from it, through its
+introspection functions (`node-kinds`, `node-fields`, `enums`,
+`target-kinds`, `categories`):
 
 | Generated | What it is |
 |-----------|------------|
@@ -17,9 +21,10 @@ declarations:
 | `schema/model.schema.json` (planned) | a JSON Schema, draft 2020-12. It has one `$defs` entry per node kind, picked out by a constant `"kind"`, and `additionalProperties: false`. All the documentation (see below) is carried over as `title`, `description` and `examples`. |
 | `docs/model-reference.md` (planned) | the human reference: a field table for each node kind, plus one short example taken from the real spec |
 
-The generated files are committed. `make test` regenerates them and fails if
-they differ from the committed copies, so code, schema and docs cannot drift
-apart.
+The generated files are committed. Each generator registers itself with
+`define-generator` (`src/export/generate.lisp`); `make generate` rewrites
+the files, and `make test` fails if they differ from what the generators
+make, so code, schema and docs cannot drift apart.
 
 ## Documentation of every definition
 
@@ -38,7 +43,12 @@ rejects a declaration that lacks any of it.
   spec.
 - **Checks.** `make test` checks mechanically that every docstring is
   present and non-empty, and that every node kind and field has an
-  example. Whether a docstring is *meaningful* is a manual check, done in
+  example (`undocumented-items`, `tests/model/documentation.lisp`). While
+  the model is being built, what still lacks them is listed per area in
+  `tests/model/undocumented-<area>.sexp`: the test fails on an
+  undocumented item missing from its list and on a listed item that is
+  now documented, so the lists only shrink; they are empty when the
+  model is complete. Whether a docstring is *meaningful* is a manual check, done in
   review (`lisp-review` checklist). A docstring that only restates the
   name ("The id of the entry") fails that check.
 - **Everything goes into the schema.**
