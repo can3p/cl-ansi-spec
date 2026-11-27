@@ -1,15 +1,20 @@
 ;;;; tools/expand.lisp
 ;;;;
-;;;; Run a spec file as a TeX job through the expander and print the
-;;;; unexpandable tokens it yields (get_x_token), one per line:
-;;;; FILE:LINE:COLUMN<tab>TOKEN, where the location is where the token was
-;;;; read (a macro body's token points into its definition).  TeX errors
-;;;; are printed as `!! message context' and recovered from as TeX does;
-;;;; a fatal error ends the run.
+;;;; Run a spec file as a TeX job through main control and print what
+;;;; it hands on to the steps that have not landed (events, alignments),
+;;;; one per line: FILE:LINE:COLUMN<tab>TOKEN<tab>MODE,
+;;;; where the location is where the token was read (a macro body's token
+;;;; points into its definition).  Assignments, groups and mode changes
+;;;; are carried out silently.  TeX errors are printed as `!! message
+;;;; context' and recovered from as TeX does; a fatal error ends the run.
+;;;; What TeX only notes (an \end inside a group) is printed as `-- (note)'.
+;;;; What the job prints (\message, \show, ...) is `>> kind[ stream]: text';
+;;;; an event the job emits (a \write) is FILE:LINE:COLUMN<tab>== kind,
+;;;; then its properties.
 ;;;;
 ;;;; The job starts from INITEX with plain TeX's category codes.  Only the
 ;;;; output produced while the file itself is read within LINES is shown;
-;;;; the job stops after the last of those lines.
+;;;; the job stops at the first output after the last of those lines.
 ;;;;
 ;;;; Usage: make expand FILE=chap-1 [LINES=10-20]
 
@@ -30,7 +35,7 @@
       "-"))
 
 (defun expand-file (name &key lines)
-  "Run the job NAME and print its expanded tokens within LINES."
+  "Run the job NAME and print what main control hands on within LINES."
   (destructuring-bind (first last) (parse-line-range lines)
     (let* ((state (cl-ansi-spec/expand:make-expander-state
                    :tex (cl-ansi-spec/tex:make-plain-state)))
@@ -41,29 +46,60 @@
       (cl-ansi-spec/tex:push-file (cl-ansi-spec/expand:expander-input expander) name)
       (setf file (cl-ansi-spec/tex:current-file-name
                   (cl-ansi-spec/expand:expander-input expander)))
-      (flet ((report (condition)
-               (when in-range
-                 (format t "!! ~A~@[ ~A~]~@[ at ~A~]~%"
-                         (cl-ansi-spec/expand:tex-error-message condition)
-                         (cl-ansi-spec/expand:tex-error-context condition)
-                         (let ((span (cl-ansi-spec/expand:tex-error-span condition)))
-                           (and span (span-location span)))))))
+      (labels ((locate (span)
+                 ;; Update IN-RANGE from SPAN; true when past LINES.
+                 (when (and span (string= (cl-ansi-spec/tex:span-file span) file))
+                   (let ((line (cl-ansi-spec/tex:span-line span)))
+                     (when (and last (> line last))
+                       (return-from expand-file t))
+                     (setf in-range (and (>= line first)
+                                         (or (null last) (<= line last)))))))
+               (report (condition)
+                 (let ((span (cl-ansi-spec/expand:tex-error-span condition)))
+                   (locate span)
+                   (when in-range
+                     (format t "!! ~A~@[ ~A~]~@[ at ~A~]~%"
+                             (cl-ansi-spec/expand:tex-error-message condition)
+                             (cl-ansi-spec/expand:tex-error-context condition)
+                             (and span (span-location span))))))
+               (hand-on (condition)
+                 (let* ((token (cl-ansi-spec/expand:unhandled-command-token condition))
+                        (span (cl-ansi-spec/tex:token-span token)))
+                   (locate span)
+                   (when in-range
+                     (format t "~A~C~A~C~(~A~)~%" (span-location span) #\Tab
+                             (cl-ansi-spec/tex:token-text token) #\Tab
+                             (cl-ansi-spec/expand:unhandled-command-mode condition)))))
+               (output (condition)
+                 (let ((item (cl-ansi-spec/expand:job-output-item condition)))
+                   (if (cl-ansi-spec/expand:log-entry-p item)
+                       (let ((span (cl-ansi-spec/expand:log-entry-span item)))
+                         (locate span)
+                         (when in-range
+                           (format t ">> ~(~A~)~@[ ~D~]: ~A~%"
+                                   (cl-ansi-spec/expand:log-entry-kind item)
+                                   (cl-ansi-spec/expand:log-entry-stream item)
+                                   (cl-ansi-spec/expand:log-entry-text item))))
+                       (let ((span (getf (rest item) :span)))
+                         (locate span)
+                         (when in-range
+                           (format t "~A~C== ~(~S~)~{ ~(~S~) ~S~}~%"
+                                   (span-location span) #\Tab (first item)
+                                   (loop for (key value) on (rest item) by #'cddr
+                                         unless (eq key :span)
+                                           append (list key
+                                                        (if (eq key :tokens)
+                                                            (cl-ansi-spec/expand:token-list-text
+                                                             expander value)
+                                                            value))))))))))
         (handler-case
-            (cl-ansi-spec/expand:call-recovering-tex-errors
-             (lambda ()
-               (loop for token = (cl-ansi-spec/expand:get-x-token expander)
-                     while token
-                     do (let ((span (cl-ansi-spec/tex:token-span token)))
-                          (when (and span (string= (cl-ansi-spec/tex:span-file span) file))
-                            (let ((line (cl-ansi-spec/tex:span-line span)))
-                              (when (and last (> line last))
-                                (return))
-                              (setf in-range (and (>= line first)
-                                                  (or (null last) (<= line last))))))
-                          (when in-range
-                            (format t "~A~C~A~%" (span-location span) #\Tab
-                                    (cl-ansi-spec/tex:token-text token))))))
-             #'report)
+            (handler-bind ((cl-ansi-spec/expand:unhandled-command #'hand-on)
+                           (cl-ansi-spec/expand:job-output #'output)
+                           (cl-ansi-spec/expand:tex-report
+                             (lambda (condition) (format t "-- ~A~%" condition))))
+              (cl-ansi-spec/expand:call-recovering-tex-errors
+               (lambda () (cl-ansi-spec/expand:main-control expander))
+               #'report))
           (cl-ansi-spec/expand:tex-fatal-error (condition)
             (format t "!! fatal: ~A~@[ ~A~]~%"
                     (cl-ansi-spec/expand:tex-error-message condition)

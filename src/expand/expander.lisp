@@ -54,8 +54,32 @@ end-of-file checks."
   ;; the line where the current skipping began (skip_line, §493).
   (conditionals '() :type list)
   (skip-line 0 :type integer)
-  ;; TeX's read_open (§480): the state of the sixteen \read streams.
-  (read-streams (make-array 16 :initial-element :closed) :read-only t))
+  ;; TeX's read_open and read_file (§480): each of the sixteen \read
+  ;; streams is :CLOSED or the line source it reads (streams.lisp).
+  (read-streams (make-array 16 :initial-element :closed) :read-only t)
+  ;; TeX's write_open (§1342): the file name each of the sixteen \write
+  ;; streams was opened on by an \immediate\openout, or NIL.
+  (write-streams (make-array 16 :initial-element nil) :read-only t)
+  ;; TeX's set_box_allowed (§1241): false while a \write is expanded.
+  (set-box-allowed t :type boolean)
+  ;; What the job printed (log.lisp), and the events it emitted, newest
+  ;; first.
+  (log '() :type list)
+  (events '() :type list)
+  ;; The token \afterassignment saved (after_token, §1266), or NIL.
+  (after-token nil)
+  ;; The interaction mode last set (§1264); recorded only: every job
+  ;; recovers from errors as in \batchmode.
+  (interaction :error-stop :type (member :batch :nonstop :scroll :error-stop))
+  ;; Hyphenation data kept as read (§§934-963): \patterns as (language
+  ;; letters levels) lists, \hyphenation exceptions as (language letters
+  ;; positions) lists, newest first; TeX's trie_not_ready.
+  (patterns '() :type list)
+  (hyphenation-exceptions '() :type list)
+  (trie-not-ready t :type boolean)
+  ;; How the job ended: NIL while it runs, :END after \end, :DUMP after
+  ;; \dump (§1335).
+  (ended nil :type (member nil :end :dump)))
 
 (defstruct (dont-expand-token (:include cs-token)
                               (:constructor make-dont-expand-token
@@ -207,12 +231,13 @@ allowed, as \\noexpand, \\string and \\meaning read their token (§§367, 470)."
   "TeX's check_outer_validity: an \\outer macro TOKEN, or the end of a file
 when TOKEN is NIL, met while the scanner is not :NORMAL.  Reports the
 runaway and inserts what TeX inserts to end it; TOKEN is put back to be
-read again.  Returns the token to use instead: a space (or NIL)."
+read again, unless it came from a line of \\read.  Returns the token to use instead: a space (or NIL)."
   (let ((status (expander-scanner-status expander))
         (span (and token (token-span token))))
     (when (eq status :normal)
       (return-from check-outer-validity token))
-    (when token
+    ;; §339: a token read from a line of \read is not read again.
+    (when (and token (not (reading-line-p (expander-input expander))))
       (back-input (expander-input expander) token))
     (if (eq status :skipping)
         (progn

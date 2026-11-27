@@ -153,11 +153,23 @@ when void)."
   (let ((value (equivalent (register-table state kind) n)))
     (if (null value) (quantity-default kind) value)))
 
-(defun set-register (state kind n value &key global)
-  "Assign VALUE to register N of KIND."
+(defun set-register (state kind n value &key global (globaldefs t))
+  "Assign VALUE to register N of KIND.  With GLOBALDEFS false,
+\\globaldefs is ignored, as for the box register \\setbox assigns when
+its box ends (TeX's eq_define, §1077): \\setbox applied \\globaldefs
+already."
   (check-type n register-number)
   (check-quantity kind value)
-  (store state (register-table state kind) n value global))
+  (if globaldefs
+      (store state (register-table state kind) n value global)
+      (assign (es-tex state) (register-table state kind) n value global)))
+
+(defun replace-register (state kind n value)
+  "Put VALUE in register N of KIND at the level of its last assignment,
+outside the save stack, as \\box empties its register (§1079)."
+  (check-type n register-number)
+  (check-quantity kind value)
+  (replace-equivalent (register-table state kind) n value))
 
 ;;; Parameters
 
@@ -174,14 +186,16 @@ when void)."
         (let ((value (equivalent (es-parameters state) name)))
           (if (null value) (quantity-default kind) value)))))
 
-(defun set-parameter (state name value &key global)
-  "Assign VALUE to the TeX82 parameter NAME."
-  (let ((kind (parameter-kind-or-lose name)))
+(defun set-parameter (state name value &key global (globaldefs t))
+  "Assign VALUE to the TeX82 parameter NAME.  With GLOBALDEFS false,
+\\globaldefs is ignored, as in the assignments TeX makes itself (TeX's
+eq_word_define, e.g. normal_paragraph's, §1070)."
+  (let ((kind (parameter-kind-or-lose name))
+        (global (if globaldefs (effective-global state global) global)))
     (check-quantity kind value)
     (if (eq kind :integer)
-        (set-integer-parameter (es-tex state) name value
-                               :global (effective-global state global))
-        (store state (es-parameters state) name value global))))
+        (set-integer-parameter (es-tex state) name value :global global)
+        (assign (es-tex state) (es-parameters state) name value global))))
 
 ;;; Character codes
 
@@ -242,10 +256,13 @@ integer."
   "\\parshape as a list of (indent . length) pairs in sp; NIL when unset."
   (equivalent (es-shapes state) :parshape))
 
-(defun set-par-shape (state shape &key global)
-  "Assign SHAPE, a list of (indent . length) pairs, to \\parshape."
+(defun set-par-shape (state shape &key global (globaldefs t))
+  "Assign SHAPE, a list of (indent . length) pairs, to \\parshape.  With
+GLOBALDEFS false, \\globaldefs is ignored (see SET-PARAMETER)."
   (check-type shape list)
-  (store state (es-shapes state) :parshape shape global))
+  (if globaldefs
+      (store state (es-shapes state) :parshape shape global)
+      (assign (es-tex state) (es-shapes state) :parshape shape global)))
 
 (defun load-font (state file &key size (identifier file))
   "The font \\font gets for FILE at SIZE (see NORMALIZE-FONT-SIZE): one

@@ -79,6 +79,21 @@ end at a newline or at the end of the text.  Trailing spaces are removed;
                   :start start :end end
                   :number (incf (line-source-line-number source))))))
 
+(defun end-of-file-line (source state)
+  "The line TeX makes when SOURCE has no line left to read for \\read
+(input_ln fails and leaves the buffer empty, §486): only the
+\\endlinechar of STATE, if it is valid, at the end of the text."
+  (let* ((end (length (line-source-text source)))
+         (endlinechar (endlinechar state))
+         (limit (if (valid-endlinechar-p endlinechar) 1 0))
+         (codes (make-array limit :element-type 'fixnum
+                                  :initial-element (max endlinechar 0)))
+         (offsets (make-array (1+ limit) :element-type 'fixnum
+                                         :initial-element end)))
+    (%make-line :codes codes :offsets offsets :limit limit
+                :start end :end end
+                :number (1+ (line-source-line-number source)))))
+
 (defun line-span (source line from to)
   "Return the span of buffer elements FROM (inclusive) to TO (exclusive)
 of LINE, read from SOURCE."

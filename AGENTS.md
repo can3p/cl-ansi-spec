@@ -57,8 +57,14 @@
   uncertain uses, files), most used first; `NAME=` details one macro. All
   chapter jobs unless `JOB=`; keep `LIMIT` small. Rules: `docs/vocabulary.md`.
 * `make expand FILE=chap-1 [LINES=10-20]` — run a spec file as a TeX job
-  (INITEX with plain catcodes) and print the unexpandable tokens it yields,
-  `FILE:LINE:COL<tab>TOKEN`, and TeX errors as `!! …`.  Always pass `LINES`.
+  (INITEX with plain catcodes) through main control and print what it hands
+  on to later steps (events, alignments),
+  `FILE:LINE:COL<tab>TOKEN<tab>MODE`, TeX errors as `!! …`, TeX's notes
+  as `-- (…)`, what the job prints (`\message`, `\show`, …) as
+  `>> kind[ stream]: text` and its events (`\write`) as
+  `FILE:LINE:COL<tab>== kind properties`.  Always
+  pass `LINES`, and a timeout: while jobs do not load plain TeX first, a
+  chapter job may loop for ever, as TeX would.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine

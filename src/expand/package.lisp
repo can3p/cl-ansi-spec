@@ -3,14 +3,19 @@
 ;;;; Phase 2, the expander: TeX's semantics below typesetting
 ;;;; (docs/architecture.md, docs/tex-fidelity.md).  So far it holds TeX's
 ;;;; quantities (integers, dimensions and glue, with TeX's exact
-;;;; arithmetic, units and printing), and its state: meanings, registers,
-;;;; parameters, codes and fonts over the reader's save stack.
+;;;; arithmetic, units and printing), its state (meanings, registers,
+;;;; parameters, codes and fonts over the reader's save stack), the
+;;;; expansion of macros and expandable primitives, scanning,
+;;;; conditionals, and main control: assignments, groups, modes, input,
+;;;; output and messages.
 
 (defpackage #:cl-ansi-spec/expand
   (:use #:cl)
   (:import-from #:cl-ansi-spec/tex
                 #:tex-state #:make-initex-state
-                #:make-equivalents #:equivalent #:assign
+                #:make-equivalents #:equivalent #:assign #:replace-equivalent
+                #:begin-group #:end-group #:current-group-kind #:group-level
+                #:save-stack-depth
                 #:integer-parameter #:set-integer-parameter
                 #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
                 #:character-code #:catcode-value
@@ -21,11 +26,14 @@
                 #:cs-token #:cs-token-p #:cs-token-control-sequence #:make-cs-token
                 #:character-token #:character-token-p #:character-token-code
                 #:character-token-catcode #:make-character-token
-                #:intern-control-sequence #:make-frozen-control-sequence
+                #:intern-control-sequence #:intern-active-character
+                #:make-frozen-control-sequence
                 #:control-sequence-name #:control-sequence-active-p
                 #:input-stack #:make-input-stack #:input-stack-file-end-hook
                 #:next-token #:back-input #:push-tokens #:push-file
-                #:end-current-file #:input-file-missing #:current-line-number)
+                #:end-current-file #:input-file-missing #:current-line-number
+                #:resolve-input #:push-read-line #:reading-line-p #:end-read-line
+                #:read-line-tokens)
   (:export
    ;; Integers and scaled values (arithmetic.lisp)
    #:+infinity+ #:+max-dimen+ #:+unity+
@@ -67,13 +75,15 @@
    #:expander-state #:make-expander-state #:es-tex #:es-null-font
    #:register-kind #:register-number #:code-kind
    #:effective-global
-   #:set-meaning #:register #:set-register #:parameter #:set-parameter
+   #:set-meaning #:register #:set-register #:replace-register
+   #:parameter #:set-parameter
    #:code #:set-code #:current-font #:set-current-font
    #:family-font #:set-family-font #:par-shape #:set-par-shape
    #:load-font
    ;; Errors (errors.lisp)
    #:tex-error #:tex-fatal-error #:tex-error-message #:tex-error-context
    #:tex-error-span #:recover #:call-recovering-tex-errors
+   #:tex-report #:tex-report-message #:tex-report-context
    ;; Primitives (primitives.lisp)
    #:define-primitive #:find-primitive #:install-primitives
    #:tex82-command-names #:tex82-expandable-names
@@ -109,4 +119,24 @@
    ;; Conditionals (conditionals.lisp)
    #:conditional #:conditional-p #:conditional-kind #:conditional-line
    #:conditional-limit #:expander-conditionals #:expander-skip-line
-   #:expander-read-streams #:if-limit #:if-test-names #:pass-text #:box-kind))
+   #:expander-read-streams #:if-limit #:if-test-names #:pass-text #:box-kind
+   ;; Main control (commands.lisp, groups.lisp, modes.lisp, boxes.lisp,
+   ;; prefixed.lisp, assignments.lisp, main-control.lisp)
+   #:command-disposition #:event-command-names #:alignment-command-names
+   #:input-output-command-names
+   #:unhandled-command #:unhandled-command-token #:unhandled-command-meaning
+   #:unhandled-command-disposition #:unhandled-command-mode
+   #:group-code #:group-record #:group-record-code #:group-record-line
+   #:current-group #:current-group-code
+   #:tex-box #:tex-box-p #:make-tex-box #:tex-box-kind #:tex-box-spec
+   #:tex-box-contents
+   #:expander-after-token #:expander-interaction #:expander-patterns
+   #:expander-hyphenation-exceptions #:expander-trie-not-ready
+   #:expander-ended
+   #:main-control
+   ;; Input, output and messages (log.lisp, messages.lisp, streams.lisp)
+   #:log-entry #:log-entry-p #:log-entry-kind #:log-entry-text
+   #:log-entry-stream #:log-entry-help #:log-entry-span
+   #:job-output #:job-output-item #:job-log #:job-events
+   #:expander-write-streams #:expander-set-box-allowed
+   #:read-toks))

@@ -18,7 +18,7 @@
    #:tex-state #:make-initex-state #:make-plain-state #:apply-plain-catcodes
    #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
    #:endlinechar #:set-endlinechar #:integer-parameter #:set-integer-parameter
-   #:equivalents #:make-equivalents #:equivalent #:assign
+   #:equivalents #:make-equivalents #:equivalent #:assign #:replace-equivalent
    #:group-level #:begin-group #:end-group #:current-group-kind #:save-stack-depth
    #:group-underflow
    ;; Spans, control sequences and tokens
@@ -37,7 +37,8 @@
    ;; The input stack
    #:input-stack #:make-input-stack #:directory-resolver
    #:input-stack-file-end-hook #:end-current-file
-   #:push-source #:push-file #:push-tokens #:back-input
+   #:push-source #:push-file #:push-tokens #:back-input #:resolve-input
+   #:push-read-line #:reading-line-p #:end-read-line #:read-line-tokens
    #:next-token #:peek-token #:input-depth #:current-file-name
    #:current-line-number
    #:input-file-missing #:input-file-missing-name))
