@@ -58,7 +58,7 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 | 2 | Expander | tokens → executed TeX: macros, conditionals, assignments, registers | `cl-ansi-spec/expand` | M2 ✅ |
 | 3 | Semantic layer | expander activity → **event stream** | `cl-ansi-spec/semantic` | M2 ✅ |
 | 4 | Model builder | event streams of all chapters → **document model**, resolved references | `cl-ansi-spec/model` | M3 |
-| 5 | Consumers | model → S-expression/JSON exports, HTML site | `…/export`, `…/html` | M3, M5 |
+| 5 | Consumers | model → S-expression/JSON exports, HTML site | `cl-ansi-spec/export`, later `…/html` | M3, M5 |
 
 Development aids are packages outside the phases, depending on them
 one way like a phase: `cl-ansi-spec/inventory` (`src/inventory/`) surveys
@@ -189,7 +189,7 @@ has the export formats, their JSON Schema and versioning.
 | 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | done (M2): TeX below typesetting (`src/expand/`, `make expand`), plain TeX's format, the vocabulary and its observation (`src/semantic/`, `make events`); every chapter job runs and its events are checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
-| 4–5 Model, consumers | outlined in `PLAN.md` |
+| 4–5 Model, exports | M3 under way (`docs/plan/m3.md`): packages `cl-ansi-spec/model` (`src/model/`) and `cl-ansi-spec/export` (`src/export/`) laid out, one stub file per step; the builder's ownership table (`src/model/owners.sexp`); the registry of generated files (`src/export/generate.lisp`, `make generate`) |
 
 Related: [process](process.md) explains how work advances.
 [History](history/) records finished milestones.

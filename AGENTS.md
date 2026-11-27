@@ -32,6 +32,9 @@
   licence requires it). Never edit; see `vendor/PROVENANCE.md`.
 * `patches/` — independent, numbered patches applied on top of `spec/tex/`.
 * `src/` — the `cl-ansi-spec` system. `tests/` — `cl-ansi-spec/tests` (Parachute).
+  One directory per phase package (`src/tex/`, `src/expand/`,
+  `src/semantic/`, `src/model/`, `src/export/`); `tests/` mirrors it.  In
+  M3 every file a wave step fills exists as a stub naming its owner step.
 * `tools/` — command-line tools, written in Lisp; `make` is only a thin wrapper.
 * `docs/` — `architecture.md` (start here), `process.md`, topic docs (`reader`, `events`,
   `vocabulary`, `tex-fidelity`, `model`, `exports`), `plan/<id>.md`
@@ -72,6 +75,8 @@
 * `make snapshots` — rewrite `tests/snapshots.sexp`, the event count and
   hash of every chapter job, printing the jobs whose events changed. Run
   it in the commit that changes the events, after checking why they did.
+* `make generate` — rewrite the generated files (JSON Schema, reference
+  doc) from the node declarations; `make test` fails while one is stale.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine

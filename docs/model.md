@@ -98,6 +98,76 @@ Built from `dict-conses.tex:1702-1761` (spans shortened to the line):
 the model by meaning, as standard error wording, and is expanded only for its
 text.
 
+## Building the model, by area
+
+One section per step of the milestone that builds it (`docs/plan/m3.md`),
+each written by its step.
+
+### Declarations
+
+*Step 3.1.* How node kinds, fields, enums and target kinds are declared
+(`define-node`) and documented.
+
+### Building
+
+*Step 3.3.* The builder core, `make model` and the build report.  Which step
+builds what: the ownership table `src/model/owners.sexp` gives every
+vocabulary key and every event kind of [events.md](events.md) exactly one
+owner, a step of the milestone and its handler file in `src/model/`
+(`tests/model/owners.lisp` checks it).
+
+### Text
+
+*Step 3.12.* Not written yet.
+
+### Structure
+
+*Step 3.8.* Not written yet.
+
+### Entries
+
+*Step 3.9.* Not written yet.
+
+### Blocks
+
+*Step 3.10.* Not written yet.
+
+### Tables and figures
+
+*Step 3.11.* Not written yet.
+
+### Inlines
+
+*Step 3.13.* Not written yet.
+
+### Glossary
+
+*Step 3.14.* Not written yet.
+
+### Syntax
+
+*Step 3.15.* Not written yet.
+
+### Math
+
+*Step 3.15m.* Not written yet.
+
+### References
+
+Resolved after the whole spec builds.
+
+#### Sections, chapters and figures
+
+*Step 3.17.* Not written yet.
+
+#### Operators
+
+*Step 3.18.* Not written yet.
+
+#### Terms
+
+*Step 3.19.* Not written yet.
+
 ## Exports
 
 S-expression and JSON exports are generated from the same node declarations
