@@ -43,9 +43,9 @@ expand: deps
 events: deps
 	@FILE='$(FILE)' LINES='$(LINES)' EVENTS=1 $(LISP) --load tools/expand.lisp
 
-# The model built from a spec file's lines: make model FILE=chap-1 [LINES=10-20]
+# The model built from a spec file's lines: make model FILE=chap-1 [LINES=10-20] [JOB=chap-1]
 model: deps
-	@FILE='$(FILE)' LINES='$(LINES)' $(LISP) --load tools/model.lisp
+	@FILE='$(FILE)' LINES='$(LINES)' JOB='$(JOB)' $(LISP) --load tools/model.lisp
 
 # Remove build outputs (fasls).
 clean:

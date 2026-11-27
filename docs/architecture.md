@@ -149,24 +149,25 @@ Document model, as phase 4 builds it (spans and most content omitted):
 
 ```lisp
 (:dictionary-entry
- :id "endp" :names ("endp") :kind :function
+ :id "endp" :names ("endp") :entry-kind :function
  :span ("dict-conses.tex" :line 1702)
  :parts
  ((:part :title "Syntax"
-   :content ((:defun :name "endp" :lambda-list ((:param "list"))
-                     :values ((:param "generalized-boolean")))))
+   :content ((:operator-signature :operator :function :names ("endp")
+              :lambda-list ((:param :name "list"))
+              :values ((:param :name "generalized-boolean")))))
   (:part :title "Arguments and Values"
    :content ((:paragraph
-              (:param "list") "---a " (:term-ref "list" :target (:glossary "list")) ","
-              (:issue-start "DOTTED-LIST-ARGUMENTS:CLARIFY")
+              (:param :name "list") "—a " (:term-ref :text "list" :target (:glossary "list")) ","
+              (:issue-start :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
               " which might be a "
-              (:term-ref "dotted list" :target (:glossary "dotted list")) " or a "
-              (:term-ref "circular list" :target (:glossary "circular list")) "."
-              (:issue-end "DOTTED-LIST-ARGUMENTS:CLARIFY"))))
+              (:term-ref :text "dotted list" :target (:glossary "dotted list")) " or a "
+              (:term-ref :text "circular list" :target (:glossary "circular list")) "."
+              (:issue-end :name "DOTTED-LIST-ARGUMENTS:CLARIFY"))))
   (:part :title "Side Effects" :none t)
   (:part :title "Notes"
    :content ((:paragraph "The purpose of "
-              (:operator-ref "endp" :target (:entry "endp")) " is to test ...")))))
+              (:operator-ref :text "endp" :via :function :target (:entry "endp")) " is to test ...")))))
 ```
 
 [Document model](model.md) has the schema draft; [exports](exports.md)
@@ -189,7 +190,7 @@ has the export formats, their JSON Schema and versioning.
 - Each package has its own test suite under `tests/<phase>/`, and its own
   debugging tool under `tools/`: `make tokens`, and as their phases land
   `make vocab`, `make expand`, `make events`
-  and `make model` (planned).
+  and `make model`.
 
 ## Status
 
@@ -198,7 +199,7 @@ has the export formats, their JSON Schema and versioning.
 | 0 Sources | pristine and vendored trees, search path and resolver done; unified diffs are read and applied strictly (`src/patch/`); the patch set (`src/patch/set.lisp`) is checked and every job reads the patched tree (M4) |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | done (M2): TeX below typesetting (`src/expand/`, `make expand`), plain TeX's format, the vocabulary and its observation (`src/semantic/`, `make events`); every chapter job runs and its events are checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
-| 4–5 Model, exports | M3 under way (`docs/plan/m3.md`): packages `cl-ansi-spec/model` (`src/model/`) and `cl-ansi-spec/export` (`src/export/`) laid out, one stub file per step; the builder's ownership table (`src/model/owners.sexp`); the registry of generated files (`src/export/generate.lisp`, `make generate`) |
+| 4–5 Model, exports | M3 under way (`docs/plan/m3.md`): packages `cl-ansi-spec/model` (`src/model/`) and `cl-ansi-spec/export` (`src/export/`) laid out, one stub file per step; the builder's ownership table (`src/model/owners.sexp`); the builder core (`src/model/build.lisp`: handler table, container stack, build report, `make model`); the registry of generated files (`src/export/generate.lisp`, `make generate`) |
 
 Related: [process](process.md) explains how work advances.
 [History](history/) records finished milestones.
