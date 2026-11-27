@@ -17,7 +17,9 @@ than the last one, at PREVIOUS-SPAN, NIL for the format), :SHARED (the
 meaning given to NAME at SPAN already belongs to the entry of
 PREVIOUS-NAME, which keeps it) or :UNBALANCED (a call of NAME's entry
 ended at SPAN in another list than the one its begin, from the call at
-PREVIOUS-SPAN, went to: the entry must be :BLOCK, or observed elsewhere)."
+PREVIOUS-SPAN, went to: the entry must be :BLOCK, or observed elsewhere;
+or the call at SPAN of NAME, a wrapper, met a node or another marker
+before an entry's call, and was dropped)."
   (kind nil :type (member :redefined :shared :unbalanced) :read-only t)
   (name "" :type string :read-only t)
   (span nil :read-only t)
@@ -30,18 +32,22 @@ PREVIOUS-SPAN, went to: the entry must be :BLOCK, or observed elsewhere)."
 an EQ table from the macros attached to an entry to that entry;
 DEFINITIONS, from an entry's name to (meaning . span) of its last
 definition seen; PENDING inline begins, (event span activation) newest
-first; and REPORT-LIST, newest first."
+first; HELD, the wrapper call waiting for its tail call, (entry arguments
+span tail), TAIL the first token of the body it is read from, or NIL; and REPORT-LIST, newest first."
   (vocabulary nil :type vocabulary :read-only t)
   (meanings (make-hash-table :test #'eq) :type hash-table :read-only t)
   (definitions (make-hash-table :test #'equal) :type hash-table :read-only t)
   (pending '() :type list)
+  (held nil :type list)
   (report-list '() :type list))
 
-(defstruct (activation (:constructor make-activation (entry span end-span))
+(defstruct (activation (:constructor make-activation (entry key span end-span))
                        (:copier nil))
-  "A call of a :CALL ENTRY at SPAN whose body ends at END-SPAN; LIST is
-the list its begin went to, once placed.  The expander's tag for it."
+  "A call of a :CALL ENTRY (or of the wrapper that called it) at SPAN,
+keyed KEY, whose body ends at END-SPAN; LIST is the list its begin went
+to, once placed.  The expander's tag for it."
   (entry nil :type entry :read-only t)
+  (key nil :type keyword :read-only t)
   (span nil :read-only t)
   (end-span nil :read-only t)
   (list nil))
@@ -79,8 +85,10 @@ observers are set; none may be set already.  Returns the OBSERVER."
                 (note-definition observer entry meaning span))))
           (expander-append-observer expander)
           (lambda (expander node list)
-            (unless (or (null (observer-pending observer)) (content-neutral-p node))
-              (place-pending observer expander list))))
+            (unless (content-neutral-p node)
+              (drop-held observer)
+              (when (observer-pending observer)
+                (place-pending observer expander list)))))
     observer))
 
 ;;; Meanings
@@ -114,20 +122,27 @@ events and return the expander's action and tag (see OBSERVE-VOCABULARY)."
         (span (token-span token)))
     (cond ((null entry) nil)
           ((entry-handler entry)
-           (funcall (entry-handler entry) observer expander token arguments)
+           (funcall (entry-handler entry) observer expander entry token arguments)
            :replace)
           (t
            (let ((key (entry-key entry)))
              (ecase (entry-kind entry)
                (:call
-                (let ((event (list :begin key :arguments arguments))
-                      (activation (make-activation entry span
-                                                   (body-end-span macro arguments span))))
-                  (if (eq (entry-placement entry) :inline)
-                      (push (list event span activation) (observer-pending observer))
-                      (setf (activation-list activation)
-                            (emit-event observer expander event :span span)))
-                  (values nil activation)))
+                (unless (tail-call-p (observer-held observer) token)
+                  (drop-held observer))
+                (begin-call observer expander entry
+                            (body-end-span macro arguments span) arguments span))
+               (:wrapper
+                (let ((tail (first (macro-body macro)))
+                      (held (observer-held observer)))
+                  (if (and held (tail-call-p held token))
+                      ;; The outermost wrapper of a chain keeps the call.
+                      (setf (fourth held) tail)
+                      (progn
+                        (drop-held observer)
+                        (setf (observer-held observer)
+                              (list entry arguments span tail)))))
+                nil)
                (:mark
                 (emit-event observer expander (list :mark key :arguments arguments)
                             :span span)
@@ -142,13 +157,48 @@ events and return the expander's action and tag (see OBSERVE-VOCABULARY)."
                             :span span)
                 nil)))))))
 
+(defun begin-call (observer expander entry end-span arguments span)
+  "Begin the call at SPAN of ENTRY, a :CALL entry, with ARGUMENTS, whose
+body ends at END-SPAN, or of the wrapper held, which takes it over: hold
+or place its :BEGIN; return the expander's action and tag."
+  (let* ((held (shiftf (observer-held observer) nil))
+         (key (entry-key (if held (first held) entry)))
+         (event (if held
+                    (list :begin key :arguments (second held) :through (entry-key entry))
+                    (list :begin key :arguments arguments)))
+         (placement (entry-placement (if held (first held) entry)))
+         (span (if held (third held) span))
+         (activation (make-activation entry key span end-span)))
+    (if (eq placement :inline)
+        (push (list event span activation) (observer-pending observer))
+        (setf (activation-list activation)
+              (emit-event observer expander event :span span)))
+    (values nil activation)))
+
+(defun tail-call-p (held token)
+  "True when TOKEN, a call's, is the tail call of the wrapper call HELD:
+the first token of the wrapper's body."
+  (and held
+       (let ((tail (fourth held)))
+         (or (eq token tail)
+             (and (typep tail 'token) (token-span tail)
+                  (eq (token-span token) (token-span tail)))))))
+
+(defun drop-held (observer)
+  "A node, a marker or another call came before the tail call of the
+wrapper held, if any: report it and drop it."
+  (let ((held (shiftf (observer-held observer) nil)))
+    (when held
+      (push (make-report :unbalanced (entry-name (first held)) (third held))
+            (observer-report-list observer)))))
+
 (defun end-call (observer expander activation)
   "The level-end observer: the body of ACTIVATION's call has ended.  Its
 :END goes to the current list, which should be the list its begin went
 to."
   (let ((entry (activation-entry activation))
         (span (activation-end-span activation)))
-    (emit-event observer expander (list :end (entry-key entry)) :span span)
+    (emit-event observer expander (list :end (activation-key activation)) :span span)
     (unless (eq (activation-list activation) (current-list expander))
       (push (make-report :unbalanced (entry-name entry) span
                          :previous-span (activation-span activation))
@@ -190,6 +240,7 @@ inside the paragraph it starts."
 OBSERVER's pending begins; return that list.  Replace handlers emit
 their events with it."
   (let ((list (current-list expander)))
+    (drop-held observer)
     (place-pending observer expander list)
     (append-marker expander event :span span :list list)
     list))

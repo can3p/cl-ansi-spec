@@ -197,6 +197,35 @@ text only) and the kinds and names of its REPORTS."
                   ((:begin :a :arguments ()) (:end :a))
                   :reports ((:shared "xb"))))
 
+;;; Wrappers
+
+(define-test wrappers
+  :parent semantic
+  ;; As setup-document.tex:62-79: a wrapper gives its key and arguments
+  ;; to its tail call; the outermost of a chain keeps them; a wrapper
+  ;; with no entry call before content is reported and dropped.
+  (check-semantic "\\def\\clref#1{{#1}}\\def\\funref{\\clref}\\def\\kwd#1{\\clref{:#1}}%
+\\def\\keyref{\\funref}\\def\\odd{x}%
+a\\clref{b}\\funref{c}\\kwd{d}\\keyref{e}\\odd\\par"
+                  (("clref" :clref) ("funref" :funref :kind :wrapper)
+                   ("kwd" :kwd :kind :wrapper) ("keyref" :keyref :kind :wrapper)
+                   ("odd" :odd :kind :wrapper))
+                  ((:begin :paragraph) (:text "a")
+                   (:begin :clref :arguments ("b")) (:text "b") (:end :clref)
+                   (:begin :funref :arguments () :through :clref) (:text "c") (:end :funref)
+                   (:begin :kwd :arguments ("d") :through :clref) (:text ":d") (:end :kwd)
+                   (:begin :keyref :arguments () :through :clref) (:text "e") (:end :keyref)
+                   (:text "x")
+                   (:end :paragraph))
+                  :reports ((:unbalanced "odd")))
+  ;; Only the call of the wrapper body's first token is its tail call.
+  (check-semantic "\\def\\clref#1{{#1}}\\def\\funref{\\relax\\clref}%
+x\\funref{y}\\par"
+                  (("clref" :clref) ("funref" :funref :kind :wrapper))
+                  ((:begin :paragraph) (:text "x") (:begin :clref :arguments ("y"))
+                   (:text "y") (:end :clref) (:end :paragraph))
+                  :reports ((:unbalanced "funref"))))
+
 ;;; Environments and marks
 
 (define-test environments
@@ -214,26 +243,6 @@ x\\issue{I}y\\par\\label Syntax:z\\endissue{I}\\par"
 
 ;;; Replace handlers
 
-(defun named-meaning (expander name)
-  "The meaning of the control sequence NAME in EXPANDER's job."
-  (let ((state (expand:expander-state expander)))
-    (expand:meaning state (intern-control-sequence (expand:es-tex state) name))))
-
-(defun hidden-note-handler (observer expander token arguments)
-  "Emit an editor note, which the options may hide, with its text, and
-do what the macro does after it (\\ignorespaces)."
-  (semantic:emit-event observer expander
-                       (list :mark :editor-note
-                             :text (expand:token-list-text expander (first arguments))
-                             :hidden (not (eq (named-meaning expander "ifeditornotes")
-                                              (named-meaning expander "iftrue"))))
-                       :span (token-span token))
-  (expand:insert-tokens expander
-                        (list (make-cs-token
-                               (intern-control-sequence
-                                (expand:es-tex (expand:expander-state expander))
-                                "ignorespaces")))))
-
 (define-test replace-handlers
   :parent semantic
   ;; setup-document.tex:417-419 and setup-options.tex:23: the note is
@@ -243,9 +252,9 @@ do what the macro does after it (\\ignorespaces)."
 \\def\\editornote#1{\\ifeditornotes{\\bf\\lbr{#1}\\rbr}\\fi\\ignorespaces}
 \\editornotesfalse
 x\\editornote{KMP: check this.} y\\par"
-                  (("editornote" :editor-note :handler hidden-note-handler))
+                  (("editornote" :editor-note :handler semantic:hidden-note))
                   ((:begin :paragraph) (:text "x")
-                   (:mark :editor-note :text "KMP: check this." :hidden t)
+                   (:mark :editor-note :arguments ("KMP: check this.") :hidden t)
                    (:text "y") (:end :paragraph))))
 
 ;;; Code round-trip

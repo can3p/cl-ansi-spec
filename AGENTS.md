@@ -65,7 +65,8 @@
 * `make events FILE=chap-1 [LINES=10-20]` — the same job, printing instead
   the events (`docs/events.md`) of the nodes appended while `LINES` were
   read, `FILE:LINE:COL<tab>EVENT`, nested events indented, then the lists
-  still open (`-- open <mode> list`).  Errors as for `make expand`.  Same
+  still open (`-- open <mode> list`), observing the spec's vocabulary
+  (`src/semantic/vocabulary.sexp`; its reports last, `-- report …`).  Errors as for `make expand`.  Same
   rules: always pass `LINES` and a timeout.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and

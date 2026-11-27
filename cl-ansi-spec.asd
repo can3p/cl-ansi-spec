@@ -64,7 +64,9 @@ Lisp draft standard (dpANS3)."
                 :serial t
                 :components ((:file "package")
                              (:file "vocabulary")
-                             (:file "observe")))
+                             (:file "observe")
+                             (:file "handlers")
+                             (:static-file "vocabulary.sexp")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
@@ -103,7 +105,8 @@ Lisp draft standard (dpANS3)."
                              (:file "observers")))
                (:module "semantic"
                 :serial t
-                :components ((:file "observe")))
+                :components ((:file "observe")
+                             (:file "vocabulary")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

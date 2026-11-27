@@ -21,7 +21,10 @@
 ;;;; FILE:LINE:COLUMN<tab>EVENT, nested events indented, long texts cut.
 ;;;; The lists still open then (a paragraph not ended) are shown last,
 ;;;; each after a `-- open <mode> list' line.  Errors and notes are
-;;;; printed as they happen, as for `make expand'.
+;;;; printed as they happen, as for `make expand'.  The spec's vocabulary
+;;;; is observed (docs/vocabulary.md): its events are shown like the
+;;;; others, their arguments as text, and its reports come last, as
+;;;; `-- report kind name at FILE:LINE:COLUMN[ previous ...]'.
 ;;;;
 ;;;; The job starts from plain TeX's format (LOAD-PLAIN-FORMAT), as every
 ;;;; chapter job does.
@@ -53,11 +56,14 @@
   (case key
     (:tokens (cl-ansi-spec/expand:token-list-text expander value))
     (:via (mapcar #'span-location value))
+    (:arguments (mapcar (lambda (tokens)
+                          (cl-ansi-spec/expand:token-list-text expander tokens))
+                        value))
     (t value)))
 
 (defun event-head-length (event)
   "How many elements of EVENT come before its properties."
-  (if (member (first event) '(:begin :end :text)) 2 1))
+  (if (member (first event) '(:begin :end :text :mark)) 2 1))
 
 (defun show-event (expander event)
   "EVENT (a list) without its :SPAN, as one line of text."
@@ -81,7 +87,7 @@ the table SHOWN and everything inside them, unless SHOWN is T."
           (let ((events (cl-ansi-spec/expand:flatten-nodes (list node)))
                 (level depth))
             (dolist (event events)
-              (when (eq (first event) :end) (decf level))
+              (when (eq (first event) :end) (setf level (max depth (1- level))))
               (format t "~A~C~A~A~%"
                       (span-location (getf (nthcdr (event-head-length event) event) :span))
                       #\Tab (make-string (* 2 level) :initial-element #\Space)
@@ -99,6 +105,17 @@ the table SHOWN and everything inside them, unless SHOWN is T."
       (format t "-- open ~(~A~) list~%" (cl-ansi-spec/expand:list-state-mode list))
       (print-events expander (cl-ansi-spec/expand:list-nodes list) 1 shown))))
 
+(defun print-reports (observer)
+  "Print the reports of OBSERVER's job."
+  (dolist (report (cl-ansi-spec/semantic:observer-reports observer))
+    (format t "-- report ~(~A~) ~A at ~A~@[ previous ~A~]~@[ previous ~A~]~%"
+            (cl-ansi-spec/semantic:report-kind report)
+            (cl-ansi-spec/semantic:report-name report)
+            (span-location (cl-ansi-spec/semantic:report-span report))
+            (let ((span (cl-ansi-spec/semantic:report-previous-span report)))
+              (and span (span-location span)))
+            (cl-ansi-spec/semantic:report-previous-name report))))
+
 (defun expand-file (name &key lines events)
   "Run the job NAME and print what happens within LINES: the nodes
 appended (EVENTS false), or the events (EVENTS true)."
@@ -108,6 +125,9 @@ appended (EVENTS false), or the events (EVENTS true)."
                       :job-name (pathname-name name)))
            (in-range (= first 1))
            (shown (make-hash-table :test 'eq))
+           (observer (and events
+                          (cl-ansi-spec/semantic:observe-vocabulary
+                           expander (cl-ansi-spec/semantic:spec-vocabulary))))
            (file nil))
       (cl-ansi-spec/expand:start-job expander name)
       (setf file (cl-ansi-spec/tex:current-file-name
@@ -170,7 +190,8 @@ appended (EVENTS false), or the events (EVENTS true)."
                       (cl-ansi-spec/expand:tex-error-message condition)
                       (cl-ansi-spec/expand:tex-error-context condition))))))
       (when events
-        (print-open-lists expander shown)))
+        (print-open-lists expander shown)
+        (print-reports observer)))
     t))
 
 (with-exit-status

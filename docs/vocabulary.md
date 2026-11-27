@@ -2,10 +2,11 @@
 
 The vocabulary is how meaning survives expansion. It is a declared table of
 the macros that carry meaning. Most come from `setup-*.tex`; a few come from
-plain TeX. It is a data file (planned, step 13 of `docs/plan/m2.md`) with one entry per macro
-(`make-entry`, `src/semantic/vocabulary.lisp`): the macro's name, the key
-of its events, its kind and placement, a handler when it replaces the call,
-and why it is in the table.
+plain TeX. It is a data file, `src/semantic/vocabulary.sexp`, with one
+entry per macro (`make-entry`, `src/semantic/vocabulary.lisp`): the
+macro's name, the key of its events, its kind and placement, a handler
+when it replaces the call, and why it is in the table. The same file
+classifies every other macro (see "Choosing entries").
 
 ## Rules
 
@@ -33,7 +34,15 @@ and why it is in the table.
 - **Kinds.** A `:call` entry (the default) is a `:begin` with the call's
   arguments when it is called and an `:end` when its body ends (see
   "Observers"), its span the body's last token. A `:mark` entry is one
-  `:mark` event. Environments are pairs: an `:open` entry's call is a
+  `:mark` event. A `:wrapper` entry hands its content to another
+  entry's macro, a tail call (`\def\funref{\clref}`, `\def\kwd#1{\ttref{:#1}}`,
+  setup-document.tex:62-79): its call is held, and the next entry
+  call takes its key and arguments for the `:begin` (with the called
+  entry's key as `:through`) and gives the `:end`; keyed on meanings
+  alone, every reference would be a `\clref`. Of a chain of wrappers,
+  the outermost keeps the call. The tail call is the call of the first
+  token of the wrapper's body; a held wrapper that meets another call, a
+  node or a marker first is reported `:unbalanced` and dropped. Environments are pairs: an `:open` entry's call is a
   `:begin`, a `:close` entry's call the `:end` of the `:open` entry it
   names, both with their arguments. `\code`…`\endcode` (through
   `\screen!`), `\begincom`…`\endcom`, `\issue`…`\endissue` are
@@ -45,11 +54,14 @@ and why it is in the table.
   sources call: `\begincom` first changes catcodes, so its entry names
   `\dobegincom`.
 - **Replace (exception).** An entry with a handler, a function
-  `(observer expander token arguments)`, replaces the call: the body is
+  `(observer expander entry token arguments)` named in the data file and
+  defined in `src/semantic/handlers.lisp`, replaces the call: the body is
   not read, and the handler emits the events itself (`emit-event`) and
   does what the macro must still do. It is used only where expansion
-  would hide content, for example editor notes that the options suppress.
-  Each use is justified in the table.
+  would hide content: editor and reviewer notes, which the options
+  suppress, are `:mark`s with `:hidden t` when hidden, and their bodies
+  are then read as TeX reads them. Each use is
+  justified in the table.
 - **Placement.** The `:begin` of an `:inline` `:call` entry waits until
   the first node of its content: it is placed just before the next node
   appended, or the next character added to a text node, in whatever
@@ -111,6 +123,20 @@ markers, nodes that carry an event (`src/expand/nodes.lisp`):
   never join a text node across a marker. `\showlists` does not show them.
 
 ## Choosing entries
+
+An entry is a macro whose meaning would otherwise be lost: the meaning
+of a macro that only expands to entries (a *phrase*: `\oftype` is
+"of `\term{type}` `\typeref{…}`") comes through them. Every macro the
+sources define and use in text (on a certain line, in the survey below)
+is an entry or is classified in the data file by a `(:class kind …)`
+form, naming it or the file that defines it: `:presentational` (layout,
+fonts with no meaning), `:phrase`, `:reference-name` (the generated
+names `\secref` and `\figref` take), `:option` (flags), or `:unreviewed`
+while the vocabulary is being written. An entry or a class naming a
+macro wins over a class naming its file; a test
+(`tests/semantic/vocabulary.lisp`) checks that every macro is classified,
+once, and that every entry names a macro that exists. Plain's macros and
+primitives with text uses are presentational unless they are entries.
 
 `make vocab` surveys the sources without expansion (package
 `cl-ansi-spec/inventory`, `src/inventory/`). It lists, per job or for the

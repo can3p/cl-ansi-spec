@@ -9,18 +9,25 @@
   (:use #:cl)
   (:import-from #:cl-ansi-spec/tex
                 #:intern-control-sequence #:control-sequence-name
-                #:token-span)
+                #:token #:token-span #:cs-token-control-sequence)
   (:import-from #:cl-ansi-spec/expand
                 #:expander-state #:es-tex #:meaning #:macro-p #:macro-body
                 #:current-list #:node-kind #:node-properties #:marker-p #:append-marker
                 #:expander-call-observer #:expander-level-end-observer
-                #:expander-definition-observer #:expander-append-observer)
+                #:expander-definition-observer #:expander-append-observer
+                #:insert-tokens)
   (:export
    ;; Entries and vocabularies (vocabulary.lisp)
    #:entry #:make-entry #:entry-name #:entry-key #:entry-kind
    #:entry-placement #:entry-closes #:entry-handler #:entry-why
    #:entry-mode
-   #:vocabulary #:make-vocabulary #:vocabulary-entries #:find-entry
+   #:vocabulary #:make-vocabulary #:vocabulary-entries #:vocabulary-classes
+   #:find-entry
+   #:macro-class #:make-macro-class #:macro-class-kind #:macro-class-names
+   #:macro-class-files #:macro-class-why #:classify-macro
+   #:load-vocabulary #:spec-vocabulary
+   ;; Handlers (handlers.lisp)
+   #:hidden-note
    ;; Observing a job (observe.lisp)
    #:observer #:observe-vocabulary #:observer-vocabulary
    #:observer-reports #:emit-event
