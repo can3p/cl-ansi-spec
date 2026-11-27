@@ -298,7 +298,55 @@ handlers of an area live in its own file and build the nodes.
 
 ### Text
 
-*Step 3.12.* Not written yet.
+`src/model/build-text.lisp` (step 3.12) turns `:text` and `:space`
+events into strings, and font runs into inlines.
+
+- **Fonts.** `*fonts*` lists the font families the jobs set text in
+  (a survey of every chapter job: cmr10/7, cmtt9, cmbx9/10 and the
+  scaled headings, cmbxsl10, cmti10, cmssi10), each with its *layout*
+  (what its character codes show) and its *class* (what a run in it
+  means). A font is told by its file; its size is not looked at, so a
+  heading in `cmbx10 scaled 1728` is cmbx10. A font outside the list
+  keeps its characters and is reported once per build (`:diagnostic`).
+- **Codes.** `*layout-codes*` gives, per layout, every slot that does
+  not show the ASCII character of its code, each with the reason (the
+  font's layout): the Greek capitals, the f ligature glyphs (shown as
+  their letters), the accents (spacing forms), `ß æ œ ø Æ Œ Ø`, the
+  quotes and dashes, and in cmti the pound sign where cmr has `$`. The
+  typewriter layout is ASCII apart from its low slots, so `<`, `\`, `{`,
+  `|` and `~` are themselves, where cmr's slots for those codes are `¡`,
+  `“`, `–`, `—` and `˜`.
+- **Ligatures.** In the cmr-style layouts: `` `` `` → `“`, `''` → `”`,
+  `--` → `–`, `---` → `—`, `!`` → `¡`, `?`` → `¿`. The f ligatures
+  change no text and are not applied; the typewriter font has none.
+  Ligatures work across the `:text` events of one font with nothing
+  between them, as TeX's do across character nodes (the expander splits
+  a run where a macro's text begins); an item another handler adds
+  between two events ends the run, and a dropped event does not.
+- **Accents.** An `:accent` becomes the accent's code in its font
+  (before the assignments) composed, with Unicode NFC, with the
+  character's code in its font (after them); a base with no precomposed
+  form keeps the combining mark after it (`u` and a dot above), an accent
+  alone shows its spacing form. The result is in the character's font.
+- **Discretionaries.** Their `:no-break` text is kept; `:pre-break` and
+  `:post-break` are dropped (text only where a line breaks).
+- **Spaces.** A `:space` is one `" "`; it is inside a font run when the
+  text on both sides is in runs of one class, else plain.
+- **Font runs.** Directly in a container, a run in a class-bearing font
+  becomes `code` (tt), `emphasis` (italic, sans italic, slanted) or
+  `strong` (bold); text in a container whose key
+  `plain-text-container-p` names stays plain, because the container
+  gives it its meaning: the vocabulary keys of structure, entries,
+  tables and figures, inlines, glossary and syntax, and `:code`
+  (`*plain-text-containers*`; a step with another such container pushes
+  its key). So `{\tt …}` in a paragraph is `code`, `\f{…}` is whatever
+  3.13 builds for it, and a heading stays text.
+- **Mechanism.** The handlers are the functions of
+  `install-text-handlers`, registered in `*handlers*` at load; tests
+  register them in a table of their own. A container's current run of
+  pieces is converted again at each event and replaces its tail of
+  items, so ligatures and spaces see their neighbours; it is closed
+  when the container's items no longer end as it left them.
 
 ### Structure
 

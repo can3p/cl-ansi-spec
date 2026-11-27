@@ -58,5 +58,9 @@
    #:event-argument-texts #:make-builder-node #:current-container
    #:find-container #:add-item #:open-container #:close-container
    #:build-events #:build-job #:build-model #:build-fixture #:forget-job-runs
+   ;; Text and fonts (build-text.lisp)
+   #:*fonts* #:font-entry #:register-handler #:*layout-codes* #:*ligatures* #:font-file #:font-class
+   #:convert-text #:install-text-handlers #:*plain-text-containers*
+   #:plain-text-container-p
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))
