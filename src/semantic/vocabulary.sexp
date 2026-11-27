@@ -539,3 +539,6 @@
  :names ("\\boxfig" "\\fig" "\\rulefig" "\\cboxfig")
  :why "They set a figure's content aside in box 1 (setup-aux.tex:637-690); \\endfig is the figure.")
 
+(:class :phrase
+ :names ("\\w" "\\n" "\\c" "\\C" "\\SE" "\\ME")
+ :why "Abbreviations of the syntax-type table of concept-syntax.tex:272-278 each is a phrase built from \\terms naming a syntax type, local to the figure's group (\\t, which it redefines too, is the phrase of its own entry above).")

@@ -33,4 +33,5 @@ touch is an error naming the patch. Every job reads the patched text;
 `make patched` writes the patched tree to `build/patched/` for reading and
 diffing only. `vendor/` is never patched.
 
-There are no patches yet.
+Patches so far: `0001-syntax-type-table-definitions` (the abbreviations the
+syntax-type table of concept-syntax.tex uses were commented out).

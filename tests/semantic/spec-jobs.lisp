@@ -111,35 +111,12 @@ vocabulary; return its SPEC-RUN."
   (or *spec-runs*
       (setf *spec-runs* (mapcar #'run-spec-job (cl-ansi-spec/inventory:chapter-jobs)))))
 
-(defparameter *source-error-lines* '("concept-syntax.tex" 279 302)
-  "Where the sources themselves are wrong, so that TeX reports errors too:
-the table of concept-syntax.tex:279-302 uses \\w, \\c, \\SE ... whose
-definitions, and the group they open, are commented out (:271-278),
-while the group's closing brace (:302) is not.  A patch will restore
-them (M4).")
-
 (define-test spec-jobs-run
   :parent spec-jobs
-  ;; No job stops, and the only errors are the sources' own: chap-2's,
-  ;; reading the table, at its lines or in the macros it calls.
-  (destructuring-bind (file first last) *source-error-lines*
-    (dolist (run (spec-runs))
-      (false (spec-run-fatal run) "~A stops: ~A" (spec-run-job run) (spec-run-fatal run))
-      (if (string= (spec-run-job run) "chap-2")
-          (progn
-            ;; 127: each row of the table meets undefined \\w, \\c ...
-            ;; and misplaced &s; any change of the expander's error
-            ;; recovery shows here.
-            (is = 127 (length (spec-run-errors run)))
-            (dolist (error (spec-run-errors run))
-              (destructuring-bind (message error-file line) error
-                (true (or (and (equal error-file file) (<= first line last))
-                          ;; \\tablefigfour, which sets the table, and
-                          ;; plain's \\cr and \\c it meets.
-                          (and (equal error-file "setup-tables.tex") (<= 177 line 207))
-                          (equal error-file "plain.tex"))
-                      "chap-2: ~A at ~A:~A" message error-file line))))
-          (is equal '() (spec-run-errors run) "errors of ~A" (spec-run-job run))))))
+  ;; No job stops, and none has a TeX error.
+  (dolist (run (spec-runs))
+    (false (spec-run-fatal run) "~A stops: ~A" (spec-run-job run) (spec-run-fatal run))
+    (is equal '() (spec-run-errors run) "errors of ~A" (spec-run-job run))))
 
 (defparameter *expected-reports*
   '(("chap-6" :unbalanced "curly"

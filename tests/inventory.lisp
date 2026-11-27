@@ -216,11 +216,17 @@ a, \\x
 
 ;;; The real sources
 
+(defun patched-lines (file)
+  "The lines of the spec source FILE as jobs read them, patches applied."
+  (let ((text (cl-ansi-spec:spec-tree-file-text
+               file (nth-value 1 (find-input-file file)))))
+    (uiop:split-string text :separator '(#\Newline))))
+
 (defun raw-use-count (name files)
   "Count NAME in FILES by text: occurrences not followed by a letter, outside
 comments (from an unescaped % to the end of the line)."
   (loop for file in files
-        sum (loop for line in (uiop:read-file-lines (nth-value 1 (find-input-file file)))
+        sum (loop for line in (patched-lines file)
                   for comment = (loop for i from 0 below (length line)
                                       when (and (char= (char line i) #\%)
                                                 (or (zerop i)

@@ -609,12 +609,10 @@ a TeX run of the spec writes and a later run reads (`chap-N.fig`,
 `generated-file-name-p`, `src/source.lisp`) is an empty source when
 the trees do not hold it, as on a first run.
 
-Every job runs to its `\end` without a fatal error, and only chap-2 has
-TeX errors: they are the sources' own (concept-syntax.tex:279-302 uses
-`\w`, `\c`, `\SE`, … whose definitions, with the brace that opens
-their group, are commented out at :271-278, while the closing brace at
-:302 is not), so TeX reports them too.  A patch will restore the
-definitions; `tests/semantic/spec-jobs.lisp` pins them meanwhile.
+Every job runs to its `\end` without a fatal error. The sources have errors
+TeX itself would report, which patches fix (`patches/`): concept-syntax.tex
+comments out the group that defines `\w`, `\c`, `\SE`, … but not its
+closing brace, and the table at :279-302 uses them (0001).
 
 Formats and jobs (`src/expand/format.lisp`), §§1299-1337:
 

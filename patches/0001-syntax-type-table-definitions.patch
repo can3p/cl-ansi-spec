@@ -1,0 +1,29 @@
+Restore the syntax-type abbreviations of the figure CharSyntaxTypesInStdSyntax.
+The definitions of \w, \n, \t, \c, \C, \SE and \ME, with the brace that
+opens their group, are commented out at lines 272-278, but the table at
+279-302 uses them and its closing brace (302) is not commented out, so TeX
+reports errors (undefined control sequences, misplaced alignment tabs,
+an extra closing brace).  Uncommenting the seven lines keeps the line count.
+--- concept-syntax.tex
++++ concept-syntax.tex
+@@ -269,13 +269,13 @@
+ 
+ \DefineFigure{CharSyntaxTypesInStdSyntax}
+ %% 22.1.1 36
+-%{\def\w{\term{whitespace}\meaning{2}}
+-%\def\n{\term{non-terminating} \term{macro char}} %cheat on "char" => "character" to make fit
+-%\def\t{\term{terminating} \term{macro char}}     %ditto
+-%\def\c{\term{constituent}}
+-%\def\C{\term{constituent}*}
+-%\def\SE{\term{single escape}}
+-%\def\ME{\term{multiple escape}}
++{\def\w{\term{whitespace}\meaning{2}}
++\def\n{\term{non-terminating} \term{macro char}} %cheat on "char" => "character" to make fit
++\def\t{\term{terminating} \term{macro char}}     %ditto
++\def\c{\term{constituent}}
++\def\C{\term{constituent}*}
++\def\SE{\term{single escape}}
++\def\ME{\term{multiple escape}}
+ \tablefigfour{Character Syntax Types in Standard Syntax}{character}{syntax type}{character}{syntax type}{
+ Backspace&\c&0--9&\c\cr
+ Tab&\w&:&\c\cr
