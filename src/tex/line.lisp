@@ -38,8 +38,9 @@ tree), read one at a time."
   (%make-line-source name (coerce text 'simple-string)))
 
 (defun open-line-source (name pathname)
-  "Return a line source reading the file PATHNAME under the name NAME."
-  (make-line-source name (read-spec-file pathname)))
+  "Return a line source reading the file PATHNAME under the name NAME: its
+text as patched, for a file of the spec tree (SPEC-TREE-FILE-TEXT)."
+  (make-line-source name (spec-tree-file-text name pathname)))
 
 (defun valid-endlinechar-p (value)
   "True if \\endlinechar VALUE designates a character to append."

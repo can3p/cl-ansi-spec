@@ -601,18 +601,22 @@ Every job starts from a snapshot of the state after Knuth's `plain.tex` and
 `hyphen.tex` were run through our expander. Those files are vendored
 unmodified in `vendor/plain/`, with their provenance and licence in
 `vendor/PROVENANCE.md`; `patches/` never applies to them. Jobs read inputs
-along the source search path: the spec tree, then `vendor/plain/`. A file
+along the source search path: the spec tree, then `vendor/plain/`; a file
+of the spec tree is read as the patch set patches it (`docs/architecture.md`,
+"Sources"), in memory, with the file's own name in spans. A file
 a TeX run of the spec writes and a later run reads (`chap-N.fig`,
 `chap-N.tc`, `\jobname.toc`, `.idx`, `.iss`, `.ref`, `.sec`:
 `generated-file-name-p`, `src/source.lisp`) is an empty source when
 the trees do not hold it, as on a first run.
 
-Every job runs to its `\end` without a fatal error, and only chap-2 has
-TeX errors: they are the sources' own (concept-syntax.tex:279-302 uses
-`\w`, `\c`, `\SE`, … whose definitions, with the brace that opens
-their group, are commented out at :271-278, while the closing brace at
-:302 is not), so TeX reports them too.  A patch will restore the
-definitions; `tests/semantic/spec-jobs.lisp` pins them meanwhile.
+Every job runs to its `\end` without a fatal error. The sources have errors
+TeX itself would report, which patches fix (`patches/`): concept-syntax.tex
+comments out the group that defines `\w`, `\c`, `\SE`, … but not its
+closing brace, and the table at :279-302 uses them (0001). Two rules are
+left unbalanced by the sources, which the semantic layer reports, not TeX: the numeric-accumulation rule of dict-iteration.tex
+breaks a row inside `\curly` (0002) and the defsetf lambda list of
+concept-bvl.tex lacks its `\rparen` (0003). With the patches, no job has an
+error or an unbalanced report.
 
 Formats and jobs (`src/expand/format.lisp`), §§1299-1337:
 

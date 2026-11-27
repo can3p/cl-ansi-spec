@@ -8,6 +8,8 @@
    #:spec-file
    #:spec-files
    #:read-spec-file
+   #:*source-overlay*
+   #:spec-tree-file-text
    #:spec-file-missing
    #:vendor-directory
    #:source-search-path

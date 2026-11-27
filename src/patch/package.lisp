@@ -25,4 +25,9 @@
    #:patch-file-missing #:patch-file-missing-path
    #:hunk-mismatch #:hunk-mismatch-expected #:hunk-mismatch-actual
    #:hunk-mismatch-reason
-   #:hunk-overlap #:hunk-overlap-other-patch #:hunk-overlap-other-hunk))
+   #:hunk-overlap #:hunk-overlap-other-patch #:hunk-overlap-other-hunk
+   #:invalid-patch #:invalid-patch-reason
+   ;; The patch set
+   #:patch-set #:patch-set-patches #:patch-set-files #:patch-directory
+   #:load-patch-set #:current-patch-set #:reset-patch-set #:with-patch-set
+   #:patched-text #:applied-patches))

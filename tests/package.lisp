@@ -7,7 +7,8 @@
   (:local-nicknames (#:expand #:cl-ansi-spec/expand)
                     (#:semantic #:cl-ansi-spec/semantic)
                     (#:model #:cl-ansi-spec/model)
-                    (#:exports #:cl-ansi-spec/export))
+                    (#:exports #:cl-ansi-spec/export)
+                    (#:json #:cl-ansi-spec/json))
   (:export #:run-tests #:write-snapshots))
 
 (in-package #:cl-ansi-spec/tests)

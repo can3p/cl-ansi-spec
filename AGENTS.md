@@ -75,8 +75,18 @@
 * `make snapshots` — rewrite `tests/snapshots.sexp`, the event count and
   hash of every chapter job, printing the jobs whose events changed. Run
   it in the commit that changes the events, after checking why they did.
+* `make model FILE=dict-conses LINES=1702-1759 [JOB=chap-14]` — the model
+  built from a spec file's lines: the nodes `build-fixture` builds, one
+  S-expression each with spans as (file line), then the build report
+  (unhandled events counted by type and key, then every other problem).
+  The job is FILE when it is a chapter job, else JOB, else the chapter
+  job that inputs FILE.  Always pass `LINES`.
+* `make patched` — write the patched spec tree (`spec/tex/` plus
+  `patches/`) to `build/patched/`, for reading and diffing only: every
+  job reads the patched text from memory.
 * `make generate` — rewrite the generated files (JSON Schema, reference
   doc) from the node declarations; `make test` fails while one is stale.
+  On a merge conflict in a generated file take either side, then run it.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine
