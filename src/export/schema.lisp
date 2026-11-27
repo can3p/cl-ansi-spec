@@ -12,7 +12,7 @@
 
 (in-package #:cl-ansi-spec/export)
 
-(defparameter +schema-draft+ "https://json-schema.org/draft/2020-12/schema"
+(defvar *schema-draft* "https://json-schema.org/draft/2020-12/schema"
   "The value of \"$schema\".")
 
 (defparameter *subset-keywords*
@@ -27,16 +27,16 @@
 
 ;;; JSON building
 
-(defun obj (&rest members)
+(defun schema-obj (&rest members)
   "The JSON object of the alternating keys and values MEMBERS."
   (json:make-json-object
    (loop for (key value) on members by #'cddr collect (cons key value))))
 
-(defun arr (list)
+(defun schema-arr (list)
   "The JSON array of the elements of LIST."
   (coerce list 'simple-vector))
 
-(defun lowercase (symbol)
+(defun json-name (symbol)
   "The name of SYMBOL in lower case: its JSON name."
   (string-downcase (symbol-name symbol)))
 
@@ -50,14 +50,14 @@
       (append members (list (cons "description" doc)))
       members))
 
-(defun ref (name)
+(defun schema-ref (name)
   "A reference to the definition NAME."
-  (obj "$ref" (format nil "#/$defs/~A" name)))
+  (schema-obj "$ref" (format nil "#/$defs/~A" name)))
 
 (defun one-of (alternatives)
   "A schema accepting any of the schemas ALTERNATIVES (one means itself)."
   (if (rest alternatives)
-      (obj "oneOf" (arr alternatives))
+      (schema-obj "oneOf" (schema-arr alternatives))
       (first alternatives)))
 
 ;;; Example values
@@ -68,7 +68,7 @@
 
 (defun text-json (string)
   "The JSON text object of STRING."
-  (obj "kind" "text" "text" string))
+  (schema-obj "kind" "text" "text" string))
 
 (declaim (ftype function node-example-json))
 
@@ -84,23 +84,25 @@
     (:boolean (if value :true :false))
     (:span (if (and (listp value) (= 5 (length value)))
                (destructuring-bind (file start end line column) value
-                 (obj "file" file "start" start "end" end "line" line "column" column))
+                 (schema-obj "file" file "start" start "end" end "line" line "column" column))
                (example-error "~S is not a span (file start end line column)." value)))
-    (:inlines (arr (mapcar (lambda (item) (item-json item registry)) value)))
-    (:enum (if (keywordp value)
-               (lowercase value)
-               (example-error "~S is not an enumeration keyword." value)))
+    (:inlines (schema-arr (mapcar (lambda (item) (item-json item registry)) value)))
+    (:enum (let ((enum (model:find-enum (second type) registry)))
+             (if (and enum (assoc value (model:enum-values enum)))
+                 (json-name value)
+                 (example-error "~S is not a value of the enumeration ~S."
+                                value (second type)))))
     (:node (item-json value registry))
     (:target (if (null value)
                  :null
                  (destructuring-bind (kind id) value
-                   (obj "kind" (lowercase kind) "id" id))))))
+                   (schema-obj "kind" (json-name kind) "id" id))))))
 
 (defun field-value-json (value field registry)
   "The JSON of VALUE for FIELD: a list of values when the field is repeated."
   (let ((type (model:field-type field)))
     (if (model:field-repeated field)
-        (arr (mapcar (lambda (v) (value-json v type registry)) value))
+        (schema-arr (mapcar (lambda (v) (value-json v type registry)) value))
         (value-json value type registry))))
 
 (defun node-example-json (example registry)
@@ -111,12 +113,12 @@
     (unless (model:find-node-declaration kind registry)
       (example-error "~S is not a declared node kind." kind))
     (json:make-json-object
-     (cons (cons "kind" (lowercase kind))
+     (cons (cons "kind" (json-name kind))
            (loop for (key value) on (rest example) by #'cddr
                  for field = (model:find-field kind key registry)
                  unless field
                    do (example-error "~S has no field ~S." kind key)
-                 collect (cons (lowercase (model:field-name field))
+                 collect (cons (json-name (model:field-name field))
                                (field-value-json value field registry)))))))
 
 ;;; Definitions
@@ -130,25 +132,25 @@
   (let ((kinds (model:expand-kinds names registry)))
     (unless kinds
       (error "No node kind is declared for ~S." names))
-    (one-of (loop for kind in kinds collect (ref (lowercase kind))))))
+    (one-of (loop for kind in kinds collect (schema-ref (json-name kind))))))
 
 (defun type-schema (type registry)
   "The schema of one value of the field type TYPE."
   (ecase (if (consp type) (first type) type)
-    (:string (obj "type" "string"))
-    (:integer (obj "type" "integer"))
-    (:boolean (obj "type" "boolean"))
-    (:span (ref "span"))
-    (:inlines (obj "type" "array"
-                   "items" (one-of (cons (ref "text")
+    (:string (schema-obj "type" "string"))
+    (:integer (schema-obj "type" "integer"))
+    (:boolean (schema-obj "type" "boolean"))
+    (:span (schema-ref "span"))
+    (:inlines (schema-obj "type" "array"
+                   "items" (one-of (cons (schema-ref "text")
                                          (loop for kind in (inline-kinds registry)
-                                               collect (ref (lowercase kind)))))))
-    (:enum (ref (format nil "enum-~A" (lowercase (second type)))))
+                                               collect (schema-ref (json-name kind)))))))
+    (:enum (schema-ref (format nil "enum-~A" (json-name (second type)))))
     (:node (kinds-schema (rest type) registry))
-    (:target (obj "oneOf"
-                  (arr (append (loop for name in (rest type)
-                                     collect (ref (format nil "target-~A" (lowercase name))))
-                               (list (obj "type" "null"))))))))
+    (:target (schema-obj "oneOf"
+                  (schema-arr (append (loop for name in (rest type)
+                                     collect (schema-ref (format nil "target-~A" (json-name name))))
+                               (list (schema-obj "type" "null"))))))))
 
 (defun target-field-p (field)
   "True when FIELD is a reference: always present, null when unresolved."
@@ -159,15 +161,15 @@
   "The property schema of FIELD, with its title, description and example."
   (let* ((one (type-schema (model:field-type field) registry))
          (base (if (model:field-repeated field)
-                   (obj "type" "array" "items" one)
+                   (schema-obj "type" "array" "items" one)
                    one)))
     (json:make-json-object
      (append (json:json-object-members base)
-             (list (cons "title" (lowercase (model:field-name field))))
+             (list (cons "title" (json-name (model:field-name field))))
              (with-description '() (model:field-doc field))
              (when (model:field-example-p field)
                (list (cons "examples"
-                           (arr (list (field-value-json (model:field-example field)
+                           (schema-arr (list (field-value-json (model:field-example field)
                                                         field registry))))))))))
 
 (defun node-schema (declaration registry)
@@ -178,28 +180,28 @@
                            (loop for field in fields
                                  when (or (model:field-required field)
                                           (target-field-p field))
-                                   collect (lowercase (model:field-name field))))))
+                                   collect (json-name (model:field-name field))))))
     (json:make-json-object
      (append
       (list (cons "type" "object")
-            (cons "title" (lowercase kind)))
+            (cons "title" (json-name kind)))
       (with-description '() (model:definition-doc declaration))
       (list (cons "properties"
                   (json:make-json-object
                    (append (list (cons "kind"
-                                       (obj "const" (lowercase kind)
+                                       (schema-obj "const" (json-name kind)
                                             "description"
                                             "The node kind; picks this definition out."))
-                                 (cons "span" (ref "span")))
+                                 (cons "span" (schema-ref "span")))
                            (loop for field in fields
-                                 collect (cons (lowercase (model:field-name field))
+                                 collect (cons (json-name (model:field-name field))
                                                (field-schema field registry))))))
-            (cons "required" (arr required))
+            (cons "required" (schema-arr required))
             (cons "additionalProperties" :false))
       (when (and (model:node-declaration-example-p declaration)
                  (model:node-declaration-example declaration))
         (list (cons "examples"
-                    (arr (list (node-example-json
+                    (schema-arr (list (node-example-json
                                 (model:node-declaration-example declaration)
                                 registry))))))))))
 
@@ -207,30 +209,31 @@
   "The $defs entry of ENUM: a oneOf of its values, each with its meaning."
   (json:make-json-object
    (append
-    (list (cons "title" (lowercase (model:definition-name enum))))
+    (list (cons "title" (json-name (model:definition-name enum))))
     (with-description '() (model:definition-doc enum))
-    (list (cons "oneOf"
-                (arr (loop for (value doc) in (model:enum-values enum)
+    (when (model:enum-values enum)
+     (list (cons "oneOf"
+                (schema-arr (loop for (value doc) in (model:enum-values enum)
                            collect (json:make-json-object
                                     (with-description
-                                        (list (cons "const" (lowercase value)))
-                                      doc)))))))))
+                                        (list (cons "const" (json-name value)))
+                                      doc))))))))))
 
 (defun target-schema (target)
   "The $defs entry of the target kind TARGET: a kind and an id."
   (json:make-json-object
    (append
     (list (cons "type" "object")
-          (cons "title" (lowercase (model:definition-name target))))
+          (cons "title" (json-name (model:definition-name target))))
     (with-description '() (model:definition-doc target))
     (list (cons "properties"
-                (obj "kind" (obj "const" (lowercase (model:definition-name target))
+                (schema-obj "kind" (schema-obj "const" (json-name (model:definition-name target))
                                  "description"
                                  "The target kind: which sort of node the id names.")
-                     "id" (obj "type" "string"
+                     "id" (schema-obj "type" "string"
                                "description"
                                "The id of the node pointed to, unique among its target kind.")))
-          (cons "required" (arr '("kind" "id")))
+          (cons "required" (schema-arr '("kind" "id")))
           (cons "additionalProperties" :false)))))
 
 (defun builtin-definitions (registry)
@@ -238,35 +241,35 @@
 REGISTRY declares a node kind :TEXT."
   (append
    (list (cons "span"
-               (obj "type" "object"
+               (schema-obj "type" "object"
                     "title" "span"
                     "description"
                     "Where a node came from in the sources: a file, character offsets (end exclusive), a line from 1 and a column from 0."
                     "properties"
-                    (obj "file" (obj "type" "string"
+                    (schema-obj "file" (schema-obj "type" "string"
                                      "description" "The source file name, without directory.")
-                         "start" (obj "type" "integer"
+                         "start" (schema-obj "type" "integer"
                                       "description" "Character offset of the first character.")
-                         "end" (obj "type" "integer"
+                         "end" (schema-obj "type" "integer"
                                     "description" "Character offset after the last character.")
-                         "line" (obj "type" "integer"
+                         "line" (schema-obj "type" "integer"
                                      "description" "Line of the first character, counted from 1.")
-                         "column" (obj "type" "integer"
+                         "column" (schema-obj "type" "integer"
                                        "description" "Column of the first character, counted from 0."))
-                    "required" (arr '("file" "start" "end" "line" "column"))
+                    "required" (schema-arr '("file" "start" "end" "line" "column"))
                     "additionalProperties" :false)))
    (unless (model:find-node-declaration :text registry)
      (list (cons "text"
-                 (obj "type" "object"
+                 (schema-obj "type" "object"
                       "title" "text"
                       "description"
                       "A run of plain text; adjacent text is merged into one object."
                       "properties"
-                      (obj "kind" (obj "const" "text"
+                      (schema-obj "kind" (schema-obj "const" "text"
                                        "description" "The node kind.")
-                           "text" (obj "type" "string"
+                           "text" (schema-obj "type" "string"
                                        "description" "The text."))
-                      "required" (arr '("kind" "text"))
+                      "required" (schema-arr '("kind" "text"))
                       "additionalProperties" :false))))))
 
 (defun model-schema (&optional (registry model:*registry*))
@@ -276,27 +279,30 @@ REGISTRY: any node kind may be the root."
     (when problems
       (error "The registry is inconsistent: ~{~A~^ ~}" problems)))
   (json:make-json-object
-   (list (cons "$schema" +schema-draft+)
-         (cons "title" "cl-ansi-spec document model")
-         (cons "description"
-               "The semantic model of the standard, one definition per node kind. Generated from the node declarations (make generate); do not edit.")
-         (cons "oneOf"
-               (arr (loop for kind in (model:node-kinds registry)
-                          collect (ref (lowercase kind)))))
-         (cons "$defs"
+   (append
+    (list (cons "$schema" *schema-draft*)
+          (cons "title" "cl-ansi-spec document model")
+          (cons "description"
+                "The semantic model of the standard, one definition per node kind. Generated from the node declarations (make generate); do not edit."))
+    ;; An empty oneOf is no schema; with no kinds there is no root to name.
+    (when (model:node-kinds registry)
+      (list (cons "oneOf"
+                  (schema-arr (loop for kind in (model:node-kinds registry)
+                                    collect (schema-ref (json-name kind)))))))
+    (list (cons "$defs"
                (json:make-json-object
                 (append
                  (builtin-definitions registry)
                  (loop for enum in (model:enums registry)
-                       collect (cons (format nil "enum-~A" (lowercase (model:definition-name enum)))
+                       collect (cons (format nil "enum-~A" (json-name (model:definition-name enum)))
                                      (enum-schema enum)))
                  (loop for target in (model:target-kinds registry)
-                       collect (cons (format nil "target-~A" (lowercase (model:definition-name target)))
+                       collect (cons (format nil "target-~A" (json-name (model:definition-name target)))
                                      (target-schema target)))
                  (loop for kind in (model:node-kinds registry)
-                       collect (cons (lowercase kind)
+                       collect (cons (json-name kind)
                                      (node-schema (model:find-node-declaration kind registry)
-                                                  registry)))))))))
+                                                  registry))))))))))
 
 (defun model-schema-text (&optional (registry model:*registry*))
   "The text of schema/model.schema.json for REGISTRY."

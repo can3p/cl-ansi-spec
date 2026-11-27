@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "cl-ansi-spec document model",
   "description": "The semantic model of the standard, one definition per node kind. Generated from the node declarations (make generate); do not edit.",
-  "oneOf": [],
   "$defs": {
     "span": {
       "type": "object",

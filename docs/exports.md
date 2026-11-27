@@ -41,6 +41,9 @@ array of `text` and the kinds of the category `inline`; a target field is a
 `oneOf` of its target definitions and `{"type": "null"}`. A docstring becomes `description`,
 a field's name its `title`, examples `examples` (an example is converted
 by the field's type; one that does not fit its kind stops the generator).
+Examples are illustrative: they carry no `span`, so they do not validate
+against their own definition. With no node kind, the top-level `oneOf` is
+omitted.
 `schema-outside-subset` and `schema-undescribed` are what the suite checks.
 
 ## Documentation of every definition
@@ -84,8 +87,8 @@ rejects a declaration that lacks any of it.
 Every exported file of the whole spec is validated against the schema in
 the test suite. The validator is Lisp and implements exactly the subset of
 JSON Schema the generator emits: `type`, `const`, `enum`, `required`,
-`properties`, `additionalProperties`, `items`, `$ref`, and `oneOf` on
-`"kind"`. The generator never emits anything outside that subset; a test
+`properties`, `additionalProperties`, `items`, `$ref`, and `oneOf` (over
+kind-constant objects, over `const` values, and over a target and `null`). The generator never emits anything outside that subset; a test
 checks this. CI also cross-checks the exports with one widely used external
 JSON Schema validator. That validator runs in CI only and is not part of the
 code base.

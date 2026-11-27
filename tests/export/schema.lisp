@@ -200,3 +200,27 @@
                                         (lambda (item) (eq :doc (first item)))
                                         (model:undocumented-items area))))
         (sort-items (exports:schema-undescribed schema)))))
+
+(define-test schema-edge-cases
+  :parent schema
+  ;; No kinds: no empty oneOf.
+  (let ((schema (exports:model-schema (model:make-registry))))
+    (is equal '("$schema" "title" "description" "$defs")
+        (mapcar #'car (json:json-object-members schema))))
+  ;; A declared :text kind replaces the built-in text definition.
+  (let ((registry (model:make-registry)))
+    (eval `(model:define-node text (:area :inlines :registry ,registry)
+             "Text." (text :string :required t :doc "The text.")))
+    (is equal '("span" "text")
+        (mapcar #'car (json:json-object-members
+                       (schema-path (exports:model-schema registry) "$defs"))))
+    (is string= "Text." (schema-path (exports:model-schema registry) "$defs" "text" "description")))
+  ;; An example naming a value the enumeration lacks stops the generator.
+  (let ((registry (model:make-registry)))
+    (eval `(progn
+             (model:define-enum shade (:area :entries :registry ,registry)
+               "Shades." (:dark "Dark."))
+             (model:define-node paint (:area :entries :registry ,registry
+                                       :example (:paint :shade :blue))
+               "Paint." (shade (:enum shade) :doc "Its shade."))))
+    (fail (exports:model-schema registry))))
