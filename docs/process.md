@@ -96,7 +96,11 @@ be merged before the next wave starts; a step may start as soon as its
   its own plan item; anything else it needs goes into its pull request's
   description for the coordinator.
 - **Shared files on merge.**  `cl-ansi-spec.asd`, package export lists,
-  `Makefile`: keep both sides.  Generated files (`tests/snapshots.sexp`,
+  `Makefile`: keep both sides, then fix the parentheses by hand: each
+  side closes the component list it ends, so a plain "accept both"
+  leaves one closing paren too many (or a component twice) and the
+  system no longer loads.  Merge one pull request at a time and run
+  `make test` on each merge before the next.  Generated files (`tests/snapshots.sexp`,
   the JSON Schema, the reference doc): take either side, then run
   `make snapshots` or `make generate` (planned) and commit the result.
   `docs/plan/<id>.md`: each step ticks only its own item, so ticks merge.
