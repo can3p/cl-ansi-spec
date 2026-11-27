@@ -18,13 +18,33 @@ introspection functions (`node-kinds`, `node-fields`, `enums`,
 | Generated | What it is |
 |-----------|------------|
 | the model classes | the CLOS classes the model builder fills in |
-| `schema/model.schema.json` (planned) | a JSON Schema, draft 2020-12. It has one `$defs` entry per node kind, picked out by a constant `"kind"`, and `additionalProperties: false`. All the documentation (see below) is carried over as `title`, `description` and `examples`. |
+| `schema/model.schema.json` | a JSON Schema, draft 2020-12. It has one `$defs` entry per node kind, picked out by a constant `"kind"`, and `additionalProperties: false`. All the documentation (see below) is carried over as `title`, `description` and `examples`. |
 | `docs/model-reference.md` (planned) | the human reference: a field table for each node kind, plus one short example taken from the real spec |
 
 The generated files are committed. Each generator registers itself with
 `define-generator` (`src/export/generate.lisp`); `make generate` rewrites
 the files, and `make test` fails if they differ from what the generators
 make, so code, schema and docs cannot drift apart.
+
+### The generated schema
+
+`src/export/schema.lisp`. Any node kind may be the root (a top-level
+`oneOf` of references). `$defs` holds, in order: `span`, `text` (the
+`{"kind": "text", …}` object, unless a node kind `text` is declared),
+`enum-<name>` (a `oneOf` of `{"const", "description"}`), `target-<name>`
+(`{"kind", "id"}`), then one entry per node kind, named as the kind. A
+node's properties are `kind`, `span`, then its fields in declaration
+order; `required` lists `kind`, `span`, the required fields and every
+`target` field. A repeated field is an array of its type; a field of
+several kinds or categories is a `oneOf` of references; an inline list is an
+array of `text` and the kinds of the category `inline`; a target field is a
+`oneOf` of its target definitions and `{"type": "null"}`. A docstring becomes `description`,
+a field's name its `title`, examples `examples` (an example is converted
+by the field's type; one that does not fit its kind stops the generator).
+Examples are illustrative: they carry no `span`, so they do not validate
+against their own definition. With no node kind, the top-level `oneOf` is
+omitted.
+`schema-outside-subset` and `schema-undescribed` are what the suite checks.
 
 ## Documentation of every definition
 
@@ -67,8 +87,8 @@ rejects a declaration that lacks any of it.
 Every exported file of the whole spec is validated against the schema in
 the test suite. The validator is Lisp and implements exactly the subset of
 JSON Schema the generator emits: `type`, `const`, `enum`, `required`,
-`properties`, `additionalProperties`, `items`, `$ref`, and `oneOf` on
-`"kind"`. The generator never emits anything outside that subset; a test
+`properties`, `additionalProperties`, `items`, `$ref`, and `oneOf` (over
+kind-constant objects, over `const` values, and over a target and `null`). The generator never emits anything outside that subset; a test
 checks this. CI also cross-checks the exports with one widely used external
 JSON Schema validator. That validator runs in CI only and is not part of the
 code base.
@@ -175,7 +195,7 @@ schema changes whenever correctness requires it. No deprecation path is
 kept, and no compatibility layer is added.
 
 - Every file states the `schemaVersion` it was written with: the
-  lowercase hex SHA-256 of the committed `schema/model.schema.json` (planned) file's
+  lowercase hex SHA-256 of the committed `schema/model.schema.json` file's
   bytes, untruncated, so a consumer always knows exactly which
   schema matches a file.
 - The schema is published alongside every export.

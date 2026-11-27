@@ -1,0 +1,7155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "cl-ansi-spec document model",
+  "description": "The semantic model of the standard, one definition per node kind. Generated from the node declarations (make generate); do not edit.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/document"
+    },
+    {
+      "$ref": "#/$defs/chapter"
+    },
+    {
+      "$ref": "#/$defs/section"
+    },
+    {
+      "$ref": "#/$defs/dictionary-entry"
+    },
+    {
+      "$ref": "#/$defs/part"
+    },
+    {
+      "$ref": "#/$defs/operator-signature"
+    },
+    {
+      "$ref": "#/$defs/setf-signature"
+    },
+    {
+      "$ref": "#/$defs/variable-signature"
+    },
+    {
+      "$ref": "#/$defs/type-signature"
+    },
+    {
+      "$ref": "#/$defs/paragraph"
+    },
+    {
+      "$ref": "#/$defs/code-block"
+    },
+    {
+      "$ref": "#/$defs/code-line"
+    },
+    {
+      "$ref": "#/$defs/item-list"
+    },
+    {
+      "$ref": "#/$defs/item"
+    },
+    {
+      "$ref": "#/$defs/editor-note"
+    },
+    {
+      "$ref": "#/$defs/reviewer-note"
+    },
+    {
+      "$ref": "#/$defs/table"
+    },
+    {
+      "$ref": "#/$defs/row"
+    },
+    {
+      "$ref": "#/$defs/cell"
+    },
+    {
+      "$ref": "#/$defs/figure"
+    },
+    {
+      "$ref": "#/$defs/term-ref"
+    },
+    {
+      "$ref": "#/$defs/operator-ref"
+    },
+    {
+      "$ref": "#/$defs/section-ref"
+    },
+    {
+      "$ref": "#/$defs/figure-ref"
+    },
+    {
+      "$ref": "#/$defs/this-section"
+    },
+    {
+      "$ref": "#/$defs/next-figure"
+    },
+    {
+      "$ref": "#/$defs/param"
+    },
+    {
+      "$ref": "#/$defs/metavariable"
+    },
+    {
+      "$ref": "#/$defs/format-directive"
+    },
+    {
+      "$ref": "#/$defs/lambda-list-keyword"
+    },
+    {
+      "$ref": "#/$defs/code"
+    },
+    {
+      "$ref": "#/$defs/emphasis"
+    },
+    {
+      "$ref": "#/$defs/strong"
+    },
+    {
+      "$ref": "#/$defs/evaluates-to"
+    },
+    {
+      "$ref": "#/$defs/may-evaluate-to"
+    },
+    {
+      "$ref": "#/$defs/does-not-evaluate-to"
+    },
+    {
+      "$ref": "#/$defs/equivalent"
+    },
+    {
+      "$ref": "#/$defs/output"
+    },
+    {
+      "$ref": "#/$defs/input"
+    },
+    {
+      "$ref": "#/$defs/citation"
+    },
+    {
+      "$ref": "#/$defs/index-entry"
+    },
+    {
+      "$ref": "#/$defs/issue-start"
+    },
+    {
+      "$ref": "#/$defs/issue-end"
+    },
+    {
+      "$ref": "#/$defs/glossary-group"
+    },
+    {
+      "$ref": "#/$defs/glossary-entry"
+    },
+    {
+      "$ref": "#/$defs/glossary-sense"
+    },
+    {
+      "$ref": "#/$defs/glossary-example"
+    },
+    {
+      "$ref": "#/$defs/bnf-rule"
+    },
+    {
+      "$ref": "#/$defs/bnf-break"
+    },
+    {
+      "$ref": "#/$defs/bnf-optional"
+    },
+    {
+      "$ref": "#/$defs/bnf-zero-or-more"
+    },
+    {
+      "$ref": "#/$defs/bnf-one-or-more"
+    },
+    {
+      "$ref": "#/$defs/bnf-repeat-previous"
+    },
+    {
+      "$ref": "#/$defs/bnf-group"
+    },
+    {
+      "$ref": "#/$defs/bnf-parenthesized"
+    },
+    {
+      "$ref": "#/$defs/bnf-bracketed"
+    },
+    {
+      "$ref": "#/$defs/bnf-interleave"
+    },
+    {
+      "$ref": "#/$defs/bnf-required"
+    },
+    {
+      "$ref": "#/$defs/bnf-indirection"
+    },
+    {
+      "$ref": "#/$defs/bnf-caret"
+    },
+    {
+      "$ref": "#/$defs/angle-name"
+    },
+    {
+      "$ref": "#/$defs/math"
+    },
+    {
+      "$ref": "#/$defs/math-noad"
+    },
+    {
+      "$ref": "#/$defs/math-char"
+    },
+    {
+      "$ref": "#/$defs/math-fraction"
+    },
+    {
+      "$ref": "#/$defs/math-delimiter"
+    },
+    {
+      "$ref": "#/$defs/math-style-change"
+    },
+    {
+      "$ref": "#/$defs/math-choice"
+    }
+  ],
+  "$defs": {
+    "span": {
+      "type": "object",
+      "title": "span",
+      "description": "Where a node came from in the sources: a file, character offsets (end exclusive), a line from 1 and a column from 0.",
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "The source file name, without directory."
+        },
+        "start": {
+          "type": "integer",
+          "description": "Character offset of the first character."
+        },
+        "end": {
+          "type": "integer",
+          "description": "Character offset after the last character."
+        },
+        "line": {
+          "type": "integer",
+          "description": "Line of the first character, counted from 1."
+        },
+        "column": {
+          "type": "integer",
+          "description": "Column of the first character, counted from 0."
+        }
+      },
+      "required": [
+        "file",
+        "start",
+        "end",
+        "line",
+        "column"
+      ],
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "object",
+      "title": "text",
+      "description": "A run of plain text; adjacent text is merged into one object.",
+      "properties": {
+        "kind": {
+          "const": "text",
+          "description": "The node kind."
+        },
+        "text": {
+          "type": "string",
+          "description": "The text."
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "enum-entry-kind": {
+      "title": "entry-kind",
+      "description": "What a dictionary entry defines: the text of its \\ftype, in\nkebab-case.  A variant spelling of one of these in the sources is fixed\nby a patch, not by a value of its own.",
+      "oneOf": [
+        {
+          "const": "function",
+          "description": "An ordinary function, called with evaluated arguments\n(\\ftype{Function})."
+        },
+        {
+          "const": "system-class",
+          "description": "A class the implementation may define as a built-in\nclass rather than a standard class (\\ftype{System Class})."
+        },
+        {
+          "const": "macro",
+          "description": "A global macro, expanded before evaluation (\\ftype{Macro})."
+        },
+        {
+          "const": "condition-type",
+          "description": "A type of condition, signalled to the handlers\n(\\ftype{Condition Type})."
+        },
+        {
+          "const": "variable",
+          "description": "A dynamic variable whose value may change\n(\\ftype{Variable})."
+        },
+        {
+          "const": "type",
+          "description": "A type that is not a class (\\ftype{Type})."
+        },
+        {
+          "const": "accessor",
+          "description": "A function that reads a place and, through setf, writes\nit (\\ftype{Accessor})."
+        },
+        {
+          "const": "standard-generic-function",
+          "description": "A generic function of the standard, whose methods users may addn(\\ftype{Standard Generic Function})."
+        },
+        {
+          "const": "special-operator",
+          "description": "An operator with its own evaluation rule, not a\nmacro or function (\\ftype{Special Operator})."
+        },
+        {
+          "const": "type-specifier",
+          "description": "A symbol that is only a compound type specifier,\nnaming no type alone (\\ftype{Type Specifier})."
+        },
+        {
+          "const": "constant-variable",
+          "description": "A variable whose value never changes\n(\\ftype{Constant Variable})."
+        },
+        {
+          "const": "declaration",
+          "description": "The identifier of a declaration, used in declare and\nproclaim (\\ftype{Declaration})."
+        },
+        {
+          "const": "restart",
+          "description": "The name of a restart the standard establishes or invokes\n(\\ftype{Restart})."
+        },
+        {
+          "const": "local-macro",
+          "description": "A macro defined only within another form (\\ftype{Local Macro})."
+        },
+        {
+          "const": "class",
+          "description": "A standard class, defined as by defclass (\\ftype{Class})."
+        },
+        {
+          "const": "symbol",
+          "description": "A symbol described for its own sake, neither operator,\nvariable nor type (\\ftype{Symbol})."
+        },
+        {
+          "const": "local-function",
+          "description": "A function defined only within another form (\\ftype{Local Function})."
+        }
+      ]
+    },
+    "enum-operator": {
+      "title": "operator",
+      "description": "The kind of operator a signature describes, by the macro that sets it.",
+      "oneOf": [
+        {
+          "const": "function",
+          "description": "A function: \\Defun and its variants, \\DefunMultiWithValues."
+        },
+        {
+          "const": "macro",
+          "description": "A macro: \\Defmac and its variants."
+        },
+        {
+          "const": "special-operator",
+          "description": "A special operator: \\Defspec and its variants."
+        },
+        {
+          "const": "generic-function",
+          "description": "A generic function: \\Defgen and its variants."
+        },
+        {
+          "const": "method",
+          "description": "A method of a generic function: \\Defmeth."
+        }
+      ]
+    },
+    "enum-reference-kind": {
+      "title": "reference-kind",
+      "description": "The macro a reference to a defined name was written with, which says\nwhat kind of name it means.",
+      "oneOf": [
+        {
+          "const": "any",
+          "description": "\\clref: a defined name of any kind."
+        },
+        {
+          "const": "function",
+          "description": "\\funref: a function."
+        },
+        {
+          "const": "macro",
+          "description": "\\macref: a macro."
+        },
+        {
+          "const": "special-operator",
+          "description": "\\specref: a special operator."
+        },
+        {
+          "const": "type",
+          "description": "\\typeref: a type or a class."
+        },
+        {
+          "const": "variable",
+          "description": "\\varref: a variable."
+        },
+        {
+          "const": "constant",
+          "description": "\\conref: a constant variable."
+        },
+        {
+          "const": "declaration",
+          "description": "\\declref: a declaration identifier."
+        },
+        {
+          "const": "package",
+          "description": "\\packref: a package."
+        },
+        {
+          "const": "keyword",
+          "description": "\\kwd, \\kwdref: a keyword, written with its colon."
+        },
+        {
+          "const": "loop-keyword",
+          "description": "\\loopref: a loop keyword."
+        },
+        {
+          "const": "lambda-list-keyword",
+          "description": "\\keyref: a lambda list keyword, written with its\nampersand."
+        },
+        {
+          "const": "typewriter",
+          "description": "\\ttref: a name set in the typewriter font."
+        },
+        {
+          "const": "misc",
+          "description": "\\misc, \\miscref: a symbol of no other kind (t, nil, a\nrestart)."
+        }
+      ]
+    },
+    "enum-index-kind": {
+      "title": "index-kind",
+      "description": "What an index entry indexes, by its macro.",
+      "oneOf": [
+        {
+          "const": "ref",
+          "description": "\\idxref: a defined name."
+        },
+        {
+          "const": "keyref",
+          "description": "\\idxkeyref: a lambda list keyword, without its ampersand."
+        },
+        {
+          "const": "code",
+          "description": "\\idxcode: code."
+        },
+        {
+          "const": "keyword",
+          "description": "\\idxkwd: a keyword."
+        },
+        {
+          "const": "text",
+          "description": "\\idxtext: a phrase."
+        },
+        {
+          "const": "term",
+          "description": "\\idxterm: a glossary term."
+        },
+        {
+          "const": "example",
+          "description": "\\idxexample: an example."
+        },
+        {
+          "const": "package",
+          "description": "\\idxpackref: a package."
+        }
+      ]
+    },
+    "enum-part-of-speech": {
+      "title": "part-of-speech",
+      "description": "The part of speech of a glossary term, by its macro.",
+      "oneOf": [
+        {
+          "const": "noun",
+          "description": "\\Noun, `n.'."
+        },
+        {
+          "const": "verb",
+          "description": "\\Verb, `v.'."
+        },
+        {
+          "const": "transitive-verb",
+          "description": "\\TransitiveVerb, `v.t.'."
+        },
+        {
+          "const": "adjective",
+          "description": "\\Adjective, `adj.'."
+        },
+        {
+          "const": "adverb",
+          "description": "\\Adverb, `adv.'."
+        }
+      ]
+    },
+    "enum-usage": {
+      "title": "usage",
+      "description": "Where a glossary sense comes from or is used, by its macro.",
+      "oneOf": [
+        {
+          "const": "ansi",
+          "description": "\\ANSI: a sense the standard itself fixes."
+        },
+        {
+          "const": "ieee",
+          "description": "\\IEEE: the sense of the IEEE standards."
+        },
+        {
+          "const": "iso",
+          "description": "\\ISO: the sense of the ISO standards."
+        },
+        {
+          "const": "traditional",
+          "description": "\\Traditional: a traditional sense, kept for\ncompatibility with earlier usage."
+        },
+        {
+          "const": "mathematics",
+          "description": "\\Mathematics: the sense of mathematics."
+        },
+        {
+          "const": "idiomatic",
+          "description": "\\Idiomatic: an idiomatic sense."
+        },
+        {
+          "const": "computers",
+          "description": "\\Computers: the sense of computing in general."
+        }
+      ]
+    },
+    "enum-math-class": {
+      "title": "math-class",
+      "description": "The class of a noad, as TeX gives it.",
+      "oneOf": [
+        {
+          "const": "ord",
+          "description": "An ordinary symbol."
+        },
+        {
+          "const": "op",
+          "description": "A large operator (a sum, an integral)."
+        },
+        {
+          "const": "bin",
+          "description": "A binary operation."
+        },
+        {
+          "const": "rel",
+          "description": "A relation."
+        },
+        {
+          "const": "open",
+          "description": "An opening delimiter."
+        },
+        {
+          "const": "close",
+          "description": "A closing delimiter."
+        },
+        {
+          "const": "punct",
+          "description": "Punctuation."
+        },
+        {
+          "const": "inner",
+          "description": "A delimited subformula (\\left … \\right)."
+        },
+        {
+          "const": "underline",
+          "description": "An underlined subformula (\\underline)."
+        },
+        {
+          "const": "overline",
+          "description": "An overlined subformula (\\overline)."
+        },
+        {
+          "const": "vcenter",
+          "description": "A box centred on the axis (\\vcenter)."
+        },
+        {
+          "const": "radical",
+          "description": "A radical (\\radical), its sign the noad's delimiter."
+        },
+        {
+          "const": "accent",
+          "description": "An accented nucleus (\\mathaccent), its accent the noad's."
+        }
+      ]
+    },
+    "enum-math-style": {
+      "title": "math-style",
+      "description": "A style of math, as TeX names it.",
+      "oneOf": [
+        {
+          "const": "display",
+          "description": "Display style (\\displaystyle)."
+        },
+        {
+          "const": "text",
+          "description": "Text style (\\textstyle)."
+        },
+        {
+          "const": "script",
+          "description": "Script style (\\scriptstyle)."
+        },
+        {
+          "const": "scriptscript",
+          "description": "Scriptscript style (\\scriptscriptstyle)."
+        }
+      ]
+    },
+    "target-chapter": {
+      "type": "object",
+      "title": "chapter",
+      "description": "A chapter, by its id: the target of a \\secref whose label a\n\\DefineChapter defines.",
+      "properties": {
+        "kind": {
+          "const": "chapter",
+          "description": "The target kind: which sort of node the id names."
+        },
+        "id": {
+          "type": "string",
+          "description": "The id of the node pointed to, unique among its target kind."
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "target-section": {
+      "type": "object",
+      "title": "section",
+      "description": "A section of any level, by its id: the target of a \\secref whose\nlabel a \\DefineSection defines.",
+      "properties": {
+        "kind": {
+          "const": "section",
+          "description": "The target kind: which sort of node the id names."
+        },
+        "id": {
+          "type": "string",
+          "description": "The id of the node pointed to, unique among its target kind."
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "target-entry": {
+      "type": "object",
+      "title": "entry",
+      "description": "A dictionary entry, by its id: the target of \\clref and its\nwrappers (\\funref, \\macref, …).",
+      "properties": {
+        "kind": {
+          "const": "entry",
+          "description": "The target kind: which sort of node the id names."
+        },
+        "id": {
+          "type": "string",
+          "description": "The id of the node pointed to, unique among its target kind."
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "target-figure": {
+      "type": "object",
+      "title": "figure",
+      "description": "A figure, by its id: the target of \\figref and \\thenextfigure.",
+      "properties": {
+        "kind": {
+          "const": "figure",
+          "description": "The target kind: which sort of node the id names."
+        },
+        "id": {
+          "type": "string",
+          "description": "The id of the node pointed to, unique among its target kind."
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "target-glossary": {
+      "type": "object",
+      "title": "glossary",
+      "description": "A glossary entry, by its id: the target of \\term and \\newterm.",
+      "properties": {
+        "kind": {
+          "const": "glossary",
+          "description": "The target kind: which sort of node the id names."
+        },
+        "id": {
+          "type": "string",
+          "description": "The id of the node pointed to, unique among its target kind."
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "document": {
+      "type": "object",
+      "title": "document",
+      "description": "The whole standard: the root of the model, built from every chapter\njob.",
+      "properties": {
+        "kind": {
+          "const": "document",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "version": {
+          "type": "string",
+          "title": "version",
+          "description": "The revision of the draft, the text of \\rev in setup-version.tex."
+        },
+        "front-matter": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/chapter"
+          },
+          "title": "front-matter",
+          "description": "The unnumbered chapters of chap-0.tex (\\beginSimpleChapter), in\norder; absent when the model is built from part of the jobs."
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/chapter"
+          },
+          "title": "chapters",
+          "description": "The numbered chapters (\\beginchapter), 1 to 26, then the\nappendix A, in that order."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "version",
+        "chapters"
+      ],
+      "additionalProperties": false
+    },
+    "chapter": {
+      "type": "object",
+      "title": "chapter",
+      "description": "A chapter: a numbered one begun by \\beginchapter, or an unnumbered\none of the front matter begun by \\beginSimpleChapter or\n\\beginSimpleChapterLeft.",
+      "properties": {
+        "kind": {
+          "const": "chapter",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "id": {
+          "type": "string",
+          "title": "id",
+          "description": "The chapter's id: the reference name of \\beginchapter (its third\nargument, e.g. ChapOne), or a simple chapter's title."
+        },
+        "number": {
+          "type": "string",
+          "title": "number",
+          "description": "The chapter's number as \\beginchapter's first argument gives it\n(\"1\" … \"26\", \"A\"); absent for a simple chapter."
+        },
+        "title": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "title",
+          "description": "The chapter's title, \\beginchapter's second argument or the\nsimple chapter's one."
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/section"
+              },
+              {
+                "$ref": "#/$defs/dictionary-entry"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "children",
+          "description": "What the chapter holds, in order: the blocks before its first\nsection, then its sections."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "id",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "section": {
+      "type": "object",
+      "title": "section",
+      "description": "A section of any level: \\beginSection or \\includeDictionary (level\n1), \\beginSubsection (2), \\beginsubsubsection (3),\n\\beginsubsubsubsection (4) or \\beginsubsubsubsubsection (5).  It runs\nto the next section of its level or above, or the chapter's end.",
+      "properties": {
+        "kind": {
+          "const": "section",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "id": {
+          "type": "string",
+          "title": "id",
+          "description": "The label of the \\DefineSection that names the section, or\n<parent-id>/<n> for a section that none names (its n-th among its\nparent's sections)."
+        },
+        "number": {
+          "type": "string",
+          "title": "number",
+          "description": "The section's number, its chapter's and the count of each level\njoined by dots (\"14.1.2\"), as the :write of its \\DefineSection\nconfirms."
+        },
+        "level": {
+          "type": "integer",
+          "title": "level",
+          "description": "The level, 1 for a section of the chapter, 2 for a subsection,\nand so on to 5."
+        },
+        "dictionary": {
+          "type": "boolean",
+          "title": "dictionary",
+          "description": "True for a dictionary section, begun by \\includeDictionary: its\nchildren are dictionary entries."
+        },
+        "title": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "title",
+          "description": "The section's title, the argument of the macro that began it."
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/section"
+              },
+              {
+                "$ref": "#/$defs/dictionary-entry"
+              },
+              {
+                "$ref": "#/$defs/glossary-group"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "children",
+          "description": "What the section holds, in order: blocks, dictionary entries,\nglossary groups and its subsections."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "id",
+        "number",
+        "level",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "dictionary-entry": {
+      "type": "object",
+      "title": "dictionary-entry",
+      "description": "A dictionary entry, from \\begincom to \\endcom: the description of\none or more defined names of one kind.",
+      "properties": {
+        "kind": {
+          "const": "dictionary-entry",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "id": {
+          "type": "string",
+          "title": "id",
+          "description": "The entry's id: its first name, or <name>/<entry-kind> when two\nentries share a first name (docs/exports.md, \"Ids\")."
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "names",
+          "description": "The names the entry describes, the comma-separated list of\n\\begincom's first argument, in order."
+        },
+        "entry-kind": {
+          "$ref": "#/$defs/enum-entry-kind",
+          "title": "entry-kind",
+          "description": "What the names are, from the entry's \\ftype."
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/part"
+          },
+          "title": "parts",
+          "description": "The entry's parts, one per \\label, in order."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "id",
+        "names",
+        "entry-kind"
+      ],
+      "additionalProperties": false
+    },
+    "part": {
+      "type": "object",
+      "title": "part",
+      "description": "A part of a dictionary entry: a \\label heading (Syntax, Arguments and\nValues, Description, …) and what follows it up to the next \\label or\nthe entry's end.",
+      "properties": {
+        "kind": {
+          "const": "part",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "title": {
+          "type": "string",
+          "title": "title",
+          "description": "The heading, the text of the \\label before its colon."
+        },
+        "none": {
+          "type": "boolean",
+          "title": "none",
+          "description": "True when the part says only \"None.\" (\\None after the\n\\label)."
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The part's blocks; absent when NONE is true."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "operator-signature": {
+      "type": "object",
+      "title": "operator-signature",
+      "description": "The syntax of an operator as a Syntax part sets it: \\Defun,\n\\Defmac, \\Defspec, \\Defgen and their WithValues, WithValuesNewline\nand NoReturn variants, \\Defmeth, \\DefunMultiWithValues, and the\nreader half of \\DefunMultiAccessorWithValues.",
+      "properties": {
+        "kind": {
+          "const": "operator-signature",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "operator": {
+          "$ref": "#/$defs/enum-operator",
+          "title": "operator",
+          "description": "The kind of operator, by the macro."
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "names",
+          "description": "The operator's name, or the names of the \\entry lines of a\n-Multi form, which share the lambda list and values."
+        },
+        "lambda-list": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "lambda-list",
+          "description": "The lambda list as written, with its parameters and lambda list\nkeywords; absent when empty."
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "values",
+          "description": "The values as written after the arrow; absent for a form\nwithout values (\\Defun, \\Defmeth) and when NO-RETURN is true."
+        },
+        "no-return": {
+          "type": "boolean",
+          "title": "no-return",
+          "description": "True for a NoReturn form: the operator never returns normally."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "operator",
+        "names"
+      ],
+      "additionalProperties": false
+    },
+    "setf-signature": {
+      "type": "object",
+      "title": "setf-signature",
+      "description": "The syntax of a setf form: \\Defsetf, \\DefsetfMulti, and the setf\nhalf of \\DefunMultiAccessorWithValues.",
+      "properties": {
+        "kind": {
+          "const": "setf-signature",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "names",
+          "description": "The accessor's name, or the names of the \\entry lines of a\n-Multi form."
+        },
+        "lambda-list": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "lambda-list",
+          "description": "The accessor's lambda list as written; absent when empty."
+        },
+        "new-value": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "new-value",
+          "description": "The new value as written."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "names",
+        "new-value"
+      ],
+      "additionalProperties": false
+    },
+    "variable-signature": {
+      "type": "object",
+      "title": "variable-signature",
+      "description": "The syntax of a variable or a constant: \\Defvar, \\Defvarnoast,\n\\Defcon.",
+      "properties": {
+        "kind": {
+          "const": "variable-signature",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The variable's name, with its asterisks when the source sets\nthem."
+        },
+        "constant": {
+          "type": "boolean",
+          "title": "constant",
+          "description": "True for a constant variable (\\Defcon)."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "type-signature": {
+      "type": "object",
+      "title": "type-signature",
+      "description": "The syntax of a compound type specifier: \\Deftype.",
+      "properties": {
+        "kind": {
+          "const": "type-signature",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The type specifier's symbol."
+        },
+        "syntax": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "syntax",
+          "description": "The lines of the compound form after the name, with their BNF\nnotation; absent when there are none."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "paragraph": {
+      "type": "object",
+      "title": "paragraph",
+      "description": "A paragraph: the text TeX set from the start of horizontal mode to\n\\par.",
+      "properties": {
+        "kind": {
+          "const": "paragraph",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The paragraph's text and inlines, in order."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "code-block": {
+      "type": "object",
+      "title": "code-block",
+      "description": "Code, from \\code to \\endcode, each line as it is written.",
+      "properties": {
+        "kind": {
+          "const": "code-block",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/code-line"
+          },
+          "title": "lines",
+          "description": "The lines, in order, blank ones included."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "lines"
+      ],
+      "additionalProperties": false
+    },
+    "code-line": {
+      "type": "object",
+      "title": "code-line",
+      "description": "A line of a code block.",
+      "properties": {
+        "kind": {
+          "const": "code-line",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The line's text, its spaces kept, and its inlines (terms,\nexample notation); absent for a blank line."
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "item-list": {
+      "type": "object",
+      "title": "item-list",
+      "description": "A list, from \\beginlist to \\endlist, or the items of a level below\n\\item (\\itemitem, \\itemitemitem) that follow one another.",
+      "properties": {
+        "kind": {
+          "const": "item-list",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/item"
+          },
+          "title": "items",
+          "description": "The list's items, in order."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "item": {
+      "type": "object",
+      "title": "item",
+      "description": "An item of a list: \\item, \\itemitem or \\itemitemitem and what\nfollows it up to the next item of its level or above, or the list's\nend.  Items of a lower level after it form an item list in its content.",
+      "properties": {
+        "kind": {
+          "const": "item",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "label": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "label",
+          "description": "The item's label, the macro's argument (a bullet, a number, a\nterm); absent when empty."
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The item's blocks."
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "editor-note": {
+      "type": "object",
+      "title": "editor-note",
+      "description": "An editor's note, \\editornote: a remark of the editors, not part of\nthe standard, kept whatever the options say.",
+      "properties": {
+        "kind": {
+          "const": "editor-note",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The note's text."
+        },
+        "hidden": {
+          "type": "boolean",
+          "title": "hidden",
+          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "reviewer-note": {
+      "type": "object",
+      "title": "reviewer-note",
+      "description": "A reviewer's note, \\reviewer: a remark of a reviewer, not part of\nthe standard, kept whatever the options say.",
+      "properties": {
+        "kind": {
+          "const": "reviewer-note",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The note's text."
+        },
+        "hidden": {
+          "type": "boolean",
+          "title": "hidden",
+          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "table": {
+      "type": "object",
+      "title": "table",
+      "description": "A table: an alignment (\\halign, as \\tabletwo, \\tablefigtwo …,\n\\displaytwo … and \\showtwo … set it) read as rows of cells.",
+      "properties": {
+        "kind": {
+          "const": "table",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/row"
+          },
+          "title": "rows",
+          "description": "The table's rows, in order."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "rows"
+      ],
+      "additionalProperties": false
+    },
+    "row": {
+      "type": "object",
+      "title": "row",
+      "description": "A row of a table.",
+      "properties": {
+        "kind": {
+          "const": "row",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "header": {
+          "type": "boolean",
+          "title": "header",
+          "description": "True for a row of column headings (the heading arguments of\n\\tablefigtwo and its relatives)."
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/cell"
+          },
+          "title": "cells",
+          "description": "The row's cells, in order."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "cells"
+      ],
+      "additionalProperties": false
+    },
+    "cell": {
+      "type": "object",
+      "title": "cell",
+      "description": "A cell of a row.",
+      "properties": {
+        "kind": {
+          "const": "cell",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The cell's text and inlines; absent for an empty cell."
+        },
+        "columns": {
+          "type": "integer",
+          "title": "columns",
+          "description": "The number of columns the cell spans when \\span joined more\nthan one; absent for one."
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "figure": {
+      "type": "object",
+      "title": "figure",
+      "description": "A figure: a numbered display with a caption (\\endfig, \\tablefigtwo\nand its relatives).",
+      "properties": {
+        "kind": {
+          "const": "figure",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "id": {
+          "type": "string",
+          "title": "id",
+          "description": "The label of the \\DefineFigure that names the figure, or\n<chapter-id>/fig-<n> for a figure that none names."
+        },
+        "number": {
+          "type": "string",
+          "title": "number",
+          "description": "The figure's number, its chapter's and its own joined by a\nhyphen (\"14-1\"), from the caption, checked against the :write of its\n\\DefineFigure when there is one."
+        },
+        "caption": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "caption",
+          "description": "The caption's text after the number; absent when the figure has\nnone."
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "What the figure shows: a table, or other blocks."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "id",
+        "number",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "term-ref": {
+      "type": "object",
+      "title": "term-ref",
+      "description": "A use of a glossary term: \\term, or \\newterm and \\newtermidx where\nthe text defines the term.",
+      "properties": {
+        "kind": {
+          "const": "term-ref",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "text": {
+          "type": "string",
+          "title": "text",
+          "description": "The term as written, inflected (\"dotted lists\")."
+        },
+        "defining": {
+          "type": "boolean",
+          "title": "defining",
+          "description": "True for \\newterm and \\newtermidx: the use defines the term."
+        },
+        "sense": {
+          "type": "integer",
+          "title": "sense",
+          "description": "The glossary sense meant, from the \\meaning that follows;\nabsent when none does."
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/target-glossary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "target",
+          "description": "The glossary entry of the term; absent while unresolved."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "text",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "operator-ref": {
+      "type": "object",
+      "title": "operator-ref",
+      "description": "A reference to a defined name: \\clref and its wrappers.",
+      "properties": {
+        "kind": {
+          "const": "operator-ref",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "text": {
+          "type": "string",
+          "title": "text",
+          "description": "The name as the reference sets it."
+        },
+        "via": {
+          "$ref": "#/$defs/enum-reference-kind",
+          "title": "via",
+          "description": "The macro the reference was written with."
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/target-entry"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "target",
+          "description": "The dictionary entry of the name; absent while unresolved."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "text",
+        "via",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "section-ref": {
+      "type": "object",
+      "title": "section-ref",
+      "description": "A reference to a section or a chapter: \\secref.",
+      "properties": {
+        "kind": {
+          "const": "section-ref",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "label": {
+          "type": "string",
+          "title": "label",
+          "description": "The label referred to, as written after \\secref."
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/target-section"
+            },
+            {
+              "$ref": "#/$defs/target-chapter"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "target",
+          "description": "The section or chapter of the label; absent while unresolved."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "label",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "figure-ref": {
+      "type": "object",
+      "title": "figure-ref",
+      "description": "A reference to a figure: \\figref.",
+      "properties": {
+        "kind": {
+          "const": "figure-ref",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "label": {
+          "type": "string",
+          "title": "label",
+          "description": "The label referred to, as written after \\figref."
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/target-figure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "target",
+          "description": "The figure of the label; absent while unresolved."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "label",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "this-section": {
+      "type": "object",
+      "title": "this-section",
+      "description": "The words `this section': \\thissection, \\Thissection, a reference to\nthe section they are in.",
+      "properties": {
+        "kind": {
+          "const": "this-section",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/target-section"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "target",
+          "description": "The section the words are in; absent while unresolved."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "next-figure": {
+      "type": "object",
+      "title": "next-figure",
+      "description": "The words `Figure N-M' for the figure that follows: \\thenextfigure,\n\\Thenextfigure.",
+      "properties": {
+        "kind": {
+          "const": "next-figure",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/target-figure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "target",
+          "description": "The next figure; absent while unresolved."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "param": {
+      "type": "object",
+      "title": "param",
+      "description": "A parameter of the operator described: \\param.",
+      "properties": {
+        "kind": {
+          "const": "param",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The parameter's name."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "metavariable": {
+      "type": "object",
+      "title": "metavariable",
+      "description": "A metavariable, in double angle brackets: \\metavar, \\metaparam.",
+      "properties": {
+        "kind": {
+          "const": "metavariable",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The metavariable's name."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "format-directive": {
+      "type": "object",
+      "title": "format-directive",
+      "description": "A format directive: \\formatOp, \\formatdirective.",
+      "properties": {
+        "kind": {
+          "const": "format-directive",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The directive after its tilde, e.g. \"A\"."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "lambda-list-keyword": {
+      "type": "object",
+      "title": "lambda-list-keyword",
+      "description": "A lambda list keyword in a lambda list: \\opt, \\rest, \\key and their\nrelatives.",
+      "properties": {
+        "kind": {
+          "const": "lambda-list-keyword",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The keyword with its ampersand, e.g. \"&optional\"."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "code": {
+      "type": "object",
+      "title": "code",
+      "description": "Code within text: \\f, \\ff, and text in the typewriter font outside\nvocabulary entries.",
+      "properties": {
+        "kind": {
+          "const": "code",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The code's text."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "emphasis": {
+      "type": "object",
+      "title": "emphasis",
+      "description": "Emphasis: \\i, \\j, and italic text outside vocabulary entries.",
+      "properties": {
+        "kind": {
+          "const": "emphasis",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The emphasised text."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "strong": {
+      "type": "object",
+      "title": "strong",
+      "description": "Strong emphasis: \\b, and bold text outside vocabulary entries.",
+      "properties": {
+        "kind": {
+          "const": "strong",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The text set in bold."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "evaluates-to": {
+      "type": "object",
+      "title": "evaluates-to",
+      "description": "The arrow `evaluates to' of an example: \\EV.",
+      "properties": {
+        "kind": {
+          "const": "evaluates-to",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "may-evaluate-to": {
+      "type": "object",
+      "title": "may-evaluate-to",
+      "description": "The arrow `might evaluate to' (implementation-dependent) of an\nexample: \\OV.",
+      "properties": {
+        "kind": {
+          "const": "may-evaluate-to",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "does-not-evaluate-to": {
+      "type": "object",
+      "title": "does-not-evaluate-to",
+      "description": "The arrow `does not evaluate to' of an example: \\NV.",
+      "properties": {
+        "kind": {
+          "const": "does-not-evaluate-to",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "equivalent": {
+      "type": "object",
+      "title": "equivalent",
+      "description": "The sign `is equivalent to' of an example: \\EQ.",
+      "properties": {
+        "kind": {
+          "const": "equivalent",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "title": "output",
+      "description": "The triangle that marks the output of an example, which follows it:\n\\OUT.",
+      "properties": {
+        "kind": {
+          "const": "output",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "title": "input",
+      "description": "User input in an example: \\IN.",
+      "properties": {
+        "kind": {
+          "const": "input",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The input."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "citation": {
+      "type": "object",
+      "title": "citation",
+      "description": "The title of a work the standard cites: \\CLtL, \\CLtLTwo and the\nother citation macros of setup-terms.tex.",
+      "properties": {
+        "kind": {
+          "const": "citation",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The title as set."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "index-entry": {
+      "type": "object",
+      "title": "index-entry",
+      "description": "An entry of the index: an anchor where the text indexes a name or a\nphrase, \\idxref and its relatives.",
+      "properties": {
+        "kind": {
+          "const": "index-entry",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "index-kind": {
+          "$ref": "#/$defs/enum-index-kind",
+          "title": "index-kind",
+          "description": "What is indexed."
+        },
+        "text": {
+          "type": "string",
+          "title": "text",
+          "description": "The indexed text, as written."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "index-kind",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "issue-start": {
+      "type": "object",
+      "title": "issue-start",
+      "description": "Where the text an X3J13 issue brought begins: \\issue.  Issues are\nranges that may cross blocks and sections, so they are anchors.",
+      "properties": {
+        "kind": {
+          "const": "issue-start",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The issue's name, e.g. \"DOTTED-LIST-ARGUMENTS:CLARIFY\"."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "issue-end": {
+      "type": "object",
+      "title": "issue-end",
+      "description": "Where the text an X3J13 issue brought ends: \\endissue, the one end\nof the issue-start before it with its name.",
+      "properties": {
+        "kind": {
+          "const": "issue-end",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The issue's name."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "glossary-group": {
+      "type": "object",
+      "title": "glossary-group",
+      "description": "The glossary entries under one letter heading, from \\firstindextab\nor \\indextab to the next.",
+      "properties": {
+        "kind": {
+          "const": "glossary-group",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "letter": {
+          "type": "string",
+          "title": "letter",
+          "description": "The heading's letter, or the heading for the entries that do not\nbegin with a letter."
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/glossary-entry"
+          },
+          "title": "entries",
+          "description": "The group's entries, in order."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "letter"
+      ],
+      "additionalProperties": false
+    },
+    "glossary-entry": {
+      "type": "object",
+      "title": "glossary-entry",
+      "description": "A glossary entry, from \\gentry to the next \\gentry, \\indextab or\nthe glossary's end.",
+      "properties": {
+        "kind": {
+          "const": "glossary-entry",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "id": {
+          "type": "string",
+          "title": "id",
+          "description": "The entry's id: its term."
+        },
+        "term": {
+          "type": "string",
+          "title": "term",
+          "description": "The term defined, \\gentry's argument."
+        },
+        "pronunciation": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "pronunciation",
+          "description": "How the term is pronounced, \\pronounced's argument, with its\nstress marks; absent when not given."
+        },
+        "parts-of-speech": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/enum-part-of-speech"
+          },
+          "title": "parts-of-speech",
+          "description": "The parts of speech given after the term, before the senses, in\norder."
+        },
+        "usages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/enum-usage"
+          },
+          "title": "usages",
+          "description": "The usages given after the term, before the senses, that hold\nfor every sense."
+        },
+        "senses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/glossary-sense"
+          },
+          "title": "senses",
+          "description": "The senses, in order; one, without a number, when the entry is\nnot numbered."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "id",
+        "term",
+        "senses"
+      ],
+      "additionalProperties": false
+    },
+    "glossary-sense": {
+      "type": "object",
+      "title": "glossary-sense",
+      "description": "A sense of a glossary term: a numbered definition (`1.', `2.', …), or\nthe entry's one definition.",
+      "properties": {
+        "kind": {
+          "const": "glossary-sense",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "number": {
+          "type": "integer",
+          "title": "number",
+          "description": "The sense's number; absent when the entry has one sense."
+        },
+        "parts-of-speech": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/enum-part-of-speech"
+          },
+          "title": "parts-of-speech",
+          "description": "The parts of speech given for this sense alone."
+        },
+        "usages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/enum-usage"
+          },
+          "title": "usages",
+          "description": "The usages given for this sense alone."
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The definition's text, its \\term references and its `See'\npointers."
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/glossary-example"
+          },
+          "title": "examples",
+          "description": "The sense's examples, \\gexample, in order."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "glossary-example": {
+      "type": "object",
+      "title": "glossary-example",
+      "description": "An example of a glossary sense, set in quotes: \\gexample.",
+      "properties": {
+        "kind": {
+          "const": "glossary-example",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The example's text."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-rule": {
+      "type": "object",
+      "title": "bnf-rule",
+      "description": "A BNF rule: \\auxbnf, a non-terminal and its definition.",
+      "properties": {
+        "kind": {
+          "const": "bnf-rule",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The non-terminal defined."
+        },
+        "definition": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "definition",
+          "description": "The right side, with its notation and line breaks."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name",
+        "definition"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-break": {
+      "type": "object",
+      "title": "bnf-break",
+      "description": "A line break within the right side of a BNF rule: \\CR.",
+      "properties": {
+        "kind": {
+          "const": "bnf-break",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-optional": {
+      "type": "object",
+      "title": "bnf-optional",
+      "description": "What may appear once or not at all, in brackets: \\brac, or \\lbrac\n… \\rbrac split over lines.",
+      "properties": {
+        "kind": {
+          "const": "bnf-optional",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The optional part."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-zero-or-more": {
+      "type": "object",
+      "title": "bnf-zero-or-more",
+      "description": "What may appear any number of times, starred: \\star.",
+      "properties": {
+        "kind": {
+          "const": "bnf-zero-or-more",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "What repeats."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-one-or-more": {
+      "type": "object",
+      "title": "bnf-one-or-more",
+      "description": "What appears one or more times, with a plus: \\plus.",
+      "properties": {
+        "kind": {
+          "const": "bnf-one-or-more",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "What repeats."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-repeat-previous": {
+      "type": "object",
+      "title": "bnf-repeat-previous",
+      "description": "A plus alone: what precedes appears one or more times (\\prevplus,\nafter a group split over lines).",
+      "properties": {
+        "kind": {
+          "const": "bnf-repeat-previous",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-group": {
+      "type": "object",
+      "title": "bnf-group",
+      "description": "A group, usually of alternatives, in braces: \\curly, or \\lcurly …\n\\rcurly split over lines.",
+      "properties": {
+        "kind": {
+          "const": "bnf-group",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The group's content."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-parenthesized": {
+      "type": "object",
+      "title": "bnf-parenthesized",
+      "description": "Its content in literal parentheses: \\paren, or \\lparen … \\rparen.",
+      "properties": {
+        "kind": {
+          "const": "bnf-parenthesized",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "What the parentheses hold."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-bracketed": {
+      "type": "object",
+      "title": "bnf-bracketed",
+      "description": "Its content in literal brackets, in the code font: \\ttbrac, or\n\\lttbrac … \\rttbrac.",
+      "properties": {
+        "kind": {
+          "const": "bnf-bracketed",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "What the brackets hold."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-interleave": {
+      "type": "object",
+      "title": "bnf-interleave",
+      "description": "Alternatives in any order, each at most once: \\interleave, or\n\\begininterleave … \\endinterleave.",
+      "properties": {
+        "kind": {
+          "const": "bnf-interleave",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The alternatives."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-required": {
+      "type": "object",
+      "title": "bnf-required",
+      "description": "Within an interleaving, what must appear exactly once: \\one.",
+      "properties": {
+        "kind": {
+          "const": "bnf-required",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/text"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "What is required."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-indirection": {
+      "type": "object",
+      "title": "bnf-indirection",
+      "description": "A non-terminal whose definition is spliced in place: \\down.",
+      "properties": {
+        "kind": {
+          "const": "bnf-indirection",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The non-terminal."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "bnf-caret": {
+      "type": "object",
+      "title": "bnf-caret",
+      "description": "The caret character `^' of a syntax description: \\hat.",
+      "properties": {
+        "kind": {
+          "const": "bnf-caret",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "angle-name": {
+      "type": "object",
+      "title": "angle-name",
+      "description": "A name in angle brackets: \\ang, the names of characters\n(\\NewlineChar) and \\noargs.",
+      "properties": {
+        "kind": {
+          "const": "angle-name",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "description": "The name, e.g. \"Newline\"."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "math": {
+      "type": "object",
+      "title": "math",
+      "description": "A formula: inline between $ and $, or displayed between $$ and $$.",
+      "properties": {
+        "kind": {
+          "const": "math",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "display": {
+          "type": "boolean",
+          "title": "display",
+          "description": "True for a displayed formula."
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "The formula's list, in order."
+        },
+        "equation-number": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "equation-number",
+          "description": "A display's equation number, \\eqno or \\leqno; absent when it\nhas none."
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "math-noad": {
+      "type": "object",
+      "title": "math-noad",
+      "description": "A noad: a nucleus of some class with its scripts.",
+      "properties": {
+        "kind": {
+          "const": "math-noad",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "class": {
+          "$ref": "#/$defs/enum-math-class",
+          "title": "class",
+          "description": "The noad's class."
+        },
+        "limits": {
+          "type": "boolean",
+          "title": "limits",
+          "description": "True for an operator whose scripts go above and below\n(\\limits)."
+        },
+        "delimiter": {
+          "type": "string",
+          "title": "delimiter",
+          "description": "A radical's sign or an accent's character, as Unicode; absent\nfor other classes."
+        },
+        "nucleus": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "nucleus",
+          "description": "The nucleus: one character, or a subformula; absent for {}."
+        },
+        "superscript": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "superscript",
+          "description": "The superscript; absent when none."
+        },
+        "subscript": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "subscript",
+          "description": "The subscript; absent when none."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "class"
+      ],
+      "additionalProperties": false
+    },
+    "math-char": {
+      "type": "object",
+      "title": "math-char",
+      "description": "A character of a formula, mapped from its family's font to Unicode.",
+      "properties": {
+        "kind": {
+          "const": "math-char",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "text": {
+          "type": "string",
+          "title": "text",
+          "description": "The character, as Unicode."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "math-fraction": {
+      "type": "object",
+      "title": "math-fraction",
+      "description": "A fraction: \\over, \\atop, \\above and their withdelims forms.",
+      "properties": {
+        "kind": {
+          "const": "math-fraction",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "numerator": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "numerator",
+          "description": "The numerator."
+        },
+        "denominator": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "denominator",
+          "description": "The denominator."
+        },
+        "no-rule": {
+          "type": "boolean",
+          "title": "no-rule",
+          "description": "True when no bar separates the two (\\atop, or a zero\nthickness)."
+        },
+        "left-delimiter": {
+          "type": "string",
+          "title": "left-delimiter",
+          "description": "The delimiter on the left of a withdelims form, as Unicode;\nabsent otherwise."
+        },
+        "right-delimiter": {
+          "type": "string",
+          "title": "right-delimiter",
+          "description": "The delimiter on the right of a withdelims form, as Unicode;\nabsent otherwise."
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "math-delimiter": {
+      "type": "object",
+      "title": "math-delimiter",
+      "description": "A delimiter that grows with its subformula: \\left or \\right.",
+      "properties": {
+        "kind": {
+          "const": "math-delimiter",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "right": {
+          "type": "boolean",
+          "title": "right",
+          "description": "True for \\right, false for \\left."
+        },
+        "text": {
+          "type": "string",
+          "title": "text",
+          "description": "The delimiter, as Unicode; absent for the null delimiter (.)."
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "math-style-change": {
+      "type": "object",
+      "title": "math-style-change",
+      "description": "A change of style within a formula: \\displaystyle, \\textstyle,\n\\scriptstyle, \\scriptscriptstyle.",
+      "properties": {
+        "kind": {
+          "const": "math-style-change",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "style": {
+          "$ref": "#/$defs/enum-math-style",
+          "title": "style",
+          "description": "The new style."
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "style"
+      ],
+      "additionalProperties": false
+    },
+    "math-choice": {
+      "type": "object",
+      "title": "math-choice",
+      "description": "\\mathchoice: four subformulas, of which TeX sets the one for the\nstyle in force; all four are kept.",
+      "properties": {
+        "kind": {
+          "const": "math-choice",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "display": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "display",
+          "description": "For display style."
+        },
+        "text": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "text",
+          "description": "For text style."
+        },
+        "script": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "script",
+          "description": "For script style."
+        },
+        "scriptscript": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/math-noad"
+              },
+              {
+                "$ref": "#/$defs/math-char"
+              },
+              {
+                "$ref": "#/$defs/math-fraction"
+              },
+              {
+                "$ref": "#/$defs/math-delimiter"
+              },
+              {
+                "$ref": "#/$defs/math-style-change"
+              },
+              {
+                "$ref": "#/$defs/math-choice"
+              }
+            ]
+          },
+          "title": "scriptscript",
+          "description": "For scriptscript style."
+        }
+      },
+      "required": [
+        "kind",
+        "span"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
