@@ -204,6 +204,14 @@ Categories: `:block`.
 |---|---|---|---|
 | `content` | inline list | yes | The paragraph's text and inlines, in order. |
 
+Example:
+
+```lisp
+(:paragraph :content
+ ("A " (:emphasis :content ("call")) " is a "
+  (:strong :content ("safe call")) " if each of the following ..."))
+```
+
 ### Node kind `:code-block`
 
 Code, from \code to \endcode, each line as it is written.
@@ -214,6 +222,14 @@ Categories: `:block`.
 |---|---|---|---|
 | `lines` | list of node of kind or category `:code-line` | yes | The lines, in order, blank ones included. |
 
+Example:
+
+```lisp
+(:code-block :lines
+ ((:code-line :content (" (let ((x 1))"))
+  (:code-line :content ("   (declare (special x))"))))
+```
+
 ### Node kind `:code-line`
 
 A line of a code block.
@@ -221,6 +237,12 @@ A line of a code block.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | no | The line's text, its spaces kept, and its inlines (terms, example notation); absent for a blank line. |
+
+Example:
+
+```lisp
+(:code-line :content ("   (declare (special x))"))
+```
 
 ### Node kind `:item-list`
 
@@ -233,6 +255,16 @@ Categories: `:block`.
 |---|---|---|---|
 | `items` | list of node of kind or category `:item` | yes | The list's items, in order. |
 
+Example:
+
+```lisp
+(:item-list :items
+ ((:item :label ("•") :content
+   ((:paragraph :content ("bindings of dynamic variables."))))
+  (:item :label ("•") :content
+   ((:paragraph :content ("bindings of functions."))))))
+```
+
 ### Node kind `:item`
 
 An item of a list: \item, \itemitem or \itemitemitem and what
@@ -243,6 +275,13 @@ end.  Items of a lower level after it form an item list in its content.
 |---|---|---|---|
 | `label` | inline list | no | The item's label, the macro's argument (a bullet, a number, a term); absent when empty. |
 | `content` | list of node of kind or category `:block` | no | The item's blocks. |
+
+Example:
+
+```lisp
+(:item :label ("•") :content
+ ((:paragraph :content ("bindings of dynamic variables."))))
+```
 
 ### Node kind `:editor-note`
 
@@ -256,6 +295,14 @@ Categories: `:block`, `:inline`.
 | `content` | inline list | yes | The note's text. |
 | `hidden` | boolean | no | True when the options (\editornotesfalse) hide the note from the typeset document. |
 
+Example:
+
+```lisp
+(:editor-note :content
+ ("KMP: ``derivatives??'' terminology to be worked on.") :hidden
+ common-lisp:t)
+```
+
 ### Node kind `:reviewer-note`
 
 A reviewer's note, \reviewer: a remark of a reviewer, not part of
@@ -267,6 +314,13 @@ Categories: `:block`, `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The note's text. |
 | `hidden` | boolean | no | True when the options (\editornotesfalse) hide the note from the typeset document. |
+
+Example:
+
+```lisp
+(:reviewer-note :content ("Is the order of other things specified??")
+ :hidden common-lisp:t)
+```
 
 ### Category `:block`
 
