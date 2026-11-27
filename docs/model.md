@@ -105,8 +105,58 @@ each written by its step.
 
 ### Declarations
 
-*Step 3.1.* How node kinds, fields, enums and target kinds are declared
-(`define-node`) and documented.
+*Step 3.1.* Every node kind is declared once
+(`src/model/define-node.lisp`):
+
+```lisp
+(define-node dictionary-entry (:area :entries :categories (:block)
+                               :example (:dictionary-entry :id "endp" …))
+  "A dictionary entry: … (docstring)"
+  (id :string :required t :doc "…" :example "endp")
+  (names :string :required t :repeated t :doc "…" :example ("endp"))
+  (entry-kind (:enum entry-kind) :required t :doc "…" :example :function)
+  (parts (:node part) :repeated t :doc "…"))
+```
+
+- **Kind and class.** The kind is the keyword of the name; the form
+  defines the class of that name, a subclass of `node` (whose `node-span`
+  every node has), with one slot per field: initarg the field's keyword,
+  accessor `<kind>-<field>`, `nil` until set.  `kind` and `span` are not
+  field names, a field's JSON name is its name in lower case, and the
+  name of a kind may not be a symbol of `common-lisp` or a class that is
+  not a node's.  `node-kind` gives a node's kind; `make-node` makes one
+  by kind, and `node-field-value` (setf-able) reads a field by its name,
+  a keyword, so that the builder fills a node as its events come.
+  A malformed or clashing declaration signals `declaration-error`.
+- **Field types.** `:string`, `:integer`, `:boolean`, `:span`;
+  `(:enum name)`, a value of a `define-enum`; `(:node name …)`, a node of
+  one of the kinds or categories named; `:inlines`, a list of strings and
+  nodes of the category `:inline`; `(:target kind …)`, a resolved
+  reference (`make-target`: a target kind of `define-target-kind` and an
+  id), `nil` while unresolved.  `:repeated t` makes the value a list of
+  values of the type (not for `:boolean` and `:inlines`); `:required t`
+  says every node of the kind has a value (a non-empty list when
+  repeated; a target may still be unresolved).  `node-problems` checks a
+  node against its declaration, `registry-problems` that every name a
+  declaration uses is declared.
+- **Categories** (`define-category`) group kinds that may stand in the
+  same place, `:block` and `:inline` among them; a kind joins one by
+  naming it in `:categories`.
+- **Areas.** Each declaration names its area, one of `*areas*`
+  (structure, entries, blocks, tables, inlines, glossary, bnf, math):
+  the file `src/model/nodes-<area>.lisp` it lives in and its
+  documentation ratchet ([exports.md](exports.md), "Documentation of
+  every definition").
+- **Documentation**: the node's docstring and `:example` (a node of the
+  real spec, as the S-expression export writes it), each field's `:doc`
+  and `:example`, each enum value's and each target kind's and
+  category's docstring.
+- **Registry.** Declarations go into `*registry*` (or the registry a
+  `:registry` option names, so that tests declare kinds of their own),
+  in order; a name declared again replaces its declaration in place.
+  Introspection: `node-kinds`, `find-node-declaration`, `node-fields`,
+  `enums`, `target-kinds`, `categories`, `category-kinds`,
+  `expand-kinds`.
 
 ### Building
 
