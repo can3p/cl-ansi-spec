@@ -62,6 +62,11 @@ description: Pre-commit quality gate for this repository — run the build/test 
 - **Untrusted names**: file resolvers reject absolute and `..` names.
 - **Make → Lisp**: pass user values as environment variables
   (`VAR='$(VAR)'`, read with `uiop:getenv`), never interpolated into argv.
+- **Whole-spec effects**: a change to the expander or the semantic layer
+  changes the events of the whole spec; `tests/semantic/spec-jobs.lisp`
+  says how.  A change of `tests/snapshots.sexp` must be meant, explained
+  in the commit message, and regenerated in it (`make snapshots`); a new
+  exception in its lists needs a reason that cites the sources.
 - **Test expectations**: when a new test fails, re-derive the expectation
   from the TeX rules before touching the code (most M1 failures were
   wrong expectations, e.g. line ends after control words are skipped).

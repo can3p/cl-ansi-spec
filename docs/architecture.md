@@ -55,8 +55,8 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 |---|-------|----------------|-------------------|-----------|
 | 0 | Sources | files → named line sources; patched tree | `cl-ansi-spec` (source), later `…/patch` | M0 ✅, M4 |
 | 1 | Reader | characters → tokens with spans, under the *current* catcodes | `cl-ansi-spec/tex` | M1 ✅ |
-| 2 | Expander | tokens → executed TeX: macros, conditionals, assignments, registers | `cl-ansi-spec/expand` | M2 |
-| 3 | Semantic layer | expander activity → **event stream** | `cl-ansi-spec/semantic` | M2 |
+| 2 | Expander | tokens → executed TeX: macros, conditionals, assignments, registers | `cl-ansi-spec/expand` | M2 ✅ |
+| 3 | Semantic layer | expander activity → **event stream** | `cl-ansi-spec/semantic` | M2 ✅ |
 | 4 | Model builder | event streams of all chapters → **document model**, resolved references | `cl-ansi-spec/model` | M3 |
 | 5 | Consumers | model → S-expression/JSON exports, HTML site | `…/export`, `…/html` | M3, M5 |
 
@@ -188,8 +188,7 @@ has the export formats, their JSON Schema and versioning.
 |-------|-------|
 | 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
-| 2–3 Expander, semantic layer | in progress: quantities, state, the expansion core, scanning, conditionals and main control's assignments, groups, modes, input, output, messages, and the lists of text, paragraphs, glue, kerns, penalties, rules, boxes, leaders, marks, discretionaries, accents, inserts, the
-whatsits, `\shipout`, math lists, alignments and plain TeX's format done (`src/expand/`, `make expand`, `make events`); the vocabulary mechanism and the spec's vocabulary done (`src/semantic/`, every macro the sources use in text an entry or classified); every chapter job runs, its events checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
+| 2–3 Expander, semantic layer | done (M2): TeX below typesetting (`src/expand/`, `make expand`), plain TeX's format, the vocabulary and its observation (`src/semantic/`, `make events`); every chapter job runs and its events are checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |
 
 Related: [process](process.md) explains how work advances.

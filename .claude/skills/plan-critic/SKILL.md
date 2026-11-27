@@ -48,6 +48,12 @@ step. Check, in this order, and skip what does not apply:
   output fit what the next phase consumes?
 - **Meaning and spans**: does anything drop meaning or source spans the
   semantic model needs, or emulate typesetting it does not need?
+- **Where TeX really is**: a plan about macros must say, on real lines,
+  in which list and at which token their effects land: a tail call ends
+  its caller first, a body may open a formula or a box, TeX expands a
+  table cell's first macro before its template, a body may end the
+  paragraph it was called in, a box set with `\setbox` may be thrown
+  away.  Ask for a fixture from the sources for each such case.
 - **Testability**: the test that proves the step done.
 - **Docs**: does the step name the docs it leaves up to date (and the
   schema, if the model changes)?

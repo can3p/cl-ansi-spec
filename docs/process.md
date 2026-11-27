@@ -21,7 +21,7 @@ the milestone's history file when it closes.
 ## Docs name what exists
 
 `make test` checks it (`tests/docs.lisp`), so "docs up to date" is not just
-a convention. In `AGENTS.md`, `PLAN.md`, `docs/*.md`, `docs/plan/*.md` and
+a convention. In `AGENTS.md`, `PLAN.md`, `docs/*.md`, `docs/plan/<id>.md` and
 `.claude/skills/*/SKILL.md`:
 
 - every repository path in backticks exists. A path is a code span without
