@@ -58,9 +58,11 @@
   chapter jobs unless `JOB=`; keep `LIMIT` small. Rules: `docs/vocabulary.md`.
 * `make expand FILE=chap-1 [LINES=10-20]` — run a spec file as a TeX job
   (INITEX with plain catcodes) through main control and print what it hands
-  on to later steps (events, alignments, input/output),
-  `FILE:LINE:COL<tab>TOKEN<tab>MODE`, TeX errors as `!! …` and TeX's notes
-  as `-- (…)`.  Always
+  on to later steps (events, alignments),
+  `FILE:LINE:COL<tab>TOKEN<tab>MODE`, TeX errors as `!! …`, TeX's notes
+  as `-- (…)`, what the job prints (`\message`, `\show`, …) as
+  `>> kind[ stream]: text` and its events (`\write`) as
+  `FILE:LINE:COL<tab>== kind properties`.  Always
   pass `LINES`, and a timeout: while jobs do not load plain TeX first, a
   chapter job may loop for ever, as TeX would.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.

@@ -290,7 +290,11 @@ NIL, with TeX's errors and replacements."
 (define-assignment "setbox" (expander token meaning global)
   (let ((n (scan-eight-bit-int expander)))
     (scan-optional-equals expander)
-    (scan-box expander (list :setbox n global))))
+    (if (expander-set-box-allowed expander)
+        (scan-box expander (list :setbox n global))
+        ;; §1241: not while a \write is expanded (streams.lisp).
+        (tex-error "Improper" :context (esc expander "setbox")
+                              :span (token-span token)))))
 
 (define-assignment ("wd" "ht" "dp") (expander token meaning global)
   ;; Box dimensions are changed in place, never saved (§1247).
@@ -449,7 +453,7 @@ with their hyphen positions, as (language letters positions)."
          (tex-error (format nil "Too late for ~A" (esc expander "patterns")))
          (scan-toks expander :warning-index (cs-token-control-sequence token)))))
 
-;;; Interaction (§1264) and \read
+;;; Interaction (§1264)
 
 (define-assignment ("batchmode" "nonstopmode" "scrollmode" "errorstopmode")
     (expander token meaning global)
@@ -457,7 +461,3 @@ with their hyphen positions, as (language letters positions)."
         (cdr (assoc name '(("batchmode" . :batch) ("nonstopmode" . :nonstop)
                            ("scrollmode" . :scroll) ("errorstopmode" . :error-stop))
                     :test #'string=))))
-
-(define-assignment "read" (expander token meaning global)
-  ;; read_to_cs is input: step 8b.
-  (hand-on expander token meaning :main-control))

@@ -47,7 +47,10 @@ Lisp draft standard (dpANS3)."
                              (:file "boxes")
                              (:file "prefixed")
                              (:file "assignments")
-                             (:file "main-control")))
+                             (:file "main-control")
+                             (:file "log")
+                             (:file "messages")
+                             (:file "streams")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
@@ -76,7 +79,8 @@ Lisp draft standard (dpANS3)."
                              (:file "scan")
                              (:file "conditionals")
                              (:file "main-control")
-                             (:file "assignments")))
+                             (:file "assignments")
+                             (:file "streams")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

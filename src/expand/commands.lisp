@@ -3,9 +3,9 @@
 ;;;; Who carries out each TeX82 primitive (docs/tex-fidelity.md, "Main
 ;;;; control"): every primitive has one disposition.  :EXPANDABLE ones run
 ;;;; inside get_x_token; :MAIN-CONTROL ones are main control's own
-;;;; (assignments, groups, modes, input and output); :EVENT ones become
-;;;; presentational events and :ALIGNMENT ones alignment commands, in
-;;;; later steps.  A command whose operation has not landed is handed on
+;;;; (assignments, groups, modes, input, output and messages); :EVENT
+;;;; ones become presentational events and :ALIGNMENT ones alignment
+;;;; commands, in later steps.  A command whose operation has not landed is handed on
 ;;;; as an UNHANDLED-COMMAND, a condition the caller may observe; it is
 ;;;; never dropped unseen.
 ;;;;
@@ -38,8 +38,8 @@ marks, inserts, math and its noads, leaders, \\shipout, \\special,
   '("cr" "crcr" "halign" "noalign" "omit" "span" "valign"))
 
 (defun input-output-command-names ()
-  "Main control's commands of input, output and messages, which have no
-operation yet (step 8b of docs/plan/m2.md)."
+  "Main control's commands of input, output and messages (messages.lisp,
+streams.lisp)."
   '("closein" "closeout" "errmessage" "immediate" "lowercase" "message"
     "openin" "openout" "read" "show" "showthe" "uppercase" "write"))
 
@@ -59,8 +59,8 @@ operation yet (step 8b of docs/plan/m2.md)."
    (meaning :initarg :meaning :reader unhandled-command-meaning
             :documentation "Its meaning (NIL for a character).")
    (disposition :initarg :disposition :reader unhandled-command-disposition
-                :documentation "Who is to carry it out: :EVENT,
-:ALIGNMENT or :MAIN-CONTROL (input and output).")
+                :documentation "Who is to carry it out: :EVENT or
+:ALIGNMENT.")
    (mode :initarg :mode :reader unhandled-command-mode
          :documentation "The mode main control was in."))
   (:report (lambda (condition stream)
@@ -69,8 +69,7 @@ operation yet (step 8b of docs/plan/m2.md)."
                      (unhandled-command-token condition)
                      (unhandled-command-mode condition))))
   (:documentation "Signalled for a command main control hands on to a
-step that has not landed (an event, an alignment command, input or
-output).  If no handler transfers control, the command is skipped: its
+step that has not landed (an event or an alignment command).  If no handler transfers control, the command is skipped: its
 operands, if any, are read as what follows."))
 
 (defun hand-on (expander token meaning disposition)

@@ -37,7 +37,8 @@
    ;; The input stack
    #:input-stack #:make-input-stack #:directory-resolver
    #:input-stack-file-end-hook #:end-current-file
-   #:push-source #:push-file #:push-tokens #:back-input
+   #:push-source #:push-file #:push-tokens #:back-input #:resolve-input
+   #:push-read-line #:reading-line-p #:end-read-line #:read-line-tokens
    #:next-token #:peek-token #:input-depth #:current-file-name
    #:current-line-number
    #:input-file-missing #:input-file-missing-name))

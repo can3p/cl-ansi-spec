@@ -74,10 +74,11 @@ Signal INPUT-FILE-MISSING if there is none."
   "Remove the exhausted token lists on top of STACK, as TeX does before it
 backs up a token or starts a macro body, so that tail calls do not grow
 the stack.  An exhausted :V-TEMPLATE list stays: its end is significant
-to alignments."
+to alignments, and an exhausted :READ-LINE list stays until
+END-READ-LINE removes it."
   (loop for top = (first (input-stack-levels stack))
         while (and (token-level-p top) (null (token-level-tokens top))
-                   (not (eq (token-level-kind top) :v-template)))
+                   (not (member (token-level-kind top) '(:v-template :read-line))))
         do (pop (input-stack-levels stack))))
 
 (defun push-tokens (stack tokens &optional (kind :inserted))
@@ -86,6 +87,34 @@ removing exhausted token lists.  TOKENS is copied, never modified.
 Returns no values."
   (pop-exhausted-token-lists stack)
   (push (make-token-level (copy-list tokens) kind) (input-stack-levels stack))
+  (values))
+
+(defun resolve-input (stack name)
+  "The line source the resolver of STACK finds for the file NAME, or NIL;
+as PUSH-FILE finds it, but nothing is pushed (TeX's a_open_in for
+\\openin)."
+  (funcall (input-stack-resolver stack) name))
+
+(defun push-read-line (stack tokens)
+  "TeX's begin_file_reading for a line of \\read (§483): TOKENS, the tokens
+of one line, are read next.  Once they are read, NEXT-TOKEN returns NIL
+(TeX's `\\read line has ended', §360) until END-READ-LINE removes the
+level.  Returns no values."
+  (push-tokens stack tokens :read-line))
+
+(defun reading-line-p (stack)
+  "True when the top level of STACK is a line PUSH-READ-LINE pushed, so
+that the token last read came from it (TeX's 1 <= name <= 17, §339)."
+  (let ((top (first (input-stack-levels stack))))
+    (and (token-level-p top) (eq (token-level-kind top) :read-line))))
+
+(defun end-read-line (stack)
+  "TeX's end_file_reading for a line of \\read: remove the exhausted
+lists on top of STACK and the line PUSH-READ-LINE pushed below them."
+  (pop-exhausted-token-lists stack)
+  (unless (reading-line-p stack)
+    (error "No line of \\read is being read."))
+  (pop (input-stack-levels stack))
   (values))
 
 (defun back-input (stack token)
@@ -100,16 +129,19 @@ on one line that file is f."
   (setf (input-stack-force-eof stack) t))
 
 (defun next-token (stack)
-  "Return the next token of STACK, or NIL once all its input is read.
-Exhausted levels (finished token lists, files at their end) are removed."
+  "Return the next token of STACK, or NIL once all its input is read, or
+once the line on top that PUSH-READ-LINE pushed is read.  Exhausted
+levels (finished token lists, files at their end) are removed."
   (loop
     (let ((top (first (input-stack-levels stack))))
       (etypecase top
         (null (return nil))
         (token-level
-         (if (token-level-tokens top)
-             (return (pop (token-level-tokens top)))
-             (pop (input-stack-levels stack))))
+         (cond ((token-level-tokens top)
+                (return (pop (token-level-tokens top))))
+               ((eq (token-level-kind top) :read-line)
+                (return nil))
+               (t (pop (input-stack-levels stack)))))
         (file-reader
          (let ((token (next-file-token top (input-stack-state stack)
                                        (lambda ()

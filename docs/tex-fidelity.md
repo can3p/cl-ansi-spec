@@ -121,7 +121,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     `\openin` opens one.
 - Main control (`src/expand/`: `commands.lisp`, `groups.lisp`,
   `modes.lisp`, `boxes.lisp`, `prefixed.lisp`, `assignments.lisp`,
-  `main-control.lisp`), §§1029-1280, 1335:
+  `main-control.lisp`, `log.lisp`, `messages.lisp`, `streams.lisp`),
+  §§1029-1298, 1335, 1340-1375:
   - *Every primitive has one disposition* (`command-disposition`):
     expandable, main control's own, an event, or an alignment command.
     What main control does not carry out yet is handed on as the
@@ -205,6 +206,48 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     line N was incomplete"; `\dump` inside a group is fatal, and ends the trie's
     readiness for `\patterns`.  The end of all input before them is
     fatal: "*** (job aborted, no legal \end found)".
+  - *Input, output and messages.*  What TeX prints goes to the job's
+    log (`job-log`, entries `log-entry`, each also signalled as a
+    `job-output` condition), one string per entry: TeX's line breaking
+    and `\newlinechar` are not kept.  `\message` and `\errmessage`
+    expand their text as `\edef` does; `\errmessage` is also a TeX
+    error whose message is the text, and its entry keeps `\errhelp` (TeX's
+    fixed help, used when `\errhelp` is empty, is not kept).
+    `\show` (the next token, unexpanded, and its meaning) and `\showthe`
+    are logged as `:show` entries and not signalled as errors (TeX's
+    error there only stops an interactive run); their text is what
+    follows `> `, without the final `.`.
+    `\uppercase`/`\lowercase` map character tokens of every category,
+    and active characters, by `\uccode`/`\lccode` when that is not 0,
+    and leave other control sequences; the result is read next.
+    `\openin` finds its file through the resolver, as `\input` (a file
+    not found leaves the stream closed, for `\ifeof`); `\closein` closes
+    it.  `\read` (read_toks) reads whole lines, under the catcodes and
+    `\endlinechar` in force, until braces balance: a right brace that
+    closes more than was opened ends the line and drops its rest; at the
+    end of the file the stream closes and the (empty) line read gives
+    `\par`, with "File ended within \read" if braces are open; an
+    `\outer` macro on a line becomes a space and is not read again
+    (§339).  The result is a macro without parameters ("Missing `to'
+    inserted").  A stream not open, or one outside 0..15, is the
+    terminal, which a job has not: the fatal "*** (cannot \read from
+    terminal in nonstop modes)".  A line of `\read` is tokenized as soon
+    as it is read; nothing can change catcodes while it is absorbed.
+    `\openout`, `\write` and `\closeout` are whatsits: events
+    (`docs/events.md`) with the stream (`\write` and `\closeout`: 17 for
+    a negative number, 16 above 15) and the file name or the unexpanded
+    token list; TeX carries them out when the page holding them is
+    shipped out.  After
+    `\immediate` (anything else after it is read again) they are carried
+    out at once: a stream 0..15 opens or closes (nothing is written to
+    disk; an event with `:immediate t` records it; streams 16 and 17
+    close nothing and emit no event), and a `\write`'s text is
+    expanded as TeX's write_out does (in braces, then the frozen
+    `\outer` `\endwrite`: "Unbalanced write command" for too many right
+    braces, a runaway for too many left ones; mode none, so `\ifvmode`
+    and its friends are false, and `\setbox` is "Improper"), then
+    becomes an event with `:text` when its stream is open, else a
+    `:write` log entry with the stream number (17: the log only).
 - Registers and parameters have INITEX defaults; TeX's integer,
   dimension and glue arithmetic is exact (see Quantities).
 - Quantities (`src/expand/`, files `arithmetic.lisp`, `units.lisp`,
@@ -274,7 +317,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
   never waits for the page builder or `\output`.
   `\lastskip`, `\lastpenalty` and `\lastkern` look at the last event of the
   current list. `\output` is stored and never run; `\shipout` is an event.
-- `\write` and `\openout` write nothing; writes are events.
+- `\write` and `\openout` write nothing; writes are events, and
+  `\immediate\write`s to no open file are log entries.
 
 These choices only affect layout code in `setup-*.tex`, such as running
 heads (`\comline`) and `\Vskip`. They are checked against every

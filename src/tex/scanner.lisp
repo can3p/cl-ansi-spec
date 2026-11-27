@@ -224,3 +224,26 @@ input there produces none."
                    :code code :span (span-of reader index next))
            (skip reader :invalid index next)
            nil))))))
+
+(defun line-tokens (source line state)
+  "The tokens of LINE, read from SOURCE, as TeX scans a line from state
+N to its end, under the category codes of STATE."
+  (let ((reader (%make-file-reader source nil))
+        (tokens '()))
+    (setf (file-reader-line reader) line)
+    (loop while (< (file-reader-loc reader) (line-limit line))
+          do (let ((token (scan-at-location reader state)))
+               (when token
+                 (push token tokens))))
+    (nreverse tokens)))
+
+(defun read-line-tokens (source state)
+  "TeX's input of one line for \\read (§§483-486): the tokens of the next
+line of SOURCE, under the category codes and \\endlinechar of STATE.
+The second value is true when SOURCE had no line left; the tokens are
+then those of an empty line (a \\par when \\endlinechar is a category
+5 character)."
+  (let ((line (read-source-line source state)))
+    (if line
+        (values (line-tokens source line state) nil)
+        (values (line-tokens source (end-of-file-line source state) state) t))))

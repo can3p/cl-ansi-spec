@@ -1,0 +1,61 @@
+;;;; src/expand/log.lisp
+;;;;
+;;;; What a job prints and what it emits.  TeX prints \message,
+;;;; \errmessage, \show, \showthe and the \write's that go to no open file
+;;;; on the terminal and in the log; here each is a LOG-ENTRY in the job's
+;;;; log (JOB-LOG), nothing is printed.  The writes and the opening and
+;;;; closing of write streams become events (docs/events.md) in the job's
+;;;; events (JOB-EVENTS); nothing is written to disk.  Each entry and event
+;;;; is also signalled as a JOB-OUTPUT, so that an observer (`make expand')
+;;;; sees it in order among the other conditions of the job.
+
+(in-package #:cl-ansi-spec/expand)
+
+(defstruct (log-entry (:constructor make-log-entry (kind text &key stream help span))
+                      (:copier nil))
+  "One thing the job printed.  KIND is :MESSAGE (\\message), :ERRMESSAGE
+(\\errmessage, whose HELP is the text of \\errhelp, or NIL when it is
+empty: TeX's fixed help texts are not kept), :SHOW
+(\\show and \\showthe, which TeX reports as errors; here they are only
+logged)
+or :WRITE (an \\immediate\\write to no open file, STREAM being its
+number: 17 for a negative one, which goes to the log only, else to the
+terminal and the log).  TEXT is what TeX prints, as one string: for
+:SHOW, what follows `> ', without the error's final `.'.  SPAN is the
+span of the command's token."
+  (kind nil :type (member :message :errmessage :show :write) :read-only t)
+  (text "" :type string :read-only t)
+  (stream nil :type (or null integer) :read-only t)
+  (help nil :type (or null string) :read-only t)
+  (span nil :read-only t))
+
+(define-condition job-output (condition)
+  ((item :initarg :item :reader job-output-item
+         :documentation "A LOG-ENTRY or an event."))
+  (:report (lambda (condition stream)
+             (format stream "Job output ~S" (job-output-item condition))))
+  (:documentation "Signalled for every entry of the job's log and every
+event, as it is made.  Nothing needs to handle it."))
+
+(defun log-message (expander kind text &rest keys &key stream help span)
+  "Add an entry of KIND with TEXT (see LOG-ENTRY) to EXPANDER's log."
+  (declare (ignore stream help span))
+  (let ((entry (apply #'make-log-entry kind text keys)))
+    (push entry (expander-log expander))
+    (signal 'job-output :item entry)
+    entry))
+
+(defun emit-event (expander event)
+  "Add EVENT, a list (KIND . PROPERTIES) as docs/events.md describes it, to
+EXPANDER's events."
+  (push event (expander-events expander))
+  (signal 'job-output :item event)
+  event)
+
+(defun job-log (expander)
+  "The entries of EXPANDER's log, oldest first."
+  (reverse (expander-log expander)))
+
+(defun job-events (expander)
+  "The events EXPANDER has emitted, oldest first."
+  (reverse (expander-events expander)))

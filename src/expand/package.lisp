@@ -6,7 +6,8 @@
 ;;;; arithmetic, units and printing), its state (meanings, registers,
 ;;;; parameters, codes and fonts over the reader's save stack), the
 ;;;; expansion of macros and expandable primitives, scanning,
-;;;; conditionals, and main control: assignments, groups and modes.
+;;;; conditionals, and main control: assignments, groups, modes, input,
+;;;; output and messages.
 
 (defpackage #:cl-ansi-spec/expand
   (:use #:cl)
@@ -25,11 +26,14 @@
                 #:cs-token #:cs-token-p #:cs-token-control-sequence #:make-cs-token
                 #:character-token #:character-token-p #:character-token-code
                 #:character-token-catcode #:make-character-token
-                #:intern-control-sequence #:make-frozen-control-sequence
+                #:intern-control-sequence #:intern-active-character
+                #:make-frozen-control-sequence
                 #:control-sequence-name #:control-sequence-active-p
                 #:input-stack #:make-input-stack #:input-stack-file-end-hook
                 #:next-token #:back-input #:push-tokens #:push-file
-                #:end-current-file #:input-file-missing #:current-line-number)
+                #:end-current-file #:input-file-missing #:current-line-number
+                #:resolve-input #:push-read-line #:reading-line-p #:end-read-line
+                #:read-line-tokens)
   (:export
    ;; Integers and scaled values (arithmetic.lisp)
    #:+infinity+ #:+max-dimen+ #:+unity+
@@ -129,4 +133,10 @@
    #:expander-after-token #:expander-interaction #:expander-patterns
    #:expander-hyphenation-exceptions #:expander-trie-not-ready
    #:expander-ended
-   #:main-control))
+   #:main-control
+   ;; Input, output and messages (log.lisp, messages.lisp, streams.lisp)
+   #:log-entry #:log-entry-p #:log-entry-kind #:log-entry-text
+   #:log-entry-stream #:log-entry-help #:log-entry-span
+   #:job-output #:job-output-item #:job-log #:job-events
+   #:expander-write-streams #:expander-set-box-allowed
+   #:read-toks))
