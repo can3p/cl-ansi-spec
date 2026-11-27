@@ -6,7 +6,7 @@
 
 (defpackage #:cl-ansi-spec/tex
   (:use #:cl)
-  (:import-from #:cl-ansi-spec #:read-spec-file
+  (:import-from #:cl-ansi-spec #:read-spec-file #:spec-tree-file-text
                 #:find-input-file #:generated-file-name-p #:source-search-path)
   (:export
    ;; Category codes

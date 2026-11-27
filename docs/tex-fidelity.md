@@ -601,7 +601,9 @@ Every job starts from a snapshot of the state after Knuth's `plain.tex` and
 `hyphen.tex` were run through our expander. Those files are vendored
 unmodified in `vendor/plain/`, with their provenance and licence in
 `vendor/PROVENANCE.md`; `patches/` never applies to them. Jobs read inputs
-along the source search path: the spec tree, then `vendor/plain/`. A file
+along the source search path: the spec tree, then `vendor/plain/`; a file
+of the spec tree is read as the patch set patches it (`docs/architecture.md`,
+"Sources"), in memory, with the file's own name in spans. A file
 a TeX run of the spec writes and a later run reads (`chap-N.fig`,
 `chap-N.tc`, `\jobname.toc`, `.idx`, `.iss`, `.ref`, `.sec`:
 `generated-file-name-p`, `src/source.lisp`) is an empty source when

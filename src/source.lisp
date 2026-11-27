@@ -78,6 +78,20 @@ them), which a job reads as empty when the search path does not hold it."
                *generated-file-types* :test #'equal)
        t))
 
+(defvar *source-overlay* nil
+  "NIL, or a function from the name of a file of the spec tree (as spans
+name it: chap-1.tex) to the text to serve in place of the file's own, or
+NIL for a file it leaves alone.  The patch set installs it
+(cl-ansi-spec/patch, \"Sources\" in docs/architecture.md); it is consulted
+by SPEC-TREE-FILE-TEXT only, never for the vendored plain TeX files.")
+
+(defun spec-tree-pathname-p (pathname)
+  "True when PATHNAME is a file directly inside the spec tree.  The tree is
+flat (a source is named by its file name, as spans name it), so the
+directory alone decides."
+  (uiop:pathname-equal (uiop:pathname-directory-pathname pathname)
+                       (spec-directory)))
+
 (defun find-input-file (name &optional (directories (source-search-path)))
   "Return the file name and the pathname of the input file NAME, as two
 values, or NIL if no directory of DIRECTORIES holds it or NAME is not
@@ -115,3 +129,12 @@ TYPE may be :WILD to list every file.  Subdirectories are never listed."
 The pristine sources are ASCII; UTF-8 is accepted so that patched sources
 may contain non-ASCII text."
   (uiop:read-file-string pathname :external-format :utf-8))
+
+(defun spec-tree-file-text (file-name pathname)
+  "The text a job reads for the source FILE-NAME found at PATHNAME: the
+patched text when PATHNAME is in the spec tree and *SOURCE-OVERLAY* has
+one for FILE-NAME, else the file's own text."
+  (or (and *source-overlay*
+           (spec-tree-pathname-p pathname)
+           (funcall *source-overlay* file-name))
+      (read-spec-file pathname)))
