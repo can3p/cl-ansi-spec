@@ -67,10 +67,26 @@ Lisp draft standard (dpANS3)."
                              (:file "observe")
                              (:file "handlers")
                              (:static-file "vocabulary.sexp")))
+               (:module "patch"
+                :serial t
+                :components ((:file "package")
+                             (:file "conditions")
+                             (:file "parse")
+                             (:file "apply")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
                              (:file "survey")))
+               (:module "sha256"
+                :serial t
+                :components ((:file "package")
+                             (:file "digest")
+                             (:file "api")))
+               (:module "json"
+                :serial t
+                :components ((:file "package")
+                             (:file "reader")
+                             (:file "writer")))
                (:module "model"
                 :serial t
                 :components ((:file "package")
@@ -148,7 +164,12 @@ Lisp draft standard (dpANS3)."
                 :components ((:file "observe")
                              (:file "vocabulary")
                              (:file "spec-jobs")))
+               (:module "patch"
+                :serial t
+                :components ((:file "patch")))
                (:file "inventory")
+               (:file "sha256")
+               (:file "json")
                (:module "model"
                 :serial t
                 :components ((:file "owners")
