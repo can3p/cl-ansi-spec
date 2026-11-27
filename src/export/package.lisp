@@ -9,7 +9,10 @@
 (defpackage #:cl-ansi-spec/export
   (:use #:cl)
   (:local-nicknames (#:model #:cl-ansi-spec/model)
-                    (#:json #:cl-ansi-spec/json))
+                    (#:json #:cl-ansi-spec/json)
+                    ;; write-json.lisp, files.lisp (step 3.7)
+                    (#:tex #:cl-ansi-spec/tex)
+                    (#:sha256 #:cl-ansi-spec/sha256))
   (:import-from #:cl-ansi-spec/json
                 #:json-object-p #:json-object-members #:json-get)
   ;; The declarations the reference doc reads (reference.lisp)
@@ -37,4 +40,8 @@
    #:unsupported-schema-keyword #:unsupported-schema-keyword-pointer
    #:unsupported-schema-keyword-keyword
    #:unresolved-schema-reference #:unresolved-schema-reference-reference
-   #:circular-schema-reference #:circular-schema-reference-reference))
+   #:circular-schema-reference #:circular-schema-reference-reference
+   ;; Writers (write-json.lisp, write-sexp.lisp, files.lisp; step 3.7)
+   #:node-json #:file-sexp #:sexp-text #:read-sexp-text #:file-object
+   #:schema-pathname #:schema-version #:export-file-name
+   #:write-export-file #:write-export-files))
