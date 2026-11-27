@@ -17,6 +17,8 @@ end-of-file checks."
   '(member :normal :skipping :defining :matching :aligning :absorbing))
 
 (defstruct (expander (:constructor %make-expander (state input job-name))
+                     (:constructor %make-format-expander
+                         (state input job-name frozen font-identifiers))
                      (:copier nil))
   "One TeX job: its STATE (an EXPANDER-STATE), its input stack and its
 \\jobname, plus the scanner variables TeX keeps beside them."
@@ -104,6 +106,12 @@ The primitives are installed in STATE."
                     (make-input-stack (es-tex state))))
          (expander (%make-expander state input job-name)))
     (install-primitives state)
+    (install-input-hooks expander)))
+
+(defun install-input-hooks (expander)
+  "Make EXPANDER's input stack call back into it at the end of a file (the
+\\outer check, §362) and of a u template (§324); return EXPANDER."
+  (let ((input (expander-input expander)))
     (setf (input-stack-file-end-hook input)
           (lambda (stack name)
             (declare (ignore stack name))
@@ -111,8 +119,8 @@ The primitives are installed in STATE."
     (setf (input-stack-u-template-end-hook input)
           (lambda (stack)
             (declare (ignore stack))
-            (end-u-template expander)))
-    expander))
+            (end-u-template expander))))
+  expander)
 
 (defun expander-tex (expander)
   "The reader state of EXPANDER."

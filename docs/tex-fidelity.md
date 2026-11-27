@@ -600,3 +600,34 @@ Every job starts from a snapshot of the state after Knuth's `plain.tex` and
 unmodified in `vendor/plain/`, with their provenance and licence in
 `vendor/PROVENANCE.md`; `patches/` never applies to them. Jobs read inputs
 along the source search path: the spec tree, then `vendor/plain/`.
+
+Formats and jobs (`src/expand/format.lisp`), §§1299-1337:
+
+- *The format.*  `load-plain-format` runs an INITEX job `plain` that
+  reads `plain.tex` (which inputs `hyphen.tex`) and then an inserted
+  `\dump`, as `initex plain \dump` reads the rest of its first line after
+  the file.  So final_cleanup's checks are TeX's: `\dump` inside a group
+  is fatal, open conditionals are noted, and the trie becomes ready.  The
+  format must load clean: any TeX error or note, or an end other than
+  `\dump`, is a Lisp `format-error`.  Loading takes about 20 ms, so nothing
+  is cached; a caller keeps the format it loaded.
+- *What it keeps* (`tex-format`): the expander state at the `\dump`
+  (meanings, registers, parameters, codes, fonts, `\parshape`, the
+  reader's catcodes, case codes and interned names), the frozen control
+  sequences and font identifiers made so far, the patterns and
+  exceptions (so a job's `\patterns` is "Too late for \patterns"), and
+  the interaction mode (TeX dumps it, §1326).  `\fmtname` is plain's own
+  macro.
+- *A job* (`make-job`) works on a copy of the format's state and never
+  shares anything mutable with the format or another job: every table is
+  copied; each font is copied once and the copy used wherever the font
+  appears (meanings, the font tables, `\nullfont`, the loaded fonts, the
+  font identifiers); box registers (`\strutbox`) are copied as `\copy`
+  does.  Control sequences, tokens, token lists, glue and the other
+  meanings are immutable and shared.  Everything else is fresh, as after
+  TeX's load_fmt_file: an empty input stack, nest and page, no marks,
+  conditionals or open streams, align_state 1000000, an empty log.
+- *Starting it* (`start-job`): the job's file is pushed, then
+  `\everyjob` is inserted on top of it (§1337), so it is read first.
+- Tokens of plain's macros keep their spans into `plain.tex`, the file
+  name the resolver gives.

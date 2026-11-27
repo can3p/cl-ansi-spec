@@ -39,6 +39,9 @@ and the expander's (:MATHCODE, :SFCODE, :DELCODE)."
   (make-equivalents name :default nil :size 256))
 
 (defstruct (expander-state (:constructor %make-expander-state (tex null-font))
+                           (:constructor %copy-expander-state
+                               (tex null-font meanings registers parameters
+                                codes fonts shapes loaded-fonts))
                            (:conc-name es-)
                            (:copier nil))
   "Everything an expander job assigns.  TEX is the reader's state, whose

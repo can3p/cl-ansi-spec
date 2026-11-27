@@ -9,12 +9,12 @@
 ;;;; conditionals, and main control: assignments, groups, modes, input,
 ;;;; output and messages, and the lists of nodes it builds (text, spaces,
 ;;;; paragraphs, glue, kerns, penalties, rules, boxes, whatsits, math,
-;;;; alignments).
+;;;; alignments), and the formats jobs start from.
 
 (defpackage #:cl-ansi-spec/expand
   (:use #:cl)
   (:import-from #:cl-ansi-spec/tex
-                #:tex-state #:make-initex-state
+                #:tex-state #:make-initex-state #:copy-tex-state #:copy-equivalents
                 #:make-equivalents #:equivalent #:assign #:replace-equivalent
                 #:begin-group #:end-group #:current-group-kind #:group-level
                 #:save-stack-depth
@@ -146,4 +146,7 @@
    #:log-entry-stream #:log-entry-help #:log-entry-span
    #:job-output #:job-output-item #:job-log #:job-events
    #:expander-write-streams #:expander-set-box-allowed
-   #:read-toks))
+   #:read-toks
+   ;; Formats and jobs (format.lisp)
+   #:tex-format #:tex-format-p #:load-plain-format #:format-error
+   #:format-error-detail #:make-job #:start-job))

@@ -23,7 +23,8 @@
 ;;;; each after a `-- open <mode> list' line.  Errors and notes are
 ;;;; printed as they happen, as for `make expand'.
 ;;;;
-;;;; The job starts from INITEX with plain TeX's category codes.
+;;;; The job starts from plain TeX's format (LOAD-PLAIN-FORMAT), as every
+;;;; chapter job does.
 ;;;;
 ;;;; Usage: make expand FILE=chap-1 [LINES=10-20]
 ;;;;        make events FILE=chap-1 [LINES=10-20]
@@ -102,14 +103,13 @@ the table SHOWN and everything inside them, unless SHOWN is T."
   "Run the job NAME and print what happens within LINES: the nodes
 appended (EVENTS false), or the events (EVENTS true)."
   (destructuring-bind (first last) (parse-line-range lines)
-    (let* ((state (cl-ansi-spec/expand:make-expander-state
-                   :tex (cl-ansi-spec/tex:make-plain-state)))
-           (expander (cl-ansi-spec/expand:make-expander
-                      :state state :job-name (pathname-name name)))
+    (let* ((expander (cl-ansi-spec/expand:make-job
+                      (cl-ansi-spec/expand:load-plain-format)
+                      :job-name (pathname-name name)))
            (in-range (= first 1))
            (shown (make-hash-table :test 'eq))
            (file nil))
-      (cl-ansi-spec/tex:push-file (cl-ansi-spec/expand:expander-input expander) name)
+      (cl-ansi-spec/expand:start-job expander name)
       (setf file (cl-ansi-spec/tex:current-file-name
                   (cl-ansi-spec/expand:expander-input expander)))
       (block job

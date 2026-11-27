@@ -16,6 +16,7 @@
    #:catcode-name #:catcode-value #:character-code
    ;; State: equivalents and the save stack
    #:tex-state #:make-initex-state #:make-plain-state #:apply-plain-catcodes
+   #:copy-tex-state #:copy-equivalents
    #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
    #:endlinechar #:set-endlinechar #:integer-parameter #:set-integer-parameter
    #:equivalents #:make-equivalents #:equivalent #:assign #:replace-equivalent
@@ -25,7 +26,7 @@
    #:span #:make-span #:span-file #:span-start #:span-end #:span-line
    #:span-column
    #:control-sequence #:control-sequence-name #:control-sequence-active-p
-   #:intern-control-sequence #:intern-active-character
+   #:intern-control-sequence #:intern-active-character #:interned-names
    #:make-frozen-control-sequence
    #:token #:token-span #:token= #:token-text #:character-text
    #:character-token #:make-character-token #:character-token-p

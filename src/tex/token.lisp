@@ -57,6 +57,12 @@ definition in the sources can reach."
         (setf (gethash code names)
               (%make-control-sequence (string (code-char code)) t)))))
 
+(defun interned-names (state)
+  "The names of the control sequences interned in STATE (not the active
+characters), in no particular order."
+  (loop for key being the hash-keys of (state-names state)
+        when (stringp key) collect key))
+
 ;;; Printing characters the way TeX shows them.
 
 (defun character-text (code)
