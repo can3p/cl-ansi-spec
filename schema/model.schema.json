@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "cl-ansi-spec document model",
+  "description": "The semantic model of the standard, one definition per node kind. Generated from the node declarations (make generate); do not edit.",
+  "oneOf": [],
+  "$defs": {
+    "span": {
+      "type": "object",
+      "title": "span",
+      "description": "Where a node came from in the sources: a file, character offsets (end exclusive), a line from 1 and a column from 0.",
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "The source file name, without directory."
+        },
+        "start": {
+          "type": "integer",
+          "description": "Character offset of the first character."
+        },
+        "end": {
+          "type": "integer",
+          "description": "Character offset after the last character."
+        },
+        "line": {
+          "type": "integer",
+          "description": "Line of the first character, counted from 1."
+        },
+        "column": {
+          "type": "integer",
+          "description": "Column of the first character, counted from 0."
+        }
+      },
+      "required": [
+        "file",
+        "start",
+        "end",
+        "line",
+        "column"
+      ],
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "object",
+      "title": "text",
+      "description": "A run of plain text; adjacent text is merged into one object.",
+      "properties": {
+        "kind": {
+          "const": "text",
+          "description": "The node kind."
+        },
+        "text": {
+          "type": "string",
+          "description": "The text."
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
