@@ -7,7 +7,7 @@
 (defpackage #:cl-ansi-spec/tex
   (:use #:cl)
   (:import-from #:cl-ansi-spec #:read-spec-file
-                #:find-input-file #:source-search-path)
+                #:find-input-file #:generated-file-name-p #:source-search-path)
   (:export
    ;; Category codes
    #:+escape+ #:+begin-group+ #:+end-group+ #:+math-shift+ #:+alignment-tab+
@@ -34,6 +34,7 @@
    #:cs-token #:make-cs-token #:cs-token-p #:cs-token-control-sequence
    ;; Lines and the scanner
    #:line-source #:make-line-source #:open-line-source #:line-source-name
+   #:line-source-text
    #:invalid-character #:invalid-character-code #:invalid-character-span
    ;; The input stack
    #:input-stack #:make-input-stack #:directory-resolver

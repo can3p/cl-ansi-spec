@@ -106,7 +106,8 @@ Lisp draft standard (dpANS3)."
                (:module "semantic"
                 :serial t
                 :components ((:file "observe")
-                             (:file "vocabulary")))
+                             (:file "vocabulary")
+                             (:file "spec-jobs")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

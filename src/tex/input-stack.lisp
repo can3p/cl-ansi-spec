@@ -52,10 +52,14 @@ with a tag is removed."
 FIND-INPUT-FILE: type tex is tried first for a name without one, unsafe
 names never resolve, and a name found in two directories signals
 AMBIGUOUS-INPUT-FILE.  Sources are named by their file name relative to
-their directory."
+their directory.  A generated file (GENERATED-FILE-NAME-P: chap-1.fig)
+that no directory holds is an empty source of that name, as after a
+first TeX run."
   (lambda (name)
     (multiple-value-bind (file-name pathname) (find-input-file name directories)
-      (and file-name (open-line-source file-name pathname)))))
+      (cond (file-name (open-line-source file-name pathname))
+            ((generated-file-name-p name) (make-line-source name ""))
+            (t nil)))))
 
 (defun make-input-stack (state &key (resolver (apply #'directory-resolver
                                                      (source-search-path)))

@@ -62,6 +62,22 @@ as given."
     (try name)
     nil))
 
+(defparameter *generated-file-types* '("fig" "tc" "toc" "idx" "iss" "ref" "sec")
+  "The types of the files a TeX run of the spec writes and later runs
+read: figure lists (chap-N.fig), tables of contents (chap-N.tc,
+\\jobname.toc), the index (\\jobname.idx, index.idx) and the issue,
+reference and section logs setup-aux.tex:180-185 opens.  None is in the
+pristine tree.")
+
+(defun generated-file-name-p (name)
+  "True when NAME names a file a TeX run of the spec generates (its type
+is one of *GENERATED-FILE-TYPES*, in lower case as the sources write
+them), which a job reads as empty when the search path does not hold it."
+  (and (safe-input-name-p name)
+       (member (pathname-type (uiop:parse-unix-namestring name))
+               *generated-file-types* :test #'equal)
+       t))
+
 (defun find-input-file (name &optional (directories (source-search-path)))
   "Return the file name and the pathname of the input file NAME, as two
 values, or NIL if no directory of DIRECTORIES holds it or NAME is not

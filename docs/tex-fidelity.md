@@ -594,12 +594,25 @@ dimension-dependent branch the setup files take; each one has a test.
 
 ## Jobs
 
-Each chapter file is a separate TeX job. Its `\jobname` is the chapter name.
+Each chapter file `chap-N.tex` (N a number or a letter) is a separate TeX
+job (`chapter-jobs`); `chap-0-edit-history.tex` is not one, `chap-0`
+inputs it. Its `\jobname` is the chapter name.
 Every job starts from a snapshot of the state after Knuth's `plain.tex` and
 `hyphen.tex` were run through our expander. Those files are vendored
 unmodified in `vendor/plain/`, with their provenance and licence in
 `vendor/PROVENANCE.md`; `patches/` never applies to them. Jobs read inputs
-along the source search path: the spec tree, then `vendor/plain/`.
+along the source search path: the spec tree, then `vendor/plain/`. A file
+a TeX run of the spec writes and a later run reads (`chap-N.fig`,
+`chap-N.tc`, `\jobname.toc`, `.idx`, `.iss`, `.ref`, `.sec`:
+`generated-file-name-p`, `src/source.lisp`) is an empty source when
+the trees do not hold it, as on a first run.
+
+Every job runs to its `\end` without a fatal error, and only chap-2 has
+TeX errors: they are the sources' own (concept-syntax.tex:279-302 uses
+`\w`, `\c`, `\SE`, … whose definitions, with the brace that opens
+their group, are commented out at :271-278, while the closing brace at
+:302 is not), so TeX reports them too.  A patch will restore the
+definitions; `tests/semantic/spec-jobs.lisp` pins them meanwhile.
 
 Formats and jobs (`src/expand/format.lisp`), §§1299-1337:
 

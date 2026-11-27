@@ -90,6 +90,22 @@ b")
     (false (funcall resolver ""))
     (true (funcall resolver "chap-1"))))
 
+(define-test generated-files-are-empty
+  :parent input-stack
+  ;; A file a TeX run of the spec writes (chap-1.fig, chap-0.tex:26) is
+  ;; an empty source when the trees do not hold it; another missing
+  ;; file, or an unsafe generated name, is not.
+  (let* ((resolver (directory-resolver (spec-directory)))
+         (source (funcall resolver "chap-1.fig")))
+    (true source)
+    (is string= "chap-1.fig" (line-source-name source))
+    (is string= "" (line-source-text source))
+    (true (funcall resolver "main.toc"))
+    (false (funcall resolver "chap-1.tex.missing"))
+    (false (funcall resolver "nothing"))
+    (false (funcall resolver "../chap-1.fig"))
+    (false (generated-file-name-p "chap-1"))))
+
 (define-test missing-files-are-signalled
   :parent input-stack
   (let ((stack (make-input-stack (make-plain-state)

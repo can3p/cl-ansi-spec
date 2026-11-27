@@ -52,6 +52,8 @@ sample export.
 
 ### M4 — Patch tooling
 Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
+First patch: concept-syntax.tex:271-278, the commented-out definitions
+of the syntax-type table's abbreviations (`docs/tex-fidelity.md`, "Jobs").
 
 ### M5 — Consumers
 An HTML site (our own HyperSpec-like rendering, nothing borrowed from the
