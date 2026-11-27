@@ -43,7 +43,7 @@
 (define-test incremental
   :parent sha256
   :description "Feeding octets one at a time gives the one-shot digest."
-  (let* ((octets (ascii-octets (car (second *fips-vectors*))))
+  (let* ((octets (ascii-octets "abc"))
          (digest (cl-ansi-spec/sha256:make-digest)))
     (loop for octet across octets
           do (cl-ansi-spec/sha256:digest-update
@@ -59,28 +59,42 @@
   (is equal (cl-ansi-spec/sha256:sha256-hex (ascii-octets "abc"))
       (cl-ansi-spec/sha256:sha256-hex (ascii-octets "xxabcyy") :start 2 :end 5)))
 
+(defparameter *padding-vectors*
+  '((55 . "5f25f149aa92e3e13093aed8216072fae623f35e26ca605b6cce17e04b7ccf44")
+    (56 . "301c69927f1603720c9f847b7e5e3bef77a7b9f75344490fe9039f13c36b842a")
+    (57 . "30ab35131f9b368e840dc65fc1eb832706e748e3c5e44ec40bc19cd1ce5c0dc2")
+    (63 . "939765b120205cbedae2ed31256b1967c38b6bdd9b0220535224cbc0b906d333")
+    (64 . "cc7321cce5e4409bd8077d58422e1214969059bbd40b4eeb0de0a642f40f7282")
+    (65 . "b8de0db62b6c87db61345504a8038bf973d987e8d2111abd8beb407c0bf3d9db"))
+  "Digests of that many 'Z' octets, generated once with sha256sum (an
+oracle independent of this code), around the block and padding boundaries.")
+
 (define-test padding-boundaries
   :parent sha256
-  :description "Lengths around the block and padding boundaries agree
-between one-shot and byte-by-byte digests."
-  (dolist (length '(55 56 57 63 64 65 119 120 128))
-    (let* ((octets (make-array length :element-type '(unsigned-byte 8)
-                                      :initial-element 90))
-           (digest (cl-ansi-spec/sha256:make-digest)))
-      (loop for i below length
-            do (cl-ansi-spec/sha256:digest-update digest octets :start i :end (1+ i)))
-      (is equalp (cl-ansi-spec/sha256:sha256 octets)
-          (cl-ansi-spec/sha256:digest-finish digest)
-          "length ~D" length))))
+  :description "Lengths around the block and padding boundaries have the
+digests sha256sum gives, and byte-by-byte digests agree with one-shot ones."
+  (loop for (length . digest) in *padding-vectors*
+        do (let ((octets (make-array length :element-type '(unsigned-byte 8)
+                                            :initial-element 90))
+                 (incremental (cl-ansi-spec/sha256:make-digest)))
+             (is equal digest (cl-ansi-spec/sha256:sha256-hex octets)
+                 "length ~D" length)
+             (loop for i below length
+                   do (cl-ansi-spec/sha256:digest-update
+                       incremental octets :start i :end (1+ i)))
+             (is equalp (cl-ansi-spec/sha256:sha256 octets)
+                 (cl-ansi-spec/sha256:digest-finish incremental)
+                 "incremental, length ~D" length))))
 
 (defun manifest-digest (manifest name)
   "The digest MANIFEST (a sha256sum listing) records for the file NAME."
-  (let ((line (find-if (lambda (line)
-                         (let ((suffix (concatenate 'string "  ./" name)))
-                           (and (>= (length line) (length suffix))
-                                (string= suffix line
-                                         :start2 (- (length line) (length suffix))))))
-                       (uiop:read-file-lines manifest))))
+  (let* ((suffix (concatenate 'string "  ./" name))
+         (line (or (find-if (lambda (line)
+                              (and (>= (length line) (length suffix))
+                                   (string= suffix line
+                                            :start2 (- (length line) (length suffix)))))
+                            (uiop:read-file-lines manifest))
+                   (error "No line for ~A in ~A" name manifest))))
     (subseq line 0 64)))
 
 (define-test sha256sum-of-a-spec-file

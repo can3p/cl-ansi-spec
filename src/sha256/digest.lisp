@@ -15,7 +15,7 @@
 (defconstant +chunk-octets+ 65536
   "Octets read at a time from a file.")
 
-(defparameter +round-constants+
+(defparameter *round-constants*
   (make-array
    64 :element-type 'word
       :initial-contents
@@ -33,7 +33,7 @@
   "The first 32 bits of the fractional parts of the cube roots of the first
 64 primes (FIPS 180-4, section 4.2.2).")
 
-(defparameter +initial-hash+
+(defparameter *initial-hash*
   (make-array
    8 :element-type 'word
      :initial-contents
@@ -46,11 +46,11 @@ first eight primes (FIPS 180-4, section 5.3.3).")
   "An incremental SHA-256 computation.  HASH holds the eight chaining
 words, BUFFER the octets of the block not yet compressed (FILL of them),
 and TOTAL the number of octets absorbed so far."
-  (hash (copy-seq +initial-hash+)
+  (hash (copy-seq *initial-hash*)
    :type (simple-array word (8)))
   (buffer (make-array +block-octets+ :element-type '(unsigned-byte 8))
    :type (simple-array (unsigned-byte 8) (*)))
-  (fill 0 :type (integer 0 64))
+  (filled 0 :type (integer 0 64))
   (total 0 :type unsigned-byte))
 
 (defmacro add32 (&rest terms)
@@ -90,13 +90,13 @@ and TOTAL the number of octets absorbed so far."
                           (aref schedule (- i 7))
                           (logxor (rotate-right w2 17) (rotate-right w2 19)
                                   (ash w2 -10)))))
-    (destructuring-bind (a b c d e f g h) (coerce hash 'list)
+    (destructuring-bind (a b c d e f g h) (list (aref hash 0) (aref hash 1) (aref hash 2) (aref hash 3) (aref hash 4) (aref hash 5) (aref hash 6) (aref hash 7))
       (dotimes (i 64)
         (let* ((big-sigma1 (logxor (rotate-right e 6) (rotate-right e 11)
                                    (rotate-right e 25)))
                (choose (logxor (logand e f) (logand (lognot e) g)))
                (temp1 (add32 h big-sigma1 choose
-                             (aref +round-constants+ i) (aref schedule i)))
+                             (aref *round-constants* i) (aref schedule i)))
                (big-sigma0 (logxor (rotate-right a 2) (rotate-right a 13)
                                    (rotate-right a 22)))
                (majority (logxor (logand a b) (logand a c) (logand b c)))
@@ -116,18 +116,18 @@ and TOTAL the number of octets absorbed so far."
 (defun digest-update (digest octets &key (start 0) (end (length octets)))
   "Absorb the octets of OCTETS from START below END into DIGEST.  Return
 DIGEST."
-  (let ((position start))
-    (loop while (< position end)
-          do (let* ((fill (digest-fill digest))
-                    (count (min (- +block-octets+ fill) (- end position)))
+  (let ((offset start))
+    (loop while (< offset end)
+          do (let* ((filled (digest-filled digest))
+                    (n (min (- +block-octets+ filled) (- end offset)))
                     (buffer (digest-buffer digest)))
                (replace buffer octets
-                        :start1 fill :start2 position :end2 (+ position count))
-               (incf (digest-fill digest) count)
-               (incf position count)
-               (when (= (digest-fill digest) +block-octets+)
+                        :start1 filled :start2 offset :end2 (+ offset n))
+               (incf (digest-filled digest) n)
+               (incf offset n)
+               (when (= (digest-filled digest) +block-octets+)
                  (compress-block (digest-hash digest) buffer)
-                 (setf (digest-fill digest) 0))))
+                 (setf (digest-filled digest) 0))))
     (incf (digest-total digest) (- end start))
     digest))
 
@@ -135,7 +135,7 @@ DIGEST."
   "Pad the message absorbed into DIGEST (FIPS 180-4, section 5.1.1) and
 return its 32-octet digest.  DIGEST must not be updated afterwards."
   (let* ((bit-length (* 8 (digest-total digest)))
-         (zeros (mod (- 56 (1+ (digest-fill digest))) +block-octets+))
+         (zeros (mod (- 56 (1+ (digest-filled digest))) +block-octets+))
          (padding (make-array (+ 1 zeros 8) :element-type '(unsigned-byte 8)
                                             :initial-element 0)))
     (setf (aref padding 0) #x80)
