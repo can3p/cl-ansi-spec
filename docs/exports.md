@@ -115,6 +115,18 @@ code base.
 - **Names** are kebab-case. Keywords in the Lisp model become strings with
   the colon removed.
 
+### Byte format
+
+Written by `cl-ansi-spec/json` (`src/json/`): UTF-8, LF line endings, two-space
+indentation, one member or element per line, `"key": value`, empty
+containers as `{}` and `[]`, a final newline, members in the order the
+exporter gives them. Strings escape only `"`, `\`, and the control
+characters (`\b \f \n \r \t`, else `\u00xx` in lowercase hex); all other
+characters are written as they are. Numbers are integers only; a float
+is an error. The reader is strict (RFC 8259): it rejects duplicate keys, lone
+surrogates, floats and trailing text. Lisp side: object `(:object (key . value)…)`,
+array vector, `:true`/`:false`/`:null`.
+
 ## Files
 
 | File | Contents |
