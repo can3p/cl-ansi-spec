@@ -4,8 +4,7 @@
 ;;;; 1335): read with get_x_token and carry out each command by mode.  A
 ;;;; command first meets TeX's rules of mode (a paragraph starts, a
 ;;;; paragraph ends before a vertical command, `$' is inserted, or `You
-;;;; can't use'); then main control's own commands run their operation,
-;;;; and the rest are handed on (UNHANDLED-COMMAND, commands.lisp).  The
+;;;; can't use'); then the command's primitive runs its operation.  The
 ;;;; job ends at \end or \dump with TeX's final_cleanup.
 ;;;;
 ;;;; A command is keyed by its primitive's name, or by a keyword for a
@@ -47,7 +46,7 @@
 
 (defparameter *math-enders*
   '("par" "end" "dump" "vskip" "vfil" "vfill" "vss" "vfilneg" "unvbox"
-    "unvcopy" "valign" "hrule")
+    "unvcopy" "valign" "hrule" "endv")
   "Commands that need math to end first (§1046).")
 
 (defparameter *math-only-commands*
@@ -93,8 +92,7 @@ can't use x in y mode' (§1048).")
 
 (defun character-command (expander key token meaning)
   "Main control for a character command KEY: braces, `$', characters and
-spaces of text, math characters and scripts, and what is handed on
-(`&')."
+spaces of text, math characters and scripts, and a misplaced `&'."
   (let ((kind (mode-kind (current-mode expander))))
     (ecase key
       (:left-brace (if (eq kind :math)
@@ -120,7 +118,7 @@ spaces of text, math characters and scripts, and what is handed on
            (math-character expander key token meaning)))
       (:math-given (math-character expander key token meaning))
       ((:sup-mark :sub-mark) (sub-sup expander token key))
-      (:tab-mark (hand-on expander token meaning :alignment)))))
+      (:tab-mark (align-error expander token meaning)))))
 
 (defun dispatch (expander token meaning)
   "Carry out the command TOKEN with MEANING (§1045)."
@@ -137,10 +135,11 @@ spaces of text, math characters and scripts, and what is handed on
                   (prefixed-command expander token meaning)
                   (character-command expander key token meaning)))
              (t
-              (let ((operation (primitive-operation (find-primitive key))))
-                (if operation
-                    (funcall operation expander token meaning)
-                    (hand-on expander token meaning (command-disposition key))))))))))
+              ;; The meaning's own operation: \endtemplate's endv is no
+              ;; primitive of the table.
+              (funcall (or (primitive-operation meaning)
+                           (error "The primitive ~A has no operation." key))
+                       expander token meaning)))))))
 
 (defun main-control (expander)
   "TeX's main_control (§1030): run EXPANDER's job until \\end or \\dump.

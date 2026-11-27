@@ -43,9 +43,9 @@ given) and FATAL message."
                     :files ,files)))
      (declare (ignorable expander))
      ,@setup
-     (multiple-value-bind (output messages contexts modes fatal-message)
+     (multiple-value-bind (output messages contexts fatal-message)
          (run-job expander)
-       (declare (ignore output contexts modes))
+       (declare (ignore output contexts))
        (is equal ',log (log-of expander) "log of ~S" ,text)
        (is equal ',errors messages "errors of ~S" ,text)
        ,@(when events `((is equal ',events (events-of expander) "events of ~S" ,text)))

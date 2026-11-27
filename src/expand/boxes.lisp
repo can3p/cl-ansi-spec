@@ -260,12 +260,14 @@ group of CODE and its left brace."
 
 (defun migrating-node-p (node)
   "True when TeX moves the marks, inserts and \\vadjust lists at the top
-of NODE's list out into the enclosing vertical list (§§655, 1199): a
-paragraph (line breaking), an adjusted \\hbox, a display."
+of NODE's list out into the enclosing vertical list (§§655, 796, 1199): a
+paragraph (line breaking), an adjusted \\hbox, a display, an entry of
+an \\halign."
   (case (node-kind node)
     (:paragraph t)
     (:box (tex-box-adjusted (node-value node)))
-    (:math (display-math-p node))))
+    (:math (display-math-p node))
+    (:cell (eq (node-value node) :hbox))))
 
 (defun adjust-marks (nodes)
   "The marks TeX moves out of a list of NODES whose adjust material
@@ -277,7 +279,9 @@ the math in it, which becomes part of the list."
                  (:vadjust (loop for child in (node-children node)
                                  when (eq (node-kind child) :tex-mark)
                                    collect (node-value child)))
-                 (:math (adjust-marks (node-children node))))))
+                 (:math (adjust-marks (node-children node)))
+                 ;; A \\valign's \\noalign material is part of the list.
+                 ((:alignment :no-align) (adjust-marks (node-children node))))))
 
 (defun split-marks (nodes)
   "The marks' token lists among NODES as \\vsplit sees them (§979): those
@@ -285,7 +289,11 @@ of the list, and those that line breaking, an adjusted \\hbox or a
 display would have moved out into it (MIGRATING-NODE-P)."
   (loop for node in nodes
         append (cond ((eq (node-kind node) :tex-mark) (list (node-value node)))
-                     ((migrating-node-p node) (adjust-marks (node-children node))))))
+                     ((migrating-node-p node) (adjust-marks (node-children node)))
+                     ;; An \\halign's rows and \\noalign material are
+                     ;; part of the list.
+                     ((member (node-kind node) '(:alignment :row :no-align))
+                      (split-marks (node-children node))))))
 
 (defun vsplit-box (expander)
   "\\vsplit's operands and box (§§1082, 977-979): the whole box of the

@@ -119,8 +119,7 @@ open."
              :span (token-span token)))
 
 (defun handle-right-brace (expander token)
-  "TeX's handle_right_brace (§1085) for the groups main control opens; the
-groups of alignments end in their own step."
+  "TeX's handle_right_brace (§§1085, 1132) for every group a `}' may end."
   (let ((code (current-group-code expander)))
     (ecase code
       (:simple (unsave expander))
@@ -135,4 +134,6 @@ groups of alignments end in their own step."
       (:insert (end-insert expander token))
       (:math (end-math-group expander token))
       (:math-choice (build-choices expander token))
-      (:vcenter (end-vcenter expander token)))))
+      (:vcenter (end-vcenter expander token))
+      (:align (missing-cr-error expander token))
+      (:no-align (end-no-align expander token)))))

@@ -26,8 +26,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     character 32 of category 10), `\par` in a macro that is not `\long`,
     an extra `}`.  Arguments keep the tokens actually read, so spans
     point to the input.  The body is substituted at once and pushed as
-    one list; exhausted token lists are removed first, so tail calls do
-    not grow the input stack.
+    one list; exhausted token lists are removed first (as before a token
+    is backed up), so tail calls do not grow the input stack.
   - *Runaways*: an `\outer` macro, or the end of a file, met while
     matching, defining, skipping, aligning or absorbing is reported and
     ended as TeX does (an inserted `\par`, `}`, `\fi` or `\cr}`).
@@ -125,11 +125,10 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
   `main-control.lisp`, `log.lisp`, `messages.lisp`, `streams.lisp`,
   `nodes.lisp`, `list-commands.lisp`), §§1029-1298, 1335, 1340-1375:
   - *Every primitive has one disposition* (`command-disposition`):
-    expandable, main control's own, an event, or an alignment command.
-    What main control does not carry out yet (the alignment commands)
-    is handed on as the condition `unhandled-command` (with its token,
-    disposition and mode), which `make expand` prints; nothing is
-    dropped unseen.
+    expandable, main control's own, or an event (it appends the node of
+    an event); every primitive of the latter two has an operation, which
+    main control runs (a primitive meaning's own, so that the frozen
+    `\endtemplate`'s, which no name reaches, runs too).
   - *TeX's cases by mode* come first: in vertical mode a character,
     `\char`, `$`, `\hskip`, `\unhbox`, `\vrule`, `\valign`, ... back up
     and begin a paragraph; in a paragraph `\vskip`, `\hrule`, `\end`,
@@ -506,8 +505,62 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     and `\skewchar` values assigned (globally, as in TeX).  `\font`
     reuses a font of the same file and size; `scaled 1000` is the design
     size, but without metrics an `at` size never equals it.
-- Alignments: preamble, templates, `\span`, `\omit`, `\noalign`, `\cr`,
-  `\crcr`.
+- Alignments (`src/expand/alignments.lisp`), §§768-812, 1126-1131,
+  1206, as TeX carries them out, never by splitting the text on `&`:
+  - *The preamble*: `\halign` or `\valign` pushes an alignment (TeX's
+    alignment stack, saving align_state) and a list (internal vertical,
+    or restricted horizontal), reads `to`/`spread` in a first alignment
+    group, then the preamble with the scanner status `:aligning` (an
+    `\outer` macro or the end of the file is a runaway) at align_state
+    -1000000: u templates up to `#` (leading blanks dropped; `&` first
+    makes the columns from there on repeat), v templates up to `&` or
+    `\cr` at that brace level, each ended by the frozen `\endtemplate`;
+    `\span` expands the next token once, `\tabskip` assignments are
+    carried out (local to the alignment's group) and each column gets the
+    glue in force after it; "Missing # inserted in alignment preamble",
+    "Only one # is allowed per tab".  Then a second alignment group
+    (each entry's: restarted at every entry's end), `\everycr`, and
+    align_peek.
+  - *align_peek*, after the preamble, every `\cr` and every `\noalign`,
+    skips blanks (not `\relax`, which begins a row): `\noalign` begins
+    its group (`normal_paragraph` in an `\halign`), `}` ends the
+    alignment, `\crcr` is ignored, anything else begins a row and is the
+    first token of its first entry.
+  - *Entries*: a row and each entry are lists of the nest (the row's of
+    the other orientation).  An entry's first token, if not `\omit`, is
+    read again after its column's u template; the end of the u template
+    sets align_state to 0, so that `&`, `\span`, `\cr` or `\crcr` (or a
+    token `\let` to `&`) at the entry's own brace level is caught by
+    get_next, dropped, and replaced by the column's v template (after
+    `\omit`, `\endtemplate` alone).  `\endtemplate` counts as `\outer`
+    while the scanner is not `:normal`, and becomes endv: do_endv checks
+    that it ended the v template on top of the input stack (else TeX's
+    fatal "interwoven alignment preambles are not allowed", as when a
+    template's end finds align_state out of step), ends a paragraph, and
+    ends the entry (fin_col) unless `\span` joins the next column into
+    it; at `\cr` the row ends (fin_row) and `\everycr` follows.  In
+    another group, what ends that group is inserted first (off_save).
+    A repeating preamble grows by one column whenever an entry needs
+    one; without one an extra `&` is "Extra alignment tab has been
+    changed to \cr".  A `}` at an entry's level is "Missing \cr
+    inserted".
+  - *Misplaced commands*: `&`, `\span`, `\cr` and `\crcr` outside
+    entries are "Misplaced" (align_error), or, within two braces of an
+    entry's level, "Missing { inserted" or "Missing } inserted" to
+    reach it; `\noalign` and `\omit` are "Misplaced".  `\halign` begins
+    an alignment in vertical mode and in a display, `\valign` in
+    horizontal mode; otherwise the modes' rules apply (a paragraph
+    begins or ends first; "You can't use" in inline math; in a group of
+    the display, off_save).
+  - *The end*: the two alignment groups end, the alignment is popped
+    (align_state restored), and its node (with its preamble, rows and
+    `\noalign` material, `docs/events.md`) goes into the enclosing list,
+    which takes the alignment list's `\prevdepth` or `\spacefactor`.  A
+    row's depth is 0 (no metrics).  In a display (which must hold
+    nothing else: "Improper \halign inside $$'s" flushes it) assignments
+    may follow, then `$$` ("Missing $$ inserted", "Display math should
+    end with $$"); the node, `:display t`, goes into the vertical list
+    and the paragraph resumes, as after a display.
 
 ## Not emulated (no typesetting)
 
@@ -526,6 +579,12 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
   `\lastskip`, `\lastpenalty` and `\lastkern` look at the last node of the
   current list, or of the page (see Lists and nodes). `\output` is stored and never run; `\shipout` makes no DVI (see
   Lists and nodes).
+- **Alignments are not packaged.** No column widths, no setting of the
+  `\tabskip` glue and no unset boxes (§§801-810): an alignment is a node
+  of its preamble, rows and cells; `to`/`spread` is kept as data.  The
+  `\vadjust`, `\insert` and `\mark` material of an `\halign`'s entry
+  stays in its cell (no hpack), which the readers that care (`\vsplit`'s
+  marks, whatsits at `\shipout`) treat as an adjusted `\hbox`'s.
 - `\write` and `\openout` write nothing; writes are events, and
   `\immediate\write`s to no open file are log entries.
 

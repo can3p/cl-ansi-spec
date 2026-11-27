@@ -31,6 +31,9 @@ end-of-file checks."
   (long-state :call :type (member :call :long :outer-call))
   ;; TeX's align_state: braces read minus braces closed, offset (§309).
   (align-state 1000000 :type integer)
+  ;; TeX's alignment stack (§770), the innermost alignment first
+  ;; (alignments.lisp).
+  (alignments '() :type list)
   ;; \topmark, \firstmark, \botmark, \splitfirstmark, \splitbotmark.
   (marks (make-array 5 :initial-element nil) :read-only t)
   (name-in-progress nil :type boolean)
@@ -105,6 +108,10 @@ The primitives are installed in STATE."
           (lambda (stack name)
             (declare (ignore stack name))
             (check-outer-validity expander nil)))
+    (setf (input-stack-u-template-end-hook input)
+          (lambda (stack)
+            (declare (ignore stack))
+            (end-u-template expander)))
     expander))
 
 (defun expander-tex (expander)
@@ -151,8 +158,19 @@ or an undefined control sequence (which expansion reports, §366)."
 (defun get-next (expander)
   "TeX's get_next (§341): the next token of the input and its meaning, or
 NIL at the end of all input.  Keeps align_state, suppresses the expansion
-of a \\noexpand-ed token, and checks an \\outer macro against the scanner
-status."
+of a \\noexpand-ed token, checks an \\outer macro (or \\endtemplate)
+against the scanner status, and at the end of an alignment entry inserts
+its v template (§342) and reads on."
+  (loop
+    (multiple-value-bind (token meaning) (read-next-token expander)
+      (if (and (zerop (expander-align-state expander)) token
+               (entry-end-kind token meaning))
+          (insert-v-template expander token meaning)
+          (return (values token meaning))))))
+
+(defun read-next-token (expander)
+  "The next token of the input and its meaning, as GET-NEXT reads it
+before it looks for the end of an alignment entry."
   (let ((token (next-token (expander-input expander)))
         (state (expander-state expander)))
     (typecase token
@@ -166,7 +184,8 @@ status."
                            meaning))))
       (cs-token
        (let ((meaning (meaning state (cs-token-control-sequence token))))
-         (if (and (macro-p meaning) (macro-outer-p meaning)
+         (if (and (or (and (macro-p meaning) (macro-outer-p meaning))
+                      (eq meaning (end-template-meaning)))
                   (not (eq (expander-scanner-status expander) :normal)))
              (values (check-outer-validity expander token) nil)
              (values token meaning))))
@@ -183,13 +202,16 @@ in setting cur_tok, which here is always the token returned.)"
   (get-next expander))
 
 (defun back-token (expander token)
-  "TeX's back_input (§325): TOKEN is read next; align_state is restored."
+  "TeX's back_input (§325): TOKEN is read next; align_state is restored,
+after the exhausted lists are removed (so after the end of a u template
+has set it).  Returns TOKEN."
   (when token
+    (back-input (expander-input expander) token)
     (cond ((character-catcode-p token +begin-group+)
            (decf (expander-align-state expander)))
           ((character-catcode-p token +end-group+)
            (incf (expander-align-state expander))))
-    (back-input (expander-input expander) token)))
+    token))
 
 (defun insert-tokens (expander tokens)
   "TeX's ins_list: TOKENS are read next, as an inserted list."
@@ -203,6 +225,11 @@ all input."
   (loop
     (multiple-value-bind (token meaning) (get-next expander)
       (cond ((null token) (return (values nil nil)))
+            ;; §380: \endtemplate is endv at once.
+            ((eq meaning (end-template-meaning))
+             (return (values (frozen-template-token expander :endv
+                                                    (token-span token))
+                             (endv-meaning))))
             ((expandable-p token meaning) (expand expander token meaning))
             (t (return (values token meaning)))))))
 

@@ -133,6 +133,39 @@ b")
       (is = 2 (input-depth stack))       ; ... replaced by the backed-up level
       (is equal '("x 11") (texts (read-all stack))))))
 
+(define-test templates-in-the-input-stack
+  :parent input-stack
+  ;; An inserted list goes on top of an exhausted one (TeX's
+  ;; begin_token_list); the end of a u template calls the hook when the
+  ;; list is removed; an exhausted v template is kept by back_input.
+  (let ((stack (string-stack ""))
+        (ends 0)
+        (x (make-character-token (char-code #\x) +letter+)))
+    (setf (input-stack-u-template-end-hook stack) (lambda (stack)
+                                                    (declare (ignore stack))
+                                                    (incf ends)))
+    (push-tokens stack (list x) :u-template)
+    (next-token stack)
+    (push-tokens stack (list x) :inserted)
+    (is = 3 (input-depth stack))
+    (is = 0 ends)
+    (next-token stack)
+    (back-input stack x)
+    (is = 1 ends)
+    (is = 2 (input-depth stack))
+    (push-tokens stack (list x) :v-template)
+    (next-token stack)
+    (true (v-template-ended-p stack))
+    (let ((depth (input-depth stack)))
+      (back-input stack x)
+      (is = (1+ depth) (input-depth stack)))
+    (false (v-template-ended-p stack))
+    (next-token stack)
+    (true (v-template-ended-p stack))
+    ;; get_next removes it.
+    (next-token stack)
+    (false (v-template-ended-p stack))))
+
 (define-test pushed-token-lists-are-copied
   :parent input-stack
   (let* ((stack (string-stack ""))

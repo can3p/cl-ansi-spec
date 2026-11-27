@@ -57,7 +57,8 @@ Lisp draft standard (dpANS3)."
                              (:file "discretionaries")
                              (:file "inserts")
                              (:file "whatsits")
-                             (:file "math-lists")))
+                             (:file "math-lists")
+                             (:file "alignments")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
@@ -90,7 +91,8 @@ Lisp draft standard (dpANS3)."
                              (:file "streams")
                              (:file "events")
                              (:file "other-nodes")
-                             (:file "math-lists")))
+                             (:file "math-lists")
+                             (:file "alignments")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

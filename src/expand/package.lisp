@@ -8,7 +8,8 @@
 ;;;; expansion of macros and expandable primitives, scanning,
 ;;;; conditionals, and main control: assignments, groups, modes, input,
 ;;;; output and messages, and the lists of nodes it builds (text, spaces,
-;;;; paragraphs, glue, kerns, penalties, rules, boxes, whatsits).
+;;;; paragraphs, glue, kerns, penalties, rules, boxes, whatsits, math,
+;;;; alignments).
 
 (defpackage #:cl-ansi-spec/expand
   (:use #:cl)
@@ -32,6 +33,7 @@
                 #:make-frozen-control-sequence
                 #:control-sequence-name #:control-sequence-active-p
                 #:input-stack #:make-input-stack #:input-stack-file-end-hook
+                #:input-stack-u-template-end-hook #:v-template-ended-p
                 #:next-token #:back-input #:push-tokens #:push-file
                 #:end-current-file #:input-file-missing #:current-line-number
                 #:resolve-input #:push-read-line #:reading-line-p #:end-read-line
@@ -130,10 +132,7 @@
    #:expander-read-streams #:if-limit #:if-test-names #:pass-text #:box-kind
    ;; Main control (commands.lisp, groups.lisp, modes.lisp, boxes.lisp,
    ;; prefixed.lisp, assignments.lisp, main-control.lisp)
-   #:command-disposition #:event-command-names #:alignment-command-names
-   #:input-output-command-names
-   #:unhandled-command #:unhandled-command-token #:unhandled-command-meaning
-   #:unhandled-command-disposition #:unhandled-command-mode
+   #:command-disposition #:event-command-names #:input-output-command-names
    #:group-code #:group-record #:group-record-code #:group-record-line
    #:current-group #:current-group-code
    #:tex-box #:tex-box-p #:make-tex-box #:tex-box-kind #:tex-box-spec

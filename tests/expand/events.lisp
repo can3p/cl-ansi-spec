@@ -12,14 +12,21 @@
   :description "The nodes of lists and the job's events.")
 
 (defun strip-event (expander event)
-  "EVENT without its :SPAN and :VIA, its token lists shown as text."
+  "EVENT without its :SPAN and :VIA, its token lists (an alignment's
+templates too) shown as text."
   (let ((head (if (member (first event) '(:begin :end :text)) 2 1)))
-    (append (subseq event 0 head)
-            (loop for (key value) on (nthcdr head event) by #'cddr
-                  unless (member key '(:span :via))
-                    append (list key (if (eq key :tokens)
-                                         (expand:token-list-text expander value)
-                                         value))))))
+    (flet ((text (tokens) (expand:token-list-text expander tokens)))
+      (append (subseq event 0 head)
+              (loop for (key value) on (nthcdr head event) by #'cddr
+                    unless (member key '(:span :via))
+                      append (list key (case key
+                                         (:tokens (text value))
+                                         (:preamble
+                                          (loop for column in value
+                                                collect (list (text (getf column :u))
+                                                              (text (getf column :v))
+                                                              (getf column :tabskip))))
+                                         (t value))))))))
 
 (defmacro check-events (text events &key (errors '()) (log nil log-p))
   "Run TEXT\\end and check the job's EVENTS (as EVENTS-OF shows them), its

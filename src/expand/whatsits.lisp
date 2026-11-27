@@ -46,7 +46,7 @@ shipped box."
 (defun carry-out-whatsits (expander nodes &optional adjusted)
   "Carry out the whatsits among NODES as hlist_out and vlist_out meet
 them (§§619-640, 1366): in boxes and paragraphs (the lines TeX would
-have made), in math and in a discretionary's no-break list, not in
+have made), in alignments, in math and in a discretionary's no-break list, not in
 leaders, inserts or a discretionary's break lists.  When ADJUSTED (the
 list of a MIGRATING-NODE-P node), each \\vadjust's list, in math too,
 follows the others."
@@ -55,9 +55,12 @@ follows the others."
                (dolist (node nodes)
                  (case (node-kind node)
                    ((:openout :write :closeout) (carry-out-whatsit expander node))
-                   ((:box :paragraph)
+                   ((:box :paragraph :cell)
                     (carry-out-whatsits expander (node-children node)
                                         (migrating-node-p node)))
+                   ;; An alignment's rows and \\noalign material are part
+                   ;; of the list it is in.
+                   ((:alignment :row :no-align) (walk (node-children node) adjusted))
                    ;; Math becomes part of the list it is in.
                    (:math (if adjusted
                               (walk (node-children node) t)

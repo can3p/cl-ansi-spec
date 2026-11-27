@@ -4,12 +4,11 @@
 ;;;; lines LINES (the output produced while the file itself is read
 ;;;; within them; the job stops at the first output after the last one):
 ;;;;
-;;;; `make expand' prints, in order, what main control hands on to the
-;;;; steps that have not landed: FILE:LINE:COLUMN<tab>TOKEN<tab>MODE,
-;;;; where the location is where the token was read (a macro body's token
-;;;; points into its definition); the nodes appended to lists other than
-;;;; text and spaces: FILE:LINE:COLUMN<tab>== kind, then its properties
-;;;; (a composite node, a paragraph or a box, when it is complete); TeX
+;;;; `make expand' prints, in order, the nodes appended to lists other
+;;;; than text and spaces: FILE:LINE:COLUMN<tab>== kind, then its
+;;;; properties (a composite node, a paragraph or a box, when it is
+;;;; complete), where the location is where its command was read (a
+;;;; macro body's token points into its definition); TeX
 ;;;; errors as `!! message context' (recovered from as TeX does; a fatal
 ;;;; error ends the run); what TeX only notes (an \end inside a group) as
 ;;;; `-- (note)'; what the job prints (\message, \show, ...) as
@@ -100,8 +99,8 @@ the table SHOWN and everything inside them, unless SHOWN is T."
       (print-events expander (cl-ansi-spec/expand:list-nodes list) 1 shown))))
 
 (defun expand-file (name &key lines events)
-  "Run the job NAME and print what happens within LINES: what main
-control hands on and does (EVENTS false), or the events (EVENTS true)."
+  "Run the job NAME and print what happens within LINES: the nodes
+appended (EVENTS false), or the events (EVENTS true)."
   (destructuring-bind (first last) (parse-line-range lines)
     (let* ((state (cl-ansi-spec/expand:make-expander-state
                    :tex (cl-ansi-spec/tex:make-plain-state)))
@@ -130,14 +129,6 @@ control hands on and does (EVENTS false), or the events (EVENTS true)."
                                (cl-ansi-spec/expand:tex-error-message condition)
                                (cl-ansi-spec/expand:tex-error-context condition)
                                (and span (span-location span))))))
-                 (hand-on (condition)
-                   (let* ((token (cl-ansi-spec/expand:unhandled-command-token condition))
-                          (span (cl-ansi-spec/tex:token-span token)))
-                     (locate span)
-                     (when (and in-range (not events))
-                       (format t "~A~C~A~C~(~A~)~%" (span-location span) #\Tab
-                               (cl-ansi-spec/tex:token-text token) #\Tab
-                               (cl-ansi-spec/expand:unhandled-command-mode condition)))))
                  (log-entry (item)
                    (let ((span (cl-ansi-spec/expand:log-entry-span item)))
                      (locate span)
@@ -168,8 +159,7 @@ control hands on and does (EVENTS false), or the events (EVENTS true)."
                          (log-entry item)
                          (node item)))))
           (handler-case
-              (handler-bind ((cl-ansi-spec/expand:unhandled-command #'hand-on)
-                             (cl-ansi-spec/expand:job-output #'output)
+              (handler-bind ((cl-ansi-spec/expand:job-output #'output)
                              (cl-ansi-spec/expand:tex-report
                                (lambda (condition) (format t "-- ~A~%" condition))))
                 (cl-ansi-spec/expand:call-recovering-tex-errors

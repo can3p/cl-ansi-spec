@@ -4,19 +4,13 @@
 ;;;; boxes.lisp, main-control.lisp): the disposition of every primitive,
 ;;;; groups and \aftergroup, modes and their errors, boxes, math shifts,
 ;;;; and the end of a job (TeX: The Program, §§1029-1200, 1335).  A job's
-;;;; output is what main control hands on (events and alignments).
+;;;; output is the text, boxes and math characters main control appends.
 
 (in-package #:cl-ansi-spec/tests)
 
 (define-test main-control
   :parent cl-ansi-spec
   :description "Main control: dispositions, groups, modes, boxes, math.")
-
-(defun token-display (token)
-  "TOKEN as EXPANSION-OF shows it."
-  (if (character-token-p token)
-      (string (code-char (character-token-code token)))
-      (format nil "\\~A " (control-sequence-name (cs-token-control-sequence token)))))
 
 (defun run-job (expander &optional reports)
   "With REPORTS a function, it is called on every TEX-REPORT."
@@ -27,20 +21,13 @@
 (defun run-main-control (expander)
   "Run EXPANDER's job with main control, recovering from TeX errors.
 Returns the characters, spaces, boxes ([hbox] ...) and the math characters
-of noads appended to lists,
-with the handed-on commands, as a string, the error messages, their contexts, the modes of
-the handed-on commands, and the message of a fatal error or NIL."
-  (let ((errors '()) (contexts '()) (modes '()) (fatal nil))
+of noads appended to lists, as a string, the error messages, their
+contexts, and the message of a fatal error or NIL."
+  (let ((errors '()) (contexts '()) (fatal nil))
     (let ((output
             (with-output-to-string (out)
               (handler-case
-                  (handler-bind ((expand:unhandled-command
-                                   (lambda (condition)
-                                     (write-string (token-display
-                                                    (expand:unhandled-command-token condition))
-                                                   out)
-                                     (push (expand:unhandled-command-mode condition) modes)))
-                                 (expand:job-output
+                  (handler-bind ((expand:job-output
                                    (lambda (condition)
                                      (let ((node (expand:job-output-item condition)))
                                        (when (expand:node-p node)
@@ -65,24 +52,22 @@ the handed-on commands, and the message of a fatal error or NIL."
                        (push (expand:tex-error-context condition) contexts))))
                 (expand:tex-fatal-error (condition)
                   (setf fatal (expand:tex-error-message condition)))))))
-      (values output (reverse errors) (reverse contexts) (reverse modes) fatal))))
+      (values output (reverse errors) (reverse contexts) fatal))))
 
-(defmacro check-job (text expected &key setup (errors '()) contexts modes
+(defmacro check-job (text expected &key setup (errors '()) contexts
                                      (fatal nil fatal-p))
   "Run TEXT (ended by \\end unless FATAL is given) after SETUP (forms run
 with EXPANDER bound), and check the output, the error messages and, if
-given, their CONTEXTS, the MODES of the handed-on commands and the
-FATAL message."
+given, their CONTEXTS and the FATAL message."
   `(let ((expander (make-test-expander ,(if fatal-p text `(concatenate 'string ,text "\\end")))))
      (declare (ignorable expander))
      ,@setup
-     (multiple-value-bind (output messages error-contexts command-modes fatal-message)
+     (multiple-value-bind (output messages error-contexts fatal-message)
          (run-job expander)
-       (declare (ignorable error-contexts command-modes))
+       (declare (ignorable error-contexts))
        (is string= ,expected output "output of ~S" ,text)
        (is equal ',errors messages "errors of ~S" ,text)
        ,@(when contexts `((is equal ',contexts error-contexts "contexts of ~S" ,text)))
-       ,@(when modes `((is equal ',modes command-modes "modes of ~S" ,text)))
        (is equal ,(if fatal-p fatal nil) fatal-message "fatal error of ~S" ,text))))
 
 (defun job-state (text)
@@ -102,11 +87,6 @@ needs no fonts' metrics.")
 
 ;;; Dispositions
 
-(defparameter *pending-event-commands*
-  '()
-  "The :EVENT primitives whose operations have not landed: they are still
-handed on.")
-
 (define-test dispositions
   :parent main-control
   (let ((names (append (expand:tex82-command-names) (expand:tex82-expandable-names)
@@ -115,30 +95,21 @@ handed on.")
                                               (string-downcase (symbol-name name)))
                                             (expand:parameter-names kind))))))
     (dolist (name names)
-      (let ((disposition (expand:command-disposition name))
-            (operation (expand:primitive-operation (expand:find-primitive name))))
+      (let ((disposition (expand:command-disposition name)))
         (true disposition "~S has a disposition" name)
-        (when (eq disposition :main-control)
-          (true operation "~S has an operation" name))
-        (when (eq disposition :alignment)
-          (false operation "~S is handed on" name))
-        (when (eq disposition :event)
-          (if (member name *pending-event-commands* :test #'string=)
-              (false operation "~S is handed on" name)
-              (true operation "~S has an operation" name))))))
+        (true (expand:primitive-operation (expand:find-primitive name))
+              "~S has an operation" name))))
   (dolist (name (expand:input-output-command-names))
     (is eq :main-control (expand:command-disposition name)))
   (is eq :event (expand:command-disposition "hskip"))
-  (is eq :alignment (expand:command-disposition "halign"))
+  (is eq :main-control (expand:command-disposition "halign"))
   (is eq :main-control (expand:command-disposition "def"))
   (is eq :main-control (expand:command-disposition "tolerance"))
   (is eq :expandable (expand:command-disposition "ifx"))
   (is eq nil (expand:command-disposition "frob")))
 
-(define-test handed-on-commands
+(define-test relax
   :parent main-control
-  (check-job "\\halign" "\\halign ")
-  (check-job "a&" "a&" :modes (:horizontal))
   (check-job "\\relax  " ""))
 
 ;;; Groups
