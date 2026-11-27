@@ -8,7 +8,17 @@
 
 (defpackage #:cl-ansi-spec/model
   (:use #:cl)
-  (:import-from #:cl-ansi-spec/tex #:span)
+  (:import-from #:cl-ansi-spec/tex
+                #:span #:make-span #:span-file #:span-start #:span-end
+                #:span-line #:span-column #:current-file-name #:current-line-number)
+  (:import-from #:cl-ansi-spec/expand
+                #:make-job #:start-job #:main-control #:load-plain-format
+                #:call-recovering-tex-errors #:tex-error-message #:tex-error-span
+                #:tex-fatal-error #:tex-report #:job-output #:job-output-item
+                #:job-events #:log-entry-p #:log-entry-kind #:log-entry-text
+                #:log-entry-span #:node-composite #:node-children #:expander-input
+                #:list-nodes #:outer-list #:flatten-nodes #:token-list-text)
+  (:import-from #:cl-ansi-spec/semantic #:observe-vocabulary #:spec-vocabulary)
   (:export
    ;; The ownership table (owners.lisp)
    #:load-owners #:owners #:owner #:owner-step #:owner-file
@@ -30,4 +40,23 @@
    #:categories #:find-category #:category-kinds #:expand-kinds
    #:registry-problems #:node-problems
    #:target #:make-target #:target-p #:target-kind #:target-id
-   #:undocumented-items))
+   #:undocumented-items
+   ;; The builder core (build.lisp)
+   #:event-type #:event-key #:event-text #:event-properties #:event-property
+   #:event-span #:event-arguments #:join-spans
+   #:cursor #:make-cursor #:cursor-peek #:cursor-next
+   #:*problem-kinds* #:problem #:make-problem #:problem-p #:problem-kind
+   #:problem-span #:problem-message #:problem-event #:problem-job
+   #:build-report #:make-build-report #:build-report-problems
+   #:merge-build-reports
+   #:handler-table #:make-handler-table #:*handlers* #:define-handler
+   #:find-handler #:handled-events
+   #:container #:container-key #:container-span #:container-node
+   #:container-field #:container-items #:container-contents
+   #:builder #:builder-registry #:builder-expander #:builder-job
+   #:next-event #:peek-event #:report-problem #:argument-text
+   #:event-argument-texts #:make-builder-node #:current-container
+   #:find-container #:add-item #:open-container #:close-container
+   #:build-events #:build-job #:build-model #:build-fixture #:forget-job-runs
+   ;; Printing nodes (print.lisp)
+   #:span-sexp #:node-sexp #:print-node))
