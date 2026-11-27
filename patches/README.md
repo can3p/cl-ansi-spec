@@ -34,4 +34,7 @@ touch is an error naming the patch. Every job reads the patched text;
 diffing only. `vendor/` is never patched.
 
 Patches so far: `0001-syntax-type-table-definitions` (the abbreviations the
-syntax-type table of concept-syntax.tex uses were commented out).
+syntax-type table of concept-syntax.tex uses were commented out),
+`0002-loop-numeric-accumulation-group` (a row break inside a brace group of
+dict-iteration.tex), `0003-defsetf-lambda-list-closing-paren` (a rule that opens a parenthesis and
+never closes it).

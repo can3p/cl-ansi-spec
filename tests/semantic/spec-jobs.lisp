@@ -118,12 +118,9 @@ vocabulary; return its SPEC-RUN."
     (false (spec-run-fatal run) "~A stops: ~A" (spec-run-job run) (spec-run-fatal run))
     (is equal '() (spec-run-errors run) "errors of ~A" (spec-run-job run))))
 
-(defparameter *expected-reports*
-  '(("chap-6" :unbalanced "curly"
-     "dict-iteration.tex:621-622: a \\CR, a new row of the BNF rule, inside
-\\curly's argument, so the group runs over two cells"))
+(defparameter *expected-reports* '()
   "The reports of the whole spec besides *SETUP-REDEFINITIONS*: (job kind
-name why).")
+name why); none now that the sources' unbalanced groups are patched.")
 
 (define-test spec-jobs-reports
   :parent spec-jobs
@@ -141,12 +138,10 @@ name why).")
 
 ;;; Invariants
 
-(defparameter *expected-imbalance*
-  '(("chap-3" :parenthesized 1
-     "concept-bvl.tex:1181-1187: the defsetf lambda list's rule opens its
-parenthesis (\\lparen) and never closes it"))
+(defparameter *expected-imbalance* '()
   "Keys whose :BEGIN and :END events differ in a job because the sources
-leave something open: (job key difference why).")
+leave something open: (job key difference why); none now that the sources'
+unclosed groups are patched.")
 
 (define-test spec-jobs-balance
   :parent spec-jobs

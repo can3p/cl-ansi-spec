@@ -612,7 +612,11 @@ the trees do not hold it, as on a first run.
 Every job runs to its `\end` without a fatal error. The sources have errors
 TeX itself would report, which patches fix (`patches/`): concept-syntax.tex
 comments out the group that defines `\w`, `\c`, `\SE`, … but not its
-closing brace, and the table at :279-302 uses them (0001).
+closing brace, and the table at :279-302 uses them (0001). Two rules are
+left unbalanced by the sources, which the semantic layer reports, not TeX: the numeric-accumulation rule of dict-iteration.tex
+breaks a row inside `\curly` (0002) and the defsetf lambda list of
+concept-bvl.tex lacks its `\rparen` (0003). With the patches, no job has an
+error or an unbalanced report.
 
 Formats and jobs (`src/expand/format.lisp`), §§1299-1337:
 
