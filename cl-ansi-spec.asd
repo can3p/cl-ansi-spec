@@ -76,6 +76,11 @@ Lisp draft standard (dpANS3)."
                 :components ((:file "package")
                              (:file "digest")
                              (:file "api"))))
+               (:module "json"
+                :serial t
+                :components ((:file "package")
+                             (:file "reader")
+                             (:file "writer"))))
   :in-order-to ((test-op (test-op "cl-ansi-spec/tests"))))
 
 (defsystem "cl-ansi-spec/tests"
@@ -115,6 +120,7 @@ Lisp draft standard (dpANS3)."
                              (:file "spec-jobs")))
                (:file "inventory")
                (:file "sha256"))
+               (:file "json"))
   :perform (test-op (operation component)
              (declare (ignore operation component))
              (unless (uiop:symbol-call '#:cl-ansi-spec/tests '#:run-tests)
