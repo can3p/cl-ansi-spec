@@ -23,9 +23,9 @@
 build report."
   (multiple-value-bind (nodes report)
       (model:build-events events :registry model:*registry* :handlers *structure-handlers*)
-    (values (mapcar #'strip-spans (mapcar #'model:node-sexp nodes)) report)))
+    (values (mapcar #'structure-strip-spans (mapcar #'model:node-sexp nodes)) report)))
 
-(defun strip-spans (sexp)
+(defun structure-strip-spans (sexp)
   "SEXP, a node as an S-expression, without the :SPAN of it and of the
 nodes inside."
   (cond ((atom sexp) sexp)
@@ -33,8 +33,8 @@ nodes inside."
          (cons (first sexp)
                (loop for (key value) on (rest sexp) by #'cddr
                      unless (eq key :span)
-                       append (list key (if (listp value) (mapcar #'strip-spans value) value)))))
-        (t (mapcar #'strip-spans sexp))))
+                       append (list key (if (listp value) (mapcar #'structure-strip-spans value) value)))))
+        (t (mapcar #'structure-strip-spans sexp))))
 
 (defun mark (key &rest arguments)
   "A mark event of KEY with ARGUMENTS (strings)."
