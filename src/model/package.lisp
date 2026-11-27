@@ -62,5 +62,8 @@
    #:*fonts* #:font-entry #:register-handler #:*layout-codes* #:*ligatures* #:font-file #:font-class
    #:convert-text #:install-text-handlers #:*plain-text-containers*
    #:plain-text-container-p
+   ;; Math (build-math.lisp)
+   #:*math-families* #:*math-tables* #:math-family-text
+   #:install-math-handlers
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))
