@@ -62,5 +62,7 @@
    #:*fonts* #:font-entry #:register-handler #:*layout-codes* #:*ligatures* #:font-file #:font-class
    #:convert-text #:install-text-handlers #:*plain-text-containers*
    #:plain-text-container-p
+   ;; The glossary (build-glossary.lisp, step 3.14)
+   #:install-glossary-handlers #:*part-of-speech-texts* #:*usage-texts*
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))

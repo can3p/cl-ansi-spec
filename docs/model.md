@@ -370,7 +370,47 @@ events into strings, and font runs into inlines.
 
 ### Glossary
 
-*Step 3.14.* Not written yet.
+*Step 3.14.* `src/model/build-glossary.lisp` builds the glossary of
+`concept-glossary.tex` (24 groups, 692 entries).  The glossary is flat in
+the events: `\firstindextab` and `\indextab` are `:glossary-letter` marks,
+`\gentry` a `:glossary-entry` mark, and nothing ends them, so a group runs
+to the next letter and an entry to the next entry or letter.  Their handlers
+open a container and *run* the events that follow (`dispatch`) until that
+stopping mark, or until the end of a container opened before them (the
+section that holds the glossary), so no `:unclosed` is reported and no
+step has to close them.
+
+- **Entry.**  `id` and `term` are `\gentry`'s argument.  The heading
+  `\gentry` sets again (the term in bold, its `:index-entry`, the term's
+  text) is dropped from the items: it only repeats the term.
+- **Notation.**  `\Noun` … `\Adverb` and `\ANSI` … `\Computers` are
+  `:part-of-speech` and `:usage` containers told by their argument text
+  (`*part-of-speech-texts*`, `*usage-texts*`); `\pronounced` is a
+  `:pronunciation` container.  In an entry each leaves a tag, and the entry
+  reads the tags when it closes; outside an entry (the glossary's
+  introduction explains the notation) the text stays, in italics, and a
+  pronunciation keeps its items.  A text that is not in the table is a
+  `:diagnostic`.
+- **Senses.**  The text of an entry has `1.`, `2.` … typed in it.  They
+  are found by their order: `N.` set off by a space before and after, the
+  next number being expected (`split-segments`), so `the integer 1.` at the
+  end of a definition and a `2.` before sense 1 are text.  What comes
+  before `1.` holds the entry's pronunciation, parts of speech and usages
+  (those given for every sense), and, when it has words (an optional
+  context, `(of an array)`), a first sense without a number.  An
+  entry without `1.` has one sense without a number.  Tags after a number
+  are that sense's.  A `:glossary-example` (`\gexample`) goes to the
+  sense's `:examples`, not to its definition.  Commas that set the notation
+  apart (`\Noun, \TransitiveVerb`, next to a tag) are dropped; those in
+  the text stay.  A sense has the span of its entry: the events do not say
+  where a number was typed.  Numbers are found by order, so a ` 2. ` inside
+  sense 1's text, after sense 1 began, would split it; the glossary has
+  none (`glossary-whole` checks that every sense has a definition).
+- **Meanings.**  `\meaning{n}` (`:sense`) sets the `:sense` of the
+  `:term-ref` it follows, from the integer its text starts with; `2a` is
+  sense 2 and is reported (`:diagnostic`) because the sub-sense letter is
+  not kept, and `n` is reported and not set.  The `:term-ref` is 3.13's:
+  a `\meaning` that does not follow one is reported.
 
 ### Syntax
 

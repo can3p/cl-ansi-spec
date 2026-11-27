@@ -622,6 +622,22 @@ or \indextab to the next.
 | `letter` | string | yes | The heading's letter, or the heading for the entries that do not begin with a letter. |
 | `entries` | list of node of kind or category `:glossary-entry` | no | The group's entries, in order. |
 
+Example:
+
+```lisp
+(:glossary-group :letter "A" :entries
+ ((:glossary-entry :id "absolute" :term "absolute" :parts-of-speech
+   (:adjective) :senses
+   ((:glossary-sense :number 1 :content
+     ("(of a " (:term-ref :text "time" :target (:glossary "time"))
+      ") representing a specific point in time."))
+    (:glossary-sense :number 2 :content
+     ("(of a "
+      (:term-ref :text "pathname" :target (:glossary "pathname"))
+      ") representing a specific position in a
+directory hierarchy."))))))
+```
+
 ### Node kind `:glossary-entry`
 
 A glossary entry, from \gentry to the next \gentry, \indextab or
@@ -634,7 +650,22 @@ the glossary's end.
 | `pronunciation` | inline list | no | How the term is pronounced, \pronounced's argument, with its stress marks; absent when not given. |
 | `parts-of-speech` | list of enumeration `part-of-speech` | no | The parts of speech given after the term, before the senses, in order. |
 | `usages` | list of enumeration `usage` | no | The usages given after the term, before the senses, that hold for every sense. |
-| `senses` | list of node of kind or category `:glossary-sense` | yes | The senses, in order; one, without a number, when the entry is not numbered. |
+| `senses` | list of node of kind or category `:glossary-sense` | yes | The senses, in order; one, without a number, when the entry is not numbered; text before `1.' (an optional context, `(of an array)') is a sense of its own, first, without a number. |
+
+Example:
+
+```lisp
+(:glossary-entry :id "access" :term "access" :parts-of-speech
+ (:noun :transitive-verb) :senses
+ ((:glossary-sense :number 1 :parts-of-speech (:transitive-verb)
+   :content
+   ("(a " (:term-ref :text "place" :target (:glossary "place")) ") to "
+    (:term-ref :text "read" :sense 1 :target (:glossary "read"))
+    " the value of the place."))
+  (:glossary-sense :number 2 :parts-of-speech (:noun) :content
+   ("(of a " (:term-ref :text "place" :target (:glossary "place"))
+    ") an attempt to read it."))))
+```
 
 ### Node kind `:glossary-sense`
 
@@ -649,6 +680,15 @@ the entry's one definition.
 | `content` | inline list | yes | The definition's text, its \term references and its `See' pointers. |
 | `examples` | list of node of kind or category `:glossary-example` | no | The sense's examples, \gexample, in order. |
 
+Example:
+
+```lisp
+(:glossary-sense :number 1 :parts-of-speech (:transitive-verb) :content
+ ("(a " (:term-ref :text "place" :target (:glossary "place"))
+  ") to read the value of the place.")
+ :examples ((:glossary-example :content ("Look it up."))))
+```
+
 ### Node kind `:glossary-example`
 
 An example of a glossary sense, set in quotes: \gexample.
@@ -656,6 +696,12 @@ An example of a glossary sense, set in quotes: \gexample.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | The example's text. |
+
+Example:
+
+```lisp
+(:glossary-example :content ("This is an example of an example."))
+```
 
 ### Enumeration `part-of-speech`
 
