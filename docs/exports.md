@@ -73,6 +73,22 @@ checks this. CI also cross-checks the exports with one widely used external
 JSON Schema validator. That validator runs in CI only and is not part of the
 code base.
 
+The validator is `src/export/validate.lisp`. `(validate-json schema
+instance)` takes both as parsed JSON (`cl-ansi-spec/json`) and returns the
+list of `validation-error`s (a JSON Pointer into the instance and a message,
+ordered by keyword, then by member or element),
+`NIL` when valid; `json-valid-p` is the boolean form. `title`, `description`,
+`examples`, `default`, `$schema`, `$id`, `$comment` and `$defs` are accepted;
+any other keyword, or a supported one with a value of the wrong form
+(`items` as an array, say), signals `unsupported-schema-keyword` for the first
+violation; `schema-subset-violations` lists them all, for the test of the
+generator. `number` accepts integers only, as the model has no floats; `true`
+and `false` are schemas. A `$ref` cycle that consumes no data signals
+`circular-schema-reference`.
+In a `oneOf` whose branches are objects with a constant `"kind"` (directly or
+through `$ref`), an instance with a known `kind` reports the errors of that
+branch only. `$ref` resolves to `#` or a JSON Pointer in the same schema.
+
 ## JSON shape
 
 - **Nodes are objects.** Every node has `"kind"` (the node kind without its
