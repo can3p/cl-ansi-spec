@@ -28,7 +28,6 @@
    #:stale-generated-files
    ;; The reference doc (reference.lisp)
    #:reference-text
-
    ;; JSON Schema generator (schema.lisp)
    #:model-schema #:model-schema-text #:schema-undescribed
    #:schema-outside-subset
