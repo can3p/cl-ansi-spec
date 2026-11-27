@@ -13,46 +13,78 @@ plist notation below is the S-expression export. The JSON export follows the
 rules in [exports.md](exports.md); for example, text becomes `{"kind": "text"}`
 objects there.
 
+The kinds are declared in `src/model/nodes-<area>.lisp`, one file per
+area ("Node shapes" below); the tables here summarise them, and the
+generated reference (`docs/model-reference.md` (planned)) has every
+field.
+
 ### Document level
 
 | Node | Fields | Children |
 |------|--------|----------|
-| `:standard` | `:version` (from `setup-version.tex`) | chapters, `:glossary`, `:index` |
-| `:chapter` | `:number`, `:id`, `:title` | sections, dictionary entries |
-| `:section` | `:number` (e.g. `"14.1.2"`), `:id` (the `\DefineSection` label), `:title`, `:level` | sections, blocks |
-| `:dictionary-entry` | `:id`, `:names`, `:kind` | `:part`s |
-| `:part` | `:title` (the `\label` text), `:none` (true for "None.") | blocks |
-| `:glossary-entry` | `:term`, `:id`, `:senses` | blocks |
-| `:figure` | `:id`, `:number`, `:caption` | a `:table` or blocks |
+| `:document` | `:version` (`\rev` of `setup-version.tex`) | `:front-matter`, `:chapters` |
+| `:chapter` | `:id`, `:number` (`"1"` … `"26"`, `"A"`; none for a simple chapter), `:title` | `:children`: blocks, sections, dictionary entries |
+| `:section` | `:id` (the `\DefineSection` label), `:number` (e.g. `"14.1.2"`), `:level` (1–5), `:dictionary`, `:title` | `:children`: blocks, sections, dictionary entries, glossary groups |
+| `:dictionary-entry` | `:id`, `:names`, `:entry-kind` (the `\ftype`, an enum) | `:parts` |
+| `:part` | `:title` (the `\label` text), `:none` (true for "None.") | `:content`: blocks |
+| `:glossary-group` | `:letter` | `:entries` |
+| `:glossary-entry` | `:id`, `:term`, `:pronunciation`, `:parts-of-speech`, `:usages` | `:senses` (`:glossary-sense`: `:number`, `:parts-of-speech`, `:usages`, `:content`, `:examples`) |
+| `:figure` | `:id`, `:number` (`"14-1"`), `:caption` | `:content`: a `:table` or blocks |
 
 ### Blocks
 
-`:paragraph`, `:code` (exact text, line structure kept), `:table`
-(`:rows` → `:cells` → inlines), `:list` (`:items`), `:defun` (`:name`,
-`:lambda-list`, `:values`), `:bnf`, `:display-math`, `:editor-note`
-(kept even though the options hide it, with `:hidden t`).
+`:paragraph`, `:code-block` (`:lines` of `:code-line`, exact text),
+`:table` (`:rows` → `:cells` → inlines), `:item-list` (`:items`, each a
+`:label` and blocks), the signatures (`:operator-signature`,
+`:setf-signature`, `:variable-signature`, `:type-signature`),
+`:bnf-rule`, `:math` with `:display t`, `:editor-note` and
+`:reviewer-note` (kept even though the options hide them, with
+`:hidden t`), and the anchors `:issue-start`, `:issue-end` and
+`:index-entry` when they stand between blocks.
 
 ### Inlines
 
 A string is plain text. Other inlines:
 
-- `(:term-ref "dotted list" :target (:glossary "dotted list"))`
-- `(:operator-ref "endp" :target (:entry "endp"))`
-- `(:section-ref :target (:section "Definitions"))`
-- `(:figure-ref :target (:figure …))`
-- `(:param "list")`, `(:code "…")`, `(:emphasis …)`, `(:strong …)`, `(:math …)`
+- `(:term-ref :text "dotted list" :target (:glossary "dotted list"))`,
+  with `:defining t` for `\newterm` and `:sense n` for `\meaning`
+- `(:operator-ref :text "endp" :via :function :target (:entry "endp"))`:
+  `:via` the macro (`\clref` `:any`, `\funref` `:function`, …)
+- `(:section-ref :label "…" :target (:section "…"))`,
+  `(:figure-ref :label "…" :target (:figure …))`, `(:this-section …)`,
+  `(:next-figure …)`
+- `(:param :name "list")`, `(:metavariable …)`, `(:format-directive …)`,
+  `(:lambda-list-keyword …)`, `(:code …)`, `(:emphasis …)`,
+  `(:strong …)`, `(:math …)`
 - `(:evaluates-to)` and the other notation of examples (`:may-evaluate-to`,
-  `:does-not-evaluate-to`, `:equivalent`, `(:output …)`, `(:input …)`)
+  `:does-not-evaluate-to`, `:equivalent`, `(:output)`, `(:input …)`)
 - `(:citation …)`: the title of a cited work
-- `(:index-entry :kind k "…")`: an index entry (`k` one of `:ref`,
-  `:keyref`, `:code`, `:keyword`, `:text`, `:term`, `:example`,
+- `(:index-entry :index-kind k :text "…")`: an index entry (`k` one of
+  `:ref`, `:keyref`, `:code`, `:keyword`, `:text`, `:term`, `:example`,
   `:package`), an anchor
-- `(:issue-start "NAME")` and `(:issue-end "NAME")`. Issues are **ranges**
-  and may cross block and section boundaries, so they are anchors, not
-  containers.
+- `(:issue-start :name "NAME")` and `(:issue-end :name "NAME")`. Issues
+  are **ranges** and may cross block and section boundaries, so they are
+  anchors, not containers.
+- the notation of syntax: `:bnf-optional`, `:bnf-zero-or-more`,
+  `:bnf-one-or-more`, `:bnf-group`, `:bnf-parenthesized`,
+  `:bnf-bracketed`, `:bnf-interleave`, `:bnf-required`,
+  `:bnf-repeat-previous`, `:bnf-indirection`, `:bnf-break`,
+  `:bnf-caret`, `:angle-name`
+
+### Math
+
+`(:math :display t …)` holds a formula's list: `:math-noad` (`:class`,
+`:limits`, `:delimiter`, `:nucleus`, `:superscript`, `:subscript`),
+`:math-char` (`:text`, Unicode), `:math-fraction` (`:numerator`,
+`:denominator`, `:no-rule`, delimiters), `:math-delimiter` (`\left`,
+`\right`), `:math-style-change` and `:math-choice`; a display's
+`:equation-number` likewise.
 
 `:target` holds resolved references. An unresolved reference keeps
 `:target nil` and is listed in the build report.
+
+`kind` names the node kind and no field (`"kind"` in JSON), so what a
+dictionary entry defines is its field `:entry-kind`.
 
 ## Identity
 
@@ -66,30 +98,33 @@ Built from `dict-conses.tex:1702-1761` (spans shortened to the line):
 
 ```lisp
 (:dictionary-entry
- :id "endp" :names ("endp") :kind :function :span ("dict-conses.tex" 1702)
+ :id "endp" :names ("endp") :entry-kind :function :span ("dict-conses.tex" 1702)
  :parts
  ((:part :title "Syntax"
-   :content ((:defun :name "endp" :lambda-list ((:param "list"))
-                     :values ((:param "generalized-boolean")))))
+   :content ((:operator-signature :operator :function :names ("endp")
+              :lambda-list ((:param :name "list"))
+              :values ((:param :name "generalized-boolean")))))
   (:part :title "Arguments and Values"
    :content
-   ((:paragraph (:param "list") "---a " (:term-ref "list" :target (:glossary "list")) ","
-                (:issue-start "DOTTED-LIST-ARGUMENTS:CLARIFY")
-                " which might be a " (:term-ref "dotted list" :target (:glossary "dotted list"))
-                " or a " (:term-ref "circular list" :target (:glossary "circular list")) "."
-                (:issue-end "DOTTED-LIST-ARGUMENTS:CLARIFY"))
-    (:paragraph (:param "generalized-boolean") "---a "
-                (:term-ref "generalized boolean" :target (:glossary "generalized boolean")) ".")))
+   ((:paragraph (:param :name "list") "—a " (:term-ref :text "list" :target (:glossary "list")) ","
+                (:issue-start :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
+                " which might be a " (:term-ref :text "dotted list" :target (:glossary "dotted list"))
+                " or a " (:term-ref :text "circular list" :target (:glossary "circular list")) "."
+                (:issue-end :name "DOTTED-LIST-ARGUMENTS:CLARIFY"))
+    (:paragraph (:param :name "generalized-boolean") "—a "
+                (:term-ref :text "generalized boolean" :target (:glossary "generalized boolean")) ".")))
   (:part :title "Description"
-   :content ((:paragraph "Returns " (:term-ref "true" :target (:glossary "true"))
-                         " if " (:param "list") " is the "
-                         (:term-ref "empty list" :target (:glossary "empty list")) ". …")))
+   :content ((:paragraph "Returns " (:term-ref :text "true" :target (:glossary "true"))
+                         " if " (:param :name "list") " is the "
+                         (:term-ref :text "empty list" :target (:glossary "empty list")) ". …")))
   (:part :title "Examples"
-   :content ((:code " (endp nil) " (:evaluates-to) " " (:term-ref "true" …) "…")))
+   :content ((:code-block :lines ((:code-line :content (" (endp nil) " (:evaluates-to) " "
+                                                          (:term-ref :text "true" …)))
+                                  …))))
   (:part :title "Side Effects" :none t)
   (:part :title "Affected By" :none t)
   (:part :title "Exceptional Situations"
-   :content ((:paragraph "Should signal an error of " (:type-ref "type-error" …) "…")))
+   :content ((:paragraph "Should signal an error of " (:operator-ref :text "type-error" :via :type …) "…")))
   (:part :title "See Also" :none t)
   (:part :title "Notes" :content (…))))
 ```
@@ -157,6 +192,43 @@ each written by its step.
   Introspection: `node-kinds`, `find-node-declaration`, `node-fields`,
   `enums`, `target-kinds`, `categories`, `category-kinds`,
   `expand-kinds`.
+
+### Node shapes
+
+*Step 3.2.* Every kind, enum, category and target kind is declared in
+`src/model/nodes-<area>.lisp` with its type and a one-line meaning; the
+examples, and fuller docstrings where needed, come with the builder step
+that owns the area (its ratchet file lists what is missing).
+
+- **What each key builds.** `tests/model/nodes.lisp` (`*node-products*`)
+  gives every vocabulary key and event kind a builder step owns the node
+  kinds its handler builds, or `:none` and why it builds none of its own
+  (a closing key, a mark that only feeds its container, a presentational
+  event).  The test checks that each kind named is declared, that every
+  owned key is listed, and that every kind is built from a key or held
+  by another kind's field (`:document`, the root, aside).  A builder step
+  that builds something else changes the table in the same commit.
+- **Names.** A kind's name cannot be a symbol of `common-lisp`, hence
+  `:document` (the standard) and `:item-list`; the block of code is
+  `:code-block`, so that `:code` is the inline.  The notation of syntax
+  is prefixed `bnf-`, math `math-`.
+- **Signatures** are four kinds by shape: `:operator-signature` (its
+  `:operator` an enum: function, macro, special operator, generic
+  function, method), `:setf-signature`, `:variable-signature`,
+  `:type-signature`.  `\DefunMultiAccessorWithValues` sets two, readers
+  and setf forms, and builds both.  A `-Multi` form's `\entry` lines are
+  its `:names`.
+- **Entry kinds** are the 17 `\ftype` texts in kebab-case; `macro`,
+  `function` and `Special Form` are source errors left to patches.
+- **Anchors** (`:issue-start`, `:issue-end`, `:index-entry`) and notes
+  are both blocks and inlines: they stand in text and between blocks
+  (`\issue` alone between paragraphs, dict-types.tex:72).
+- **Glossary.** Parts of speech and usages are lists, on the entry (given
+  before the senses, `\Noun, \TransitiveVerb`) and on each sense; the
+  pronunciation keeps its stress marks, so it is inlines.  `\meaning`
+  after a `\term` is the `:sense` of that term reference.
+- **Math** keeps `\mathchoice`'s four lists (`:math-choice`): which one
+  TeX sets depends on the style at typesetting time.
 
 ### Building
 

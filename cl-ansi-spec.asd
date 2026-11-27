@@ -175,6 +175,7 @@ Lisp draft standard (dpANS3)."
                 :components ((:file "owners")
                              (:file "define-node")
                              (:file "documentation")
+                             (:file "nodes")
                              (:file "build")
                              (:file "text")
                              (:file "structure")
