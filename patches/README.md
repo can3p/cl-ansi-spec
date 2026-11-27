@@ -5,7 +5,7 @@ Adjustments to the pristine sources in `spec/tex/` live here as a list of
 
 Conventions (the format and application are enforced by
 `cl-ansi-spec/patch`, `src/patch/`; names, headers and independence by the
-patch set, planned):
+patch set, `src/patch/set.lisp`):
 
 - One concern per patch, named `NNNN-short-description.patch`
   (unified diff, paths relative to `spec/tex/`).
@@ -25,5 +25,12 @@ patch set, planned):
   patch, the hunk and the line.
 - Patches must apply independently of each other; no patch may depend on
   another's context.
+
+The set is checked when it loads (`make test`, `make patched`): a name not
+of that form, a duplicate number, an empty header, a patch that does not
+apply alone to the pristine tree, or two patches whose hunks overlap or
+touch is an error naming the patch. Every job reads the patched text;
+`make patched` writes the patched tree to `build/patched/` for reading and
+diffing only. `vendor/` is never patched.
 
 There are no patches yet.

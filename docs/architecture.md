@@ -71,6 +71,15 @@ the sources' macros with the reader alone, for `make vocab`
   `src/source.lisp`); a name found in both trees is an error, so each source
   keeps its own file name in spans. File access goes through a pluggable
   *resolver*, which by default follows that search path.
+  The **patched tree** lives in memory: the patch files of `patches/` are loaded
+  and checked (`load-patch-set`, `src/patch/set.lisp`: names, headers,
+  independence), applied to the pristine text, and a file of the spec
+  tree is read as its patched text under its own name, so spans point
+  into the patched text.  The hook is `*source-overlay*` in
+  `src/source.lisp`, consulted by `open-line-source` for the spec tree
+  only (never `vendor/`), which the patch package installs; `make patched`
+  writes the tree to `build/patched/` for reading and diffing.
+  `applied-patches` gives each patch's name and SHA-256.
   Missing generated files (`chap-N.fig`, `.tc`, `.toc`, `.idx`) are
   synthesised by the resolver, not treated as errors.
 - **Reader** ([reader](reader.md)). This is a lazy, pull-based token stream. It consults the
@@ -187,7 +196,7 @@ has the export formats, their JSON Schema and versioning.
 
 | Phase | State |
 |-------|-------|
-| 0 Sources | pristine and vendored trees, search path and resolver done; unified diffs are read and applied strictly (`src/patch/`); the patch set and the patched resolver are M4 |
+| 0 Sources | pristine and vendored trees, search path and resolver done; unified diffs are read and applied strictly (`src/patch/`); the patch set (`src/patch/set.lisp`) is checked and every job reads the patched tree (M4) |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | done (M2): TeX below typesetting (`src/expand/`, `make expand`), plain TeX's format, the vocabulary and its observation (`src/semantic/`, `make events`); every chapter job runs and its events are checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
 | 4–5 Model, exports | M3 under way (`docs/plan/m3.md`): packages `cl-ansi-spec/model` (`src/model/`) and `cl-ansi-spec/export` (`src/export/`) laid out, one stub file per step; the builder's ownership table (`src/model/owners.sexp`); the builder core (`src/model/build.lisp`: handler table, container stack, build report, `make model`); the registry of generated files (`src/export/generate.lisp`, `make generate`) |

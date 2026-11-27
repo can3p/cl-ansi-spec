@@ -3,7 +3,7 @@
 SBCL ?= sbcl
 LISP := $(SBCL) --noinform --non-interactive --no-sysinit --no-userinit
 
-.PHONY: all deps test snapshots generate tokens vocab expand events model clean distclean
+.PHONY: all deps test snapshots generate patched tokens vocab expand events model clean distclean
 
 all: test
 
@@ -21,6 +21,10 @@ snapshots: deps
 # declarations.
 generate: deps
 	$(LISP) --load tools/generate.lisp
+
+# Write the patched spec tree to build/patched/ (reading and diffing only).
+patched: deps
+	$(LISP) --load tools/patched.lisp
 
 # Dump the tokens of a spec file: make tokens FILE=chap-1 [LINES=10-20] [SKIPS=1]
 tokens: deps
