@@ -102,11 +102,12 @@ Of the outer vertical list only the nodes not yet on the page are shown
     (loop for (list . rest) on (expander-nest expander)
           for mode = (list-state-mode list)
           for graf = (list-state-prev-graf list)
-          for nodes = (if rest
-                          (list-nodes list)
-                          (reverse (loop for node in (list-state-contents list)
-                                         until (eq node (list-state-contributed list))
-                                         collect node)))
+          for nodes = (remove-if #'marker-p
+                                 (if rest
+                                     (list-nodes list)
+                                     (reverse (loop for node in (list-state-contents list)
+                                                    until (eq node (list-state-contributed list))
+                                                    collect node))))
           do (format out "~&### ~A entered at line ~D" (mode-text mode)
                      (list-state-line list))
              ;; The hyphenation data a paragraph began with (§1091),

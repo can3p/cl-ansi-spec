@@ -88,7 +88,9 @@ which extends the text node that ends the list when it can."
     (fix-language expander span))
   (let* ((list (current-list expander))
          (style (font-style-name (current-font (expander-state expander))))
-         (last (last-node list))
+         ;; Not across a marker: it sits between the characters.
+         (last (let ((node (last-node list)))
+                 (and (eq node (first (list-state-contents list))) node)))
          (char (code-char code)))
     (if (and last (text-continues-p last style span))
         (progn
@@ -199,7 +201,7 @@ SPAN."
 (define-command "/" (expander token meaning)
   ;; §1112: after a character, a kern of the character's italic
   ;; correction, which is 0 without metrics; in math, always.
-  (let ((last (first (list-state-contents (current-list expander)))))
+  (let ((last (list-tail (current-list expander))))
     (when (or (eq (mode-kind (current-mode expander)) :math)
               (and last (eq (car (node-last-item last)) :character)))
       (append-node expander (make-node :kern :properties (list :width (format-dimen 0)
@@ -255,7 +257,7 @@ height and depth, each a dimension in sp or :RUNNING."
                         (null (page-state-last-glue (expander-page expander))))
              (report-illegal-case expander token meaning)))
           ((and last (eq (car last) kind)
-                (not (protected-tail-p (first (list-state-contents list)))))
+                (not (protected-tail-p (list-tail list))))
            (remove-last-node list)))))
 
 ;;; Marks (§1101)

@@ -160,7 +160,7 @@ noad."
                    (setf (node-children noad)
                          (remove field (node-children noad) :key #'node-kind)))))
             ((and only (eq (noad-class only) :accent) (eq field :nucleus)
-                  (eq noad (first (list-state-contents list))) (eq (noad-class noad) :ord))
+                  (eq noad (list-tail list)) (eq (noad-class noad) :ord))
              (remove-last-node list)
              (append-node expander only))
             (t (set-noad-field noad field nodes :span span :end-span (token-span token)))))))
@@ -199,7 +199,7 @@ script of the noad ending the list, or of a new ord noad when there is
 none or the script is there already (`Double superscript')."
   (let* ((span (token-span token))
          (field (if (eq key :sup-mark) :superscript :subscript))
-         (tail (first (list-state-contents (current-list expander))))
+         (tail (list-tail (current-list expander)))
          (noad (and (scripts-allowed-p tail) tail)))
     (when (or (null noad) (noad-field noad field))
       (let ((double (and noad t)))
@@ -224,7 +224,7 @@ none or the script is there already (`Double superscript')."
 
 (define-command ("limits" "nolimits" "displaylimits") (expander token meaning)
   ;; §1159: the limits of the op noad ending the list.
-  (let ((tail (first (list-state-contents (current-list expander)))))
+  (let ((tail (list-tail (current-list expander))))
     (if (and tail (eq (noad-class tail) :op))
         (if (string= name "displaylimits")
             (remf (node-properties tail) :limits)

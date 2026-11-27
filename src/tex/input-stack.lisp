@@ -10,11 +10,13 @@
 
 (in-package #:cl-ansi-spec/tex)
 
-(defstruct (token-level (:constructor make-token-level (tokens kind)))
+(defstruct (token-level (:constructor make-token-level (tokens kind &optional tag)))
   "A token list being read.  KIND says where it comes from, e.g.
-:BACKED-UP, :INSERTED or :MACRO."
+:BACKED-UP, :INSERTED or :MACRO; TAG, if not NIL, is given to the stack's
+LEVEL-END-HOOK when the level is removed."
   (tokens '() :type list)
-  (kind nil :read-only t))
+  (kind nil :read-only t)
+  (tag nil :read-only t))
 
 (defstruct (input-stack (:constructor %make-input-stack
                             (state resolver skip-hook)))
@@ -24,12 +26,15 @@ if not NIL, is called with the stack and the file's name each time a file
 has been read to its end and removed; it may push tokens, which are read
 next (TeX checks for runaway text there, §362).  U-TEMPLATE-END-HOOK, if
 not NIL, is called with the stack each time an exhausted :U-TEMPLATE
-list is removed (TeX's end_token_list, §324)."
+list is removed (TeX's end_token_list, §324).  LEVEL-END-HOOK, if not
+NIL, is called with the stack and the level's tag each time a token list
+with a tag is removed."
   (state nil :type tex-state :read-only t)
   (resolver nil :type function :read-only t)
   (skip-hook nil :type (or null function) :read-only t)
   (file-end-hook nil :type (or null function))
   (u-template-end-hook nil :type (or null function))
+  (level-end-hook nil :type (or null function))
   ;; TeX's force_eof, set by \\endinput: the next file to finish a line
   ;; ends there.
   (force-eof nil :type boolean)
@@ -75,9 +80,13 @@ Signal INPUT-FILE-MISSING if there is none."
 
 (defun pop-token-level (stack)
   "Remove the exhausted token list on top of STACK; at the end of a
-:U-TEMPLATE list, call the stack's U-TEMPLATE-END-HOOK."
+:U-TEMPLATE list, call the stack's U-TEMPLATE-END-HOOK, and for a list
+with a tag its LEVEL-END-HOOK."
   (let ((level (pop (input-stack-levels stack)))
-        (hook (input-stack-u-template-end-hook stack)))
+        (hook (input-stack-u-template-end-hook stack))
+        (end-hook (input-stack-level-end-hook stack)))
+    (when (and end-hook (token-level-tag level))
+      (funcall end-hook stack (token-level-tag level)))
     (when (and hook (eq (token-level-kind level) :u-template))
       (funcall hook stack))))
 
@@ -92,15 +101,16 @@ END-READ-LINE removes it."
                    (not (member (token-level-kind top) '(:v-template :read-line))))
         do (pop-token-level stack)))
 
-(defun push-tokens (stack tokens &optional (kind :inserted))
+(defun push-tokens (stack tokens &optional (kind :inserted) tag)
   "Insert the list TOKENS to be read next, as a level of KIND.  For a
 :MACRO body the exhausted token lists are removed first, as TeX's
 macro_call does (§390); other lists (TeX's begin_token_list and
 back_list) go on top of them, which ends a u template later.  TOKENS is
-copied, never modified.  Returns no values."
+copied, never modified.  A non-NIL TAG is given to the stack's
+LEVEL-END-HOOK when the level is removed.  Returns no values."
   (when (eq kind :macro)
     (pop-exhausted-token-lists stack))
-  (push (make-token-level (copy-list tokens) kind) (input-stack-levels stack))
+  (push (make-token-level (copy-list tokens) kind tag) (input-stack-levels stack))
   (values))
 
 (defun resolve-input (stack name)
@@ -115,6 +125,13 @@ of one line, are read next.  Once they are read, NEXT-TOKEN returns NIL
 (TeX's `\\read line has ended', §360) until END-READ-LINE removes the
 level.  Returns no values."
   (push-tokens stack tokens :read-line))
+
+(defun open-level-tags (stack)
+  "The tags of the token-list levels of STACK not yet removed, innermost
+first."
+  (loop for level in (input-stack-levels stack)
+        when (and (token-level-p level) (token-level-tag level))
+          collect (token-level-tag level)))
 
 (defun reading-line-p (stack)
   "True when the top level of STACK is a line PUSH-READ-LINE pushed, so

@@ -50,7 +50,9 @@ list, which TeX puts after the disc node (§1120), else NODE itself."
     (:accent (car (last (node-children node))))
     (:discretionary
      (let ((no-break (find :no-break (node-children node) :key #'node-kind)))
-       (if no-break (car (last (node-children no-break))) node)))
+       (if no-break
+           (or (find-if-not #'marker-p (reverse (node-children no-break))) node)
+           node)))
     (t node)))
 
 (defun protected-tail-p (node)
@@ -71,11 +73,36 @@ cons (KIND . VALUE), KIND a LAST-NODE-KIND, of its VISIBLE-TAIL."
     (:penalty (cons :penalty (node-value node)))
     (t (list :other))))
 
+;;; Markers
+
+(defun make-marker (event &optional span)
+  "A marker node: EVENT, a list such as (:BEGIN KEY ...), (:END KEY ...)
+or (:MARK KEY ...), is its event, with SPAN.  Markers record where an observed macro begins and ends
+(docs/vocabulary.md); TeX never sees them (LIST-TAIL)."
+  (make-node :marker :value event :span span))
+
+(defun marker-p (node)
+  "True when NODE is a marker."
+  (eq (node-kind node) :marker))
+
+(defun append-marker (expander event &key span (list (current-list expander)))
+  "Append a marker for EVENT at SPAN to LIST, the current list unless
+given; return it."
+  (append-node expander (make-marker event span) :list list))
+
+(defun list-tail (list)
+  "TeX's tail of LIST: its last node that is not a marker, or NIL."
+  (find-if-not #'marker-p (list-state-contents list)))
+
+(defun list-empty-p (list)
+  "True when LIST has no nodes but markers (TeX's head = tail)."
+  (null (list-tail list)))
+
 (defun list-state-last-node (list)
   "The last node of LIST as NODE-LAST-ITEM gives it, or NIL when LIST is
-empty (TeX's tail = head): when it has no nodes, or when the page builder
-took them all (BUILD-PAGE)."
-  (let ((node (first (list-state-contents list))))
+empty (TeX's tail = head): when it has no nodes but markers, or when the
+page builder took them all (BUILD-PAGE)."
+  (let ((node (list-tail list)))
     (and node (not (eq node (list-state-contributed list)))
          (node-last-item node))))
 
@@ -95,13 +122,17 @@ unless given.  It is signalled as a JOB-OUTPUT."
   node)
 
 (defun remove-last-node (list)
-  "Remove the last node of LIST and return it."
-  (pop (list-state-contents list)))
+  "Remove the last node of LIST (LIST-TAIL), leaving the markers after it,
+and return it."
+  (let ((tail (list-tail list)))
+    (setf (list-state-contents list)
+          (remove tail (list-state-contents list) :count 1 :test #'eq))
+    tail))
 
 (defun last-node (list)
-  "The last node of LIST itself, or NIL when LIST-STATE-LAST-NODE says it
-is empty."
-  (and (list-state-last-node list) (first (list-state-contents list))))
+  "The last node of LIST itself, LIST-TAIL, or NIL when
+LIST-STATE-LAST-NODE says it is empty."
+  (and (list-state-last-node list) (list-tail list)))
 
 ;;; The page builder (§§994-996)
 
@@ -111,7 +142,7 @@ vertical list counts as empty, its nodes being on the page (they stay in
 the list, which is the job's output: no page is built), and the page's
 last glue, penalty and kern are those of its last node (§996)."
   (let* ((outer (outer-list expander))
-         (node (first (list-state-contents outer)))
+         (node (list-tail outer))
          (page (expander-page expander)))
     (when (and node (not (eq node (list-state-contributed outer))))
       (setf (list-state-contributed outer) node)
@@ -133,17 +164,21 @@ last glue, penalty and kern are those of its last node (§996)."
 
 (defun flatten-nodes (nodes)
   "The events of NODES (oldest first): a composite node becomes
-(:begin KIND ...), the events of its children and (:end KIND :span ...)."
+(:begin KIND ...), the events of its children and (:end KIND :span ...);
+a marker, its own event with :SPAN."
   (let ((events '()))
     (labels ((walk (node)
-               (if (node-composite node)
-                   (progn
-                     (push (cons :begin (node-head node)) events)
-                     (mapc #'walk (node-children node))
-                     (push (list :end (node-kind node)
-                                 :span (or (node-end-span node) (node-span node)))
-                           events))
-                   (push (node-head node) events))))
+               (cond
+                 ((marker-p node)
+                  (push (append (node-value node) (list :span (node-span node)))
+                        events))
+                 ((node-composite node)
+                  (push (cons :begin (node-head node)) events)
+                  (mapc #'walk (node-children node))
+                  (push (list :end (node-kind node)
+                              :span (or (node-end-span node) (node-span node)))
+                        events))
+                 (t (push (node-head node) events)))))
       (mapc #'walk nodes))
     (nreverse events)))
 

@@ -40,6 +40,10 @@ next.
 | `(:write :stream s :tokens … :text "…" :immediate t)`, `(:openout … :immediate t)`, `(:closeout … :immediate t)` | The same after `\immediate`, carried out at once: the tokens are expanded and `:text` is what TeX would write.  An `\immediate\write` to a stream that is not open is no event but an entry of the job's log, and an `\immediate\closeout` of stream 16 or 17 closes nothing and is no event (`docs/tex-fidelity.md`). |
 | `(:diagnostic …)` | A TeX error the job recovered from, or an unknown construct. |
 
+The `:begin`/`:end`/`:mark` events of the vocabulary come from *marker*
+nodes (`make-marker`, `append-marker`): a marker's event is its own, with
+its span.  TeX never sees a marker (`docs/vocabulary.md`, "Observers").
+
 Every event has a `:span`: where the command, character or list began
 (`:end` events: what ended it, when known).  The expander builds the
 events as nodes of TeX's lists (`src/expand/nodes.lisp`, `docs/tex-fidelity.md`,

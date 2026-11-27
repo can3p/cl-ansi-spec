@@ -33,7 +33,9 @@
                 #:make-frozen-control-sequence
                 #:control-sequence-name #:control-sequence-active-p
                 #:input-stack #:make-input-stack #:input-stack-file-end-hook
-                #:input-stack-u-template-end-hook #:v-template-ended-p
+                #:input-stack-u-template-end-hook #:input-stack-level-end-hook #:pop-exhausted-token-lists
+                #:open-level-tags
+                #:v-template-ended-p
                 #:next-token #:back-input #:push-tokens #:push-file
                 #:end-current-file #:input-file-missing #:current-line-number
                 #:resolve-input #:push-read-line #:reading-line-p #:end-read-line
@@ -95,6 +97,8 @@
    #:expander #:make-expander #:expander-state #:expander-input
    #:expander-job-name #:expander-scanner-status #:expander-align-state
    #:expander-marks #:scanner-status
+   #:expander-call-observer #:expander-level-end-observer
+   #:expander-definition-observer
    #:get-next #:get-token #:get-x-token #:back-token #:insert-tokens
    #:expand #:expandable-p #:frozen-control-sequence #:dont-expand-meaning
    #:cs-name-text #:token-list-text #:meaning-text #:string-tokens
@@ -110,6 +114,7 @@
    #:node-children #:node-composite #:node-span #:node-end-span #:node-via
    #:node-last-item #:list-nodes #:outer-list #:append-node #:remove-last-node
    #:flatten-nodes #:font-style-name
+   #:make-marker #:marker-p #:append-marker #:list-tail #:list-empty-p
    #:page-state #:page-state-so-far #:page-state-contents
    #:page-state-output-active #:page-state-last-penalty
    #:page-state-last-kern #:page-state-last-glue #:page-state-dead-cycles

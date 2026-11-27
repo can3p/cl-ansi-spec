@@ -82,7 +82,16 @@ end-of-file checks."
   (trie-not-ready t :type boolean)
   ;; How the job ended: NIL while it runs, :END after \end, :DUMP after
   ;; \dump (§1335).
-  (ended nil :type (member nil :end :dump)))
+  (ended nil :type (member nil :end :dump))
+  ;; Observers of the job, NIL or functions (docs/vocabulary.md,
+  ;; "Observers"): CALL-OBSERVER (expander token macro arguments) before a
+  ;; matched macro's body is read, returning an action (NIL or :REPLACE)
+  ;; and a tag; LEVEL-END-OBSERVER (expander tag) when the body of a call
+  ;; given a tag ends; DEFINITION-OBSERVER (expander control-sequence
+  ;; meaning span) after a definition.
+  (call-observer nil :type (or null function))
+  (level-end-observer nil :type (or null function))
+  (definition-observer nil :type (or null function)))
 
 (defstruct (dont-expand-token (:include cs-token)
                               (:constructor make-dont-expand-token
@@ -110,7 +119,8 @@ The primitives are installed in STATE."
 
 (defun install-input-hooks (expander)
   "Make EXPANDER's input stack call back into it at the end of a file (the
-\\outer check, §362) and of a u template (§324); return EXPANDER."
+\\outer check, §362), of a u template (§324) and of an observed macro
+body; return EXPANDER."
   (let ((input (expander-input expander)))
     (setf (input-stack-file-end-hook input)
           (lambda (stack name)
@@ -119,7 +129,11 @@ The primitives are installed in STATE."
     (setf (input-stack-u-template-end-hook input)
           (lambda (stack)
             (declare (ignore stack))
-            (end-u-template expander))))
+            (end-u-template expander)))
+    (setf (input-stack-level-end-hook input)
+          (lambda (stack tag)
+            (declare (ignore stack))
+            (end-observed-body expander tag))))
   expander)
 
 (defun expander-tex (expander)

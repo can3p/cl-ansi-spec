@@ -38,6 +38,8 @@
    ;; The input stack
    #:input-stack #:make-input-stack #:directory-resolver
    #:input-stack-file-end-hook #:input-stack-u-template-end-hook
+   #:input-stack-level-end-hook #:pop-exhausted-token-lists
+   #:open-level-tags
    #:v-template-ended-p #:end-current-file
    #:push-source #:push-file #:push-tokens #:back-input #:resolve-input
    #:push-read-line #:reading-line-p #:end-read-line #:read-line-tokens

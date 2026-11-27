@@ -54,6 +54,14 @@ until set."
   "TeX's pop_nest: drop the innermost list."
   (pop (expander-nest expander)))
 
+(defun drop-list (expander)
+  "Drop the innermost list, which holds no nodes but markers, as TeX
+drops an empty paragraph; its markers go on to the enclosing list."
+  (let ((markers (remove-if-not #'marker-p
+                                (list-state-contents (pop-nest expander)))))
+    (setf (list-state-contents (current-list expander))
+          (append markers (list-state-contents (current-list expander))))))
+
 (defun begin-token-list (expander tokens kind)
   "TeX's begin_token_list for one of the \\every... parameters: TOKENS
 are read next, as a level of KIND."
@@ -110,7 +118,7 @@ is its first node."
   (let ((outer (current-list expander)))
     (setf (list-state-prev-graf outer) 0)
     (when (or (eq (list-state-mode outer) :vertical)
-              (list-state-contents outer))
+              (not (list-empty-p outer)))
       (append-node expander (glue-node (parameter (expander-state expander) :parskip)
                                        "parskip" span))))
   (push-nest expander :horizontal span)
@@ -155,9 +163,9 @@ one more line, of unknown depth (no line breaking, §§815, 890)."
   "TeX's end_graf (§1096): end the paragraph being built, if any, at
 END-SPAN; an empty one is dropped."
   (when (eq (current-mode expander) :horizontal)
-    (if (list-state-contents (current-list expander))
-        (break-paragraph expander end-span)
-        (pop-nest expander))
+    (if (list-empty-p (current-list expander))
+        (drop-list expander)
+        (break-paragraph expander end-span))
     (normal-paragraph expander)))
 
 (defun head-for-vmode (expander token meaning)
@@ -215,9 +223,9 @@ Returns the length and the shift, in sp."
 is ended, then \\predisplaysize (0pt without metrics, -\\maxdimen after an
 empty paragraph), \\displaywidth and \\displayindent are set."
   (let ((state (expander-state expander))
-        (size (if (list-state-contents (current-list expander))
-                  (progn (break-paragraph expander span) 0)
-                  (progn (pop-nest expander) (- +max-dimen+)))))
+        (size (if (list-empty-p (current-list expander))
+                  (progn (drop-list expander) (- +max-dimen+))
+                  (progn (break-paragraph expander span) 0))))
     (multiple-value-bind (length shift) (display-line expander)
       (push-math expander :math-shift :span span)
       (setf (list-state-mode (current-list expander)) :display-math)

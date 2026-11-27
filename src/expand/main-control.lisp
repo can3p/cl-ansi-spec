@@ -235,8 +235,8 @@ Returns how the job ended, :END or :DUMP."
 
 (defun final-cleanup (expander dump)
   "TeX's final_cleanup (§1335): report the groups and conditionals still
-open (TEX-REPORTs, not errors), then end the job; \\dump (DUMP) inside a
-group is fatal (§1304)."
+open (TEX-REPORTs, not errors), and the observed macro bodies still being
+read, then end the job; \\dump (DUMP) inside a group is fatal (§1304)."
   (let ((level (group-level (expander-tex expander))))
     (when (plusp level)
       (tex-report (esc expander "end occurred")
@@ -252,4 +252,7 @@ group is fatal (§1304)."
     (when (plusp (save-stack-depth (expander-tex expander)))
       (tex-fatal-error "You can't dump inside a group"))
     (setf (expander-trie-not-ready expander) nil))
+  ;; The observed bodies still being read end with the job.
+  (dolist (tag (open-level-tags (expander-input expander)))
+    (end-observed-body expander tag))
   (setf (expander-ended expander) (if dump :dump :end)))

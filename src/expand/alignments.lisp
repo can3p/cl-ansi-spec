@@ -267,10 +267,11 @@ horizontal for \\valign), `to' or `spread', the preamble, then
     (setf (expander-align-state expander) -1000000)
     ;; §776
     (when (and (eq mode :display-math)
-               (or (list-state-contents list) (list-state-incompleat list)))
+               (or (not (list-empty-p list)) (list-state-incompleat list)))
       (tex-error (format nil "Improper ~A inside $$'s" (esc expander "halign"))
                  :span (token-span token))
-      (setf (list-state-contents list) '()
+      ;; flush_math; markers stay.
+      (setf (list-state-contents list) (remove-if-not #'marker-p (list-state-contents list))
             (list-state-incompleat list) nil))
     ;; §775
     (push-nest expander (case mode

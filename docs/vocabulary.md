@@ -33,6 +33,41 @@ mode and why it is in the table.
   `\term`, …. Phase 4 resolves them from the `\Define*` events, not from the
   stale generated `setup-sections.tex`/`setup-figures.tex`.
 
+## Observers
+
+The expander knows nothing of the vocabulary. It offers observers, slots
+of the expander that are NIL by default (`src/expand/expander.lisp`), and
+markers, nodes that carry an event (`src/expand/nodes.lisp`):
+
+- **`call-observer`** `(expander token macro arguments)` is called by
+  `macro-call` once a call's arguments are matched, before its body is
+  read. It returns an action, NIL (the body is read) or `:replace` (it is
+  not, and no tag may be given), and a tag. A non-NIL tag goes on the
+  body's token-list level.
+- **`level-end-observer`** `(expander tag)` is called when that level is
+  removed, which is TeX's own end of the body (§§324-325, 390): lazily,
+  when a token is next wanted from below it, or when back_input or a later
+  macro call removes it. A tail call therefore ends its caller before it
+  begins, so an entry is observed at the macro whose body holds the
+  content (its observation point); a body whose last command reads ahead
+  (`\futurelet`, or a `\kern` scanning for a space) ends when it reads
+  past. An empty body ends at once; bodies still being read when the job
+  ends (`\end`, `\dump`) end with it, innermost first.
+- **`definition-observer`** `(expander control-sequence meaning span)` is
+  called after `\def`, `\gdef`, `\edef`, `\xdef`, `\let`, `\futurelet`
+  and the shorthand definitions (`\chardef`, …).
+- **Markers** (`append-marker`) are appended to a list like any node, but
+  TeX never sees them, so observing never changes what TeX does: every
+  read of a list's tail (`\lastskip` and friends, `\unskip`, `\unkern`,
+  `\unpenalty`, `\lastbox`, `\/`, a script's or `\limits`' noad, the page
+  builder) skips them (`list-tail`); the removing commands leave them in
+  place; a discretionary's lists may hold them; a list holding only
+  markers counts as empty (`list-empty-p`: no
+  `\parskip` before a paragraph, an empty paragraph dropped, `$$` after
+  it), and what such a dropped list or a flushed display (`\halign`
+  inside `$$`) held of markers goes on to the enclosing list. Characters
+  never join a text node across a marker. `\showlists` does not show them.
+
 ## Choosing entries
 
 `make vocab` surveys the sources without expansion (package

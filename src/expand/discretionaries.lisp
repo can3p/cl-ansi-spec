@@ -54,8 +54,9 @@ horizontal list (§§1117, 1119)."
 
 (defun proper-disc-node-p (node)
   "True when a discretionary's list may hold NODE (§1121): a character,
-a box (the indentation is one), a rule or a kern."
-  (and (member (node-kind node) '(:text :box :indent :rule :kern)) t))
+a box (the indentation is one), a rule or a kern; or a marker, which
+TeX never sees."
+  (and (member (node-kind node) '(:text :box :indent :rule :kern :marker)) t))
 
 (defun prune-disc-list (expander nodes)
   "§1121: NODES up to the first one a discretionary may not hold; that
@@ -74,9 +75,12 @@ TeX's diagnostic in the log."
 
 (defun disc-list-length (nodes)
   "The number of TeX's nodes in NODES: one per character of a :TEXT
-node."
+node, none for a marker."
   (loop for node in nodes
-        sum (if (eq (node-kind node) :text) (length (node-value node)) 1)))
+        sum (case (node-kind node)
+              (:text (length (node-value node)))
+              (:marker 0)
+              (t 1))))
 
 (defun build-discretionary (expander token)
   "TeX's build_discretionary (§§1119-1121), at the `}' TOKEN of a disc
