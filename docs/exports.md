@@ -191,7 +191,27 @@ Every JSON file is an object with `schemaVersion` and its content, e.g.
 `{"schemaVersion": "<sha256>", "chapter": {…}}`.
 The S-expression export has the same files with `.sexp`. Each one is a
 single form `(:schema-version "<digest>" . content)`, read back with `read`
-under the readtable documented in `docs/model-reference.md` (planned).
+with `*read-eval*` false under standard syntax (keywords, strings, integers
+and lists only).
+
+### The writers
+
+`src/export/write-json.lisp` (`node-json`), `write-sexp.lisp` (`file-sexp`,
+`sexp-text`, `read-sexp-text`) and `files.lisp` (`write-export-files`,
+`schema-version`). Both writers walk the registry's declarations, so a node
+kind needs no writer code. Besides the rules of "JSON shape":
+
+- a required field that has no value is written empty (`[]`, `false`), not
+  omitted, and a node made without a span has no `span`; the validator then
+  reports it, since the writer does not hide what the builder left out;
+- an empty text is dropped when adjacent text is merged;
+- a file's content is a plist of keys and nodes or lists of nodes: `:chapter`
+  (one chapter node), `:glossary` (glossary groups), `:index` (index entries);
+- a chapter file is named by its id with every run of characters other than
+  letters, digits, `.` and `_` replaced by one `-` (simple chapters are named
+  by their title); two chapters naming one file stop the export;
+- `write-export-files` returns the `(path . sha256)` of each file written,
+  for the manifest.
 
 ## Versioning
 
