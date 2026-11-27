@@ -37,8 +37,10 @@ classifies every other macro (see "Choosing entries").
   `:mark` event. A `:wrapper` entry hands its content to another
   entry's macro, a tail call (`\def\funref{\clref}`, `\def\kwd#1{\ttref{:#1}}`,
   setup-document.tex:62-79): its call is held, and the next entry
-  call takes its key and arguments for the `:begin` (with the called
-  entry's key as `:through`) and gives the `:end`; keyed on meanings
+  call takes its key for the `:begin`, with the wrapper's arguments
+  followed by its own (`\funref{car}` has none of its own: `("car")`;
+  `\kwd{test}` is `("test" ":test")`) and the called entry's key as
+  `:through`, and gives the `:end`; keyed on meanings
   alone, every reference would be a `\clref`. Of a chain of wrappers,
   the outermost keeps the call. The tail call is the call of the first
   token of the wrapper's body; a held wrapper that meets another call, a
@@ -125,8 +127,19 @@ markers, nodes that carry an event (`src/expand/nodes.lisp`):
 ## Choosing entries
 
 An entry is a macro whose meaning would otherwise be lost: the meaning
-of a macro that only expands to entries (a *phrase*: `\oftype` is
-"of `\term{type}` `\typeref{…}`") comes through them. Every macro the
+of a macro that only expands to text and entries (a *phrase*: `\oftype` is
+"of `\term{type}` `\typeref{…}`") comes through them.  So the entries
+are the authors' markup (`\term`, `\param`, `\i`, `\f`, …), the
+references (`\clref` and its wrappers `\funref`, `\kwd`, …), the
+notation of examples (`\EV`, `\OUT`, …), index entries (`\idx…`,
+marks keyed by the kind of entry), cited works (`\CLtL`, `:cite`),
+self-references (`\thissection`) and the structure; font changes written
+directly (`{\tt …}`) stay presentational and phase 4 reads them outside
+entries only.  A macro of plain TeX the setup files redefine as an entry
+(`\b`, `\i`, `\j`, `\hat`, and `\item`, `\itemitem`) is reported in
+every job.  A redefinition of a plain macro that plain itself calls
+cannot be an entry: setup-terms.tex makes `\empty` the empty list `()`
+in the code font, which phase 4 sees only as code-font text. Every macro the
 sources define and use in text (on a certain line, in the survey below)
 is an entry or is classified in the data file by a `(:class kind …)`
 form, naming it or the file that defines it: `:presentational` (layout,

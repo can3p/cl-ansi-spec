@@ -9,7 +9,7 @@ next.
 
 | Event | Meaning |
 |-------|---------|
-| `(:begin <key> :arguments args)` / `(:end <key>)` | A vocabulary entry starts or ends (`docs/vocabulary.md`). `args` are its arguments as the macro's own parameter text matched them, one token list each, with their spans; phase 4 reads names and content from them. The `:end` of an environment, a `:close` entry's call, has that call's `:arguments`. A wrapper's `:begin` has `:through k`, the key of the entry it called. A replace handler emits events of its own making; a note the options hide is a `:mark` with `:hidden t`. |
+| `(:begin <key> :arguments args)` / `(:end <key>)` | A vocabulary entry starts or ends (`docs/vocabulary.md`). `args` are its arguments as the macro's own parameter text matched them, one token list each, with their spans; phase 4 reads names and content from them. The `:end` of an environment, a `:close` entry's call, has that call's `:arguments`. A wrapper's `:begin` has `:through k`, the key of the entry it called, and as `args` its own arguments followed by that entry's. A replace handler emits events of its own making; a note the options hide is a `:mark` with `:hidden t`. |
 | `(:mark <key> :arguments args)` | A vocabulary entry with no extent (`\label`, `\DefineSection`). |
 | `(:text "…" :style s)` | A run of characters in one font. `s` names the font by its file and size (`"cmr10"`, `"cmr10 at 12.0pt"`, `"cmr10 scaled 1200"`), whatever control sequence selected it; phase 4 maps fonts to meaning only outside vocabulary entries. |
 | `(:space)` | An interword space (a blank in horizontal mode, or `\ `). |

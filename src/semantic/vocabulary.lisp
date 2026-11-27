@@ -16,11 +16,10 @@
   "A vocabulary entry: the macro NAME (a string, without escape) whose
 calls become events keyed KEY (a keyword).  KIND is :CALL (a :BEGIN when
 called, an :END when its body ends), :WRAPPER (its call gives its key and
-arguments to the next :CALL entry's call, its tail call), :MARK (one
-:MARK event), :OPEN (a :BEGIN; the extent runs to the call of a :CLOSE
-entry) or :CLOSE (the :END of the :OPEN entry keyed CLOSES).  PLACEMENT,
-for a :CALL entry, is
-:INLINE (its :BEGIN waits for the first node of its content) or :BLOCK
+arguments to the next :CALL entry's call, its tail call, whose arguments
+follow them), :MARK (one :MARK event), :OPEN (a :BEGIN; the extent runs
+to the call of a :CLOSE entry) or :CLOSE (the :END of the :OPEN entry
+keyed CLOSES).  PLACEMENT, for a :CALL entry, is :INLINE (its :BEGIN waits for the first node of its content) or :BLOCK
 (placed at once).  HANDLER, when given, replaces the call: a function
 (observer expander entry token arguments) that emits the events itself.  WHY
 says why the macro is an entry."
@@ -43,7 +42,7 @@ or :REPLACE (its handler stands for the call)."
   "Macros that are not entries, and why: those called NAMES (spelt as
 the survey spells them, \"\\\\tt\" or an active \"~\") and those defined in FILES (file names such as \"setup-terms.tex\").
 KIND is :PRESENTATIONAL (layout and fonts, no meaning), :PHRASE (it
-expands to entries only), :REFERENCE-NAME (a name references take as
+expands to text and entries only), :REFERENCE-NAME (a name references take as
 argument), :OPTION (a flag of the options) or :UNREVIEWED (not yet
 classified)."
   (kind nil :type (member :presentational :phrase :reference-name :option :unreviewed)

@@ -40,7 +40,13 @@ A string is plain text. Other inlines:
 - `(:operator-ref "endp" :target (:entry "endp"))`
 - `(:section-ref :target (:section "Definitions"))`
 - `(:figure-ref :target (:figure …))`
-- `(:param "list")`, `(:code "…")`, `(:emphasis …)`, `(:math …)`
+- `(:param "list")`, `(:code "…")`, `(:emphasis …)`, `(:strong …)`, `(:math …)`
+- `(:evaluates-to)` and the other notation of examples (`:may-evaluate-to`,
+  `:does-not-evaluate-to`, `:equivalent`, `(:output …)`, `(:input …)`)
+- `(:citation …)`: the title of a cited work
+- `(:index-entry :kind k "…")`: an index entry (`k` one of `:ref`,
+  `:keyref`, `:code`, `:keyword`, `:text`, `:term`, `:example`,
+  `:package`), an anchor
 - `(:issue-start "NAME")` and `(:issue-end "NAME")`. Issues are **ranges**
   and may cross block and section boundaries, so they are anchors, not
   containers.

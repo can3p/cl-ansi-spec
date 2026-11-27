@@ -202,8 +202,9 @@ text only) and the kinds and names of its REPORTS."
 (define-test wrappers
   :parent semantic
   ;; As setup-document.tex:62-79: a wrapper gives its key and arguments
-  ;; to its tail call; the outermost of a chain keeps them; a wrapper
-  ;; with no entry call before content is reported and dropped.
+  ;; to its tail call, whose arguments follow its own; the outermost of
+  ;; a chain keeps them; a wrapper with no entry call before content is
+  ;; reported and dropped.
   (check-semantic "\\def\\clref#1{{#1}}\\def\\funref{\\clref}\\def\\kwd#1{\\clref{:#1}}%
 \\def\\keyref{\\funref}\\def\\odd{x}%
 a\\clref{b}\\funref{c}\\kwd{d}\\keyref{e}\\odd\\par"
@@ -212,9 +213,9 @@ a\\clref{b}\\funref{c}\\kwd{d}\\keyref{e}\\odd\\par"
                    ("odd" :odd :kind :wrapper))
                   ((:begin :paragraph) (:text "a")
                    (:begin :clref :arguments ("b")) (:text "b") (:end :clref)
-                   (:begin :funref :arguments () :through :clref) (:text "c") (:end :funref)
-                   (:begin :kwd :arguments ("d") :through :clref) (:text ":d") (:end :kwd)
-                   (:begin :keyref :arguments () :through :clref) (:text "e") (:end :keyref)
+                   (:begin :funref :arguments ("c") :through :clref) (:text "c") (:end :funref)
+                   (:begin :kwd :arguments ("d" ":d") :through :clref) (:text ":d") (:end :kwd)
+                   (:begin :keyref :arguments ("e") :through :clref) (:text "e") (:end :keyref)
                    (:text "x")
                    (:end :paragraph))
                   :reports ((:unbalanced "odd")))

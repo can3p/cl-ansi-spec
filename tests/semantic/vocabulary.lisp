@@ -84,24 +84,32 @@ observer."
          (observer (semantic:observe-vocabulary expander (semantic:spec-vocabulary))))
     (values expander observer)))
 
-(defun vocabulary-events (expander observer)
+(defun vocabulary-events (expander observer &optional keys)
   "The events of EXPANDER's job keyed by an entry of OBSERVER's
-vocabulary, as SEMANTIC-EVENTS shows them."
-  (let ((keys (mapcar #'semantic:entry-key
-                      (semantic:vocabulary-entries (semantic:observer-vocabulary observer)))))
+vocabulary, or by one of KEYS when given, as SEMANTIC-EVENTS shows them."
+  (let ((keys (or keys
+                  (mapcar #'semantic:entry-key
+                          (semantic:vocabulary-entries
+                           (semantic:observer-vocabulary observer))))))
     (loop for event in (expand:job-events expander)
           when (and (member (first event) '(:begin :end :mark))
                     (member (second event) keys))
             collect (strip-semantic-event expander event nil))))
 
-(defmacro check-vocabulary (text events &key (reports '((:redefined "item") (:redefined "itemitem"))))
-  "Run TEXT after the setup files; check its vocabulary EVENTS and the
-kinds and names of its REPORTS (plain's \\item and \\itemitem are always
-redefined)."
+(defparameter *setup-redefinitions*
+  '((:redefined "item") (:redefined "itemitem") (:redefined "b")
+    (:redefined "i") (:redefined "j") (:redefined "hat"))
+  "The reports of every job: the setup files redefine plain's \\item,
+\\itemitem, \\b, \\i, \\j and \\hat, which are entries.")
+
+(defmacro check-vocabulary (text events &key (reports '*setup-redefinitions*) keys)
+  "Run TEXT after the setup files; check its vocabulary EVENTS (only
+those keyed by one of KEYS, when given) and the kinds and names of its
+REPORTS (a form, by default *SETUP-REDEFINITIONS*)."
   `(multiple-value-bind (expander observer) (spec-vocabulary-job ,text)
      (run-job expander)
-     (is equal ',events (vocabulary-events expander observer))
-     (is equal ',reports (mapcar (lambda (report)
+     (is equal ',events (vocabulary-events expander observer ',keys))
+     (is equal ,reports (mapcar (lambda (report)
                                    (list (semantic:report-kind report)
                                          (semantic:report-name report)))
                                  (semantic:observer-reports observer)))))
@@ -122,7 +130,8 @@ redefined)."
                      (:end :code :arguments ())
                      (:mark :label :arguments ("Side Effects" "\\None "))
                      (:mark :label-confidence :arguments ("."))
-                     (:end :com :arguments ()))))
+                     (:end :com :arguments ()))
+                    :keys (:com :label :label-confidence :issue :code)))
 
 (define-test structure-events
   :parent spec-vocabulary
@@ -139,7 +148,8 @@ redefined)."
                      (:mark :item-2 :arguments ("\\bull "))
                      (:end :list :arguments ())
                      (:begin :secref :arguments ("\\LanguageSubsets "))
-                     (:end :secref))))
+                     (:end :secref))
+                    :keys (:section :define-section :list :item-2 :secref)))
 
 (define-test hidden-note-events
   :parent spec-vocabulary
@@ -152,3 +162,140 @@ redefined)."
       (is eq :editor-note (second (first events)))
       (is eq t (getf (cddr (first events)) :hidden))
       (true (search "KMP: Apparently" (first (getf (cddr (first events)) :arguments)))))))
+
+(define-test inline-events
+  :parent spec-vocabulary
+  ;; concept-args.tex:11 and :160, terms, a new term and its index mark,
+  ;; wrappers with no argument of their own; appendix-removed.tex:114-117,
+  ;; \\packref keeps its argument as written; a keyword, a cited book, a
+  ;; phrase (appendix-implem-defined.tex:68, concept-history.tex:193,
+  ;; concept-args.tex:142).
+  (check-vocabulary (concatenate 'string (spec-lines "concept-args" 11 11)
+                                 (spec-lines "concept-args" 160 160))
+                    ((:begin :term :arguments ("call"))
+                     (:end :term)
+                     (:begin :new-term :arguments ("safe call"))
+                     (:end :new-term)
+                     (:mark :index-term :arguments ("safe call"))
+                     (:begin :keyref :arguments ("rest" "\\&rest") :through :clref)
+                     (:end :keyref)
+                     (:begin :keyref :arguments ("key" "\\&key") :through :clref)
+                     (:end :keyref)))
+  (check-vocabulary (spec-lines "appendix-removed" 114 116)
+                    ((:begin :term :arguments ("packages"))
+                     (:end :term)
+                     (:begin :packref :arguments ("lisp" "\\uppercase {lisp}") :through :ttref)
+                     (:end :packref)
+                     (:mark :index-package :arguments ("lisp"))
+                     (:begin :packref :arguments ("user" "\\uppercase {user}") :through :ttref)
+                     (:end :packref)
+                     (:mark :index-package :arguments ("user"))))
+  (check-vocabulary (concatenate 'string (spec-lines "appendix-implem-defined" 68 68)
+                                 (spec-lines "concept-history" 193 193)
+                                 (spec-lines "concept-args" 142 142))
+                    ((:begin :term :arguments ("sequence"))
+                     (:end :term)
+                     (:begin :kwd :arguments ("initial-element" ":initial-element")
+                      :through :ttref)
+                     (:end :kwd)
+                     (:begin :cite :arguments ())
+                     (:end :cite)
+                     (:begin :term :arguments ("type"))
+                     (:end :term)
+                     (:begin :typeref :arguments ("program-error") :through :clref)
+                     (:end :typeref))))
+
+(define-test code-and-emphasis-events
+  :parent spec-vocabulary
+  ;; concept-bvl.tex:360-362, an arrow in code; concept-bvl.tex:1117,
+  ;; emphasis nested in inline code; concept-definitions.tex:1069,
+  ;; lambda-list keywords and parameters.
+  (check-vocabulary (concatenate 'string (spec-lines "concept-bvl" 360 362) "\\endcode
+" (spec-lines "concept-bvl" 1117 1117) (spec-lines "concept-definitions" 1069 1069))
+                    ((:begin :code :arguments ())
+                     (:begin :evaluates-to :arguments ())
+                     (:end :evaluates-to)
+                     (:end :code :arguments ())
+                     (:begin :inline-code :arguments
+                      ("((\\i {key} \\i {var}) \\brac {\\i {default} \\brac {\\i {svar}}})"))
+                     (:begin :emphasis :arguments ("key"))
+                     (:end :emphasis)
+                     (:begin :emphasis :arguments ("var"))
+                     (:end :emphasis)
+                     (:begin :emphasis :arguments ("default"))
+                     (:end :emphasis)
+                     (:begin :emphasis :arguments ("svar"))
+                     (:end :emphasis)
+                     (:end :inline-code)
+                     (:begin :lambda-list-keyword :arguments ())
+                     (:end :lambda-list-keyword)
+                     (:begin :param :arguments ("z"))
+                     (:end :param)
+                     (:begin :lambda-list-keyword :arguments ())
+                     (:end :lambda-list-keyword)
+                     (:begin :param :arguments ("k"))
+                     (:end :param))))
+
+(define-test paragraph-starting-with-a-term
+  :parent spec-vocabulary
+  ;; concept-classes.tex:70: an inline entry used in vertical mode begins
+  ;; inside the paragraph it starts, before its first character.
+  (multiple-value-bind (expander observer)
+      (spec-vocabulary-job (spec-lines "concept-classes" 70 70))
+    (declare (ignore observer))
+    (run-job expander)
+    (let ((events (semantic-events expander :text-only t)))
+      (is equal '((:begin :paragraph)
+                  (:begin :new-term :arguments ("local precedence order"))
+                  (:text "local"))
+          (subseq (member '(:begin :paragraph) events :test #'equal) 0 3)))))
+
+(defun why-place (why)
+  "The first FILE.tex:LINE that WHY names, as (FILE LINE), or NIL: the
+place of the definition, by the convention of the data file (later
+places a reason names are not checked)."
+  (let ((dot (search ".tex:" why)))
+    (when dot
+      (let ((start (1+ (or (position-if-not (lambda (char)
+                                              (or (alphanumericp char) (char= char #\-)))
+                                            why :end dot :from-end t)
+                           -1)))
+            (end (or (position-if-not #'digit-char-p why :start (+ dot 5))
+                     (length why))))
+        (list (subseq why start (+ dot 4))
+              (parse-integer why :start (+ dot 5) :end end))))))
+
+(defun defines-name-p (line name)
+  "True when LINE, a source line, defines the control sequence NAME with
+\\def, \\gdef, \\edef, \\xdef or \\let (a space may follow the
+command): some occurrence is not followed by a letter, which would make
+it another name."
+  (flet ((defined-by-p (command)
+           (let ((target (concatenate 'string command "\\" name)))
+             (loop for at = (search target line) then (search target line :start2 (1+ at))
+                   while at
+                   thereis (let ((after (+ at (length target))))
+                             (or (= after (length line))
+                                 (not (alpha-char-p (char line after)))))))))
+    (some #'defined-by-p '("\\def" "\\gdef" "\\edef" "\\xdef" "\\let"
+                           "\\def " "\\let "))))
+
+(define-test vocabulary-reasons-name-definitions
+  :parent spec-vocabulary
+  ;; Each entry's reason names the line of the setup files that defines
+  ;; its macro.
+  (let ((files (make-hash-table :test #'equal)))
+    (flet ((source-line (file line)
+             (nth (1- line)
+                  (or (gethash file files)
+                      (setf (gethash file files)
+                            (uiop:read-file-lines
+                             (spec-file (subseq file 0 (- (length file) 4)))))))))
+      (dolist (entry (semantic:vocabulary-entries (semantic:spec-vocabulary)))
+        (let ((name (semantic:entry-name entry))
+              (place (why-place (semantic:entry-why entry))))
+          (true place "\\~A's reason names a place" name)
+          (when place
+            (destructuring-bind (file line) place
+              (true (defines-name-p (source-line file line) name)
+                    "~A:~D defines \\~A" file line name))))))))

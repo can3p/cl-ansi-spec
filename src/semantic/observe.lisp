@@ -159,12 +159,14 @@ events and return the expander's action and tag (see OBSERVE-VOCABULARY)."
 
 (defun begin-call (observer expander entry end-span arguments span)
   "Begin the call at SPAN of ENTRY, a :CALL entry, with ARGUMENTS, whose
-body ends at END-SPAN, or of the wrapper held, which takes it over: hold
-or place its :BEGIN; return the expander's action and tag."
+body ends at END-SPAN, or of the wrapper held, which takes it over with
+its own arguments followed by ARGUMENTS: hold or place its :BEGIN;
+return the expander's action and tag."
   (let* ((held (shiftf (observer-held observer) nil))
          (key (entry-key (if held (first held) entry)))
          (event (if held
-                    (list :begin key :arguments (second held) :through (entry-key entry))
+                    (list :begin key :arguments (append (second held) arguments)
+                                     :through (entry-key entry))
                     (list :begin key :arguments arguments)))
          (placement (entry-placement (if held (first held) entry)))
          (span (if held (third held) span))
