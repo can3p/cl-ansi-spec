@@ -12,6 +12,7 @@
    #:vendor-directory
    #:source-search-path
    #:find-input-file
+   #:generated-file-name-p
    #:ambiguous-input-file
    #:ambiguous-input-file-name
    #:ambiguous-input-file-pathnames))

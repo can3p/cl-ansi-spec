@@ -131,11 +131,15 @@ turned into points, so only `at' sizes are shown."
         (primitive
          (let* ((name (primitive-name meaning))
                 (mark (mark-index name)))
-           (if mark
-               (concatenate 'string (esc expander name) ":"
-                            (token-list-text
-                             expander (aref (expander-marks expander) mark)))
-               (esc expander name))))
+           (cond (mark
+                  (concatenate 'string (esc expander name) ":"
+                               (token-list-text
+                                expander (aref (expander-marks expander) mark))))
+                 ;; The meanings of the frozen \endtemplate (§1295).
+                 ((eq meaning (end-template-meaning))
+                  (esc expander "outer endtemplate"))
+                 ((eq meaning (endv-meaning)) "end of alignment template")
+                 (t (esc expander name)))))
         (character-meaning
          (character-command-text (character-meaning-catcode meaning)
                                  (character-meaning-code meaning)))

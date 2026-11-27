@@ -135,6 +135,14 @@ sequence inserted': a character is read again after `\\inaccessible '."
             (back-token expander (make-cs-token (frozen-protection expander) span))
             (tex-error "Missing control sequence inserted" :span span))))))
 
+(defun define-control-sequence (expander token cs meaning global)
+  "Give CS the MEANING (GLOBAL as for SET-MEANING), as the definition
+command TOKEN does, and tell EXPANDER's definition observer."
+  (set-meaning (expander-state expander) cs meaning :global global)
+  (let ((observer (expander-definition-observer expander)))
+    (when observer
+      (funcall observer expander cs meaning (token-span token)))))
+
 (define-assignment ("def" "gdef" "edef" "xdef") (expander token meaning global long outer)
   ;; §1218
   (let ((cs (get-r-token expander)))
@@ -145,9 +153,9 @@ sequence inserted': a character is read again after `\\inaccessible '."
         (scan-toks expander :macro-def t
                             :xpand (member name '("edef" "xdef") :test #'string=)
                             :warning-index cs)
-      (set-meaning (expander-state expander) cs
-                   (make-macro parameter-text body :long-p long :outer-p outer)
-                   :global global))))
+      (define-control-sequence expander token cs
+                               (make-macro parameter-text body :long-p long :outer-p outer)
+                               global))))
 
 (defun token-meaning (token meaning)
   "What \\let gives a control sequence for TOKEN with MEANING (§1221): a
@@ -176,9 +184,9 @@ character's code and category, or the meaning of a control sequence."
                 (back-token expander second)
                 (back-token expander first)
                 (values second second-meaning))))
-      (set-meaning (expander-state expander) cs
-                   (and value (token-meaning value value-meaning))
-                   :global global))))
+      (define-control-sequence expander token cs
+                               (and value (token-meaning value value-meaning))
+                               global))))
 
 (define-assignment ("chardef" "mathchardef" "countdef" "dimendef" "skipdef"
                     "muskipdef" "toksdef")
@@ -193,9 +201,21 @@ character's code and category, or the meaning of a control sequence."
                           :test #'string=))))
     (set-meaning state cs (find-primitive "relax") :global global)
     (scan-optional-equals expander)
-    (set-meaning state cs
-                 (make-shorthand kind (case kind
-                                        (:char (scan-char-num expander))
-                                        (:mathchar (scan-fifteen-bit-int expander))
-                                        (t (scan-eight-bit-int expander))))
-                 :global global)))
+    (define-control-sequence expander token cs
+                             (make-shorthand kind (case kind
+                                                    (:char (scan-char-num expander))
+                                                    (:mathchar (scan-fifteen-bit-int expander))
+                                                    (t (scan-eight-bit-int expander))))
+                             global)))
+
+(defun do-assignments (expander)
+  "TeX's do_assignments (§1270): carry out the assignments that follow,
+after blanks and \\relax, with \\setbox not allowed (`Improper').
+Returns the first other token and its meaning, which are not read again."
+  (loop
+    (multiple-value-bind (token meaning) (get-x-nonblank-nonrelax expander)
+      (unless (and token (or (prefix-name meaning) (assignment-function meaning)))
+        (return (values token meaning)))
+      (setf (expander-set-box-allowed expander) nil)
+      (prefixed-command expander token meaning)
+      (setf (expander-set-box-allowed expander) t))))

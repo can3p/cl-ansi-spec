@@ -9,9 +9,10 @@ Goal: a semantic model of the standard, parsed from `spec/tex/`
 
 ## Status
 
-- Current: **M2 — Expander and semantic layer** (first unticked step) —
-  [`docs/plan/m2.md`](docs/plan/m2.md).
-- Done: M0 (scaffold), M1 (TeX reader) — [`docs/history/m0-m1.md`](docs/history/m0-m1.md).
+- Current: **M3 — Semantic document model**, not yet planned in detail
+  (next: write `docs/plan/m3.md` (planned), then `plan-critic` on its first step).
+- Done: M0 (scaffold), M1 (TeX reader) — [`docs/history/m0-m1.md`](docs/history/m0-m1.md);
+  M2 (expander and semantic layer) — [`docs/history/m2.md`](docs/history/m2.md).
 
 ## Milestones
 
@@ -20,6 +21,13 @@ step updates) when it is planned; the file is deleted when the milestone
 closes and its history goes to `docs/history/`.  Not yet planned in detail:
 
 ### M3 — Semantic document model
+Input from M2: each chapter job's events (`docs/events.md`), the
+vocabulary's keys and arguments (`src/semantic/vocabulary.sexp`), the
+reports and exceptions `tests/semantic/spec-jobs.lisp` lists.  To
+settle when planning: section marks carry titles, not numbers (the
+numbers are TeX's counters, `\secn` …, or the text the `\Define…`
+writes expand to); a caption's number is in its text.
+
 A documented schema (Lisp classes) for the standard: chapters and
 sections (numbered, labelled), glossary entries, dictionary entries (names,
 kind, `\label` sections such as Syntax, Arguments and Values, Description,
@@ -52,6 +60,8 @@ sample export.
 
 ### M4 — Patch tooling
 Apply `patches/*.patch` in order onto a copy of `spec/tex/`, in Lisp.
+First patch: concept-syntax.tex:271-278, the commented-out definitions
+of the syntax-type table's abbreviations (`docs/tex-fidelity.md`, "Jobs").
 
 ### M5 — Consumers
 An HTML site (our own HyperSpec-like rendering, nothing borrowed from the

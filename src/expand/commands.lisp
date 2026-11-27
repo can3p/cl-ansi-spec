@@ -3,11 +3,9 @@
 ;;;; Who carries out each TeX82 primitive (docs/tex-fidelity.md, "Main
 ;;;; control"): every primitive has one disposition.  :EXPANDABLE ones run
 ;;;; inside get_x_token; :MAIN-CONTROL ones are main control's own
-;;;; (assignments, groups, modes, input, output and messages); :EVENT
-;;;; ones become presentational events and :ALIGNMENT ones alignment
-;;;; commands, in later steps.  A command whose operation has not landed is handed on
-;;;; as an UNHANDLED-COMMAND, a condition the caller may observe; it is
-;;;; never dropped unseen.
+;;;; (assignments, groups, modes, input, output, messages and
+;;;; alignments); :EVENT ones append the nodes of presentational events.
+;;;; Every one of the latter two has an operation.
 ;;;;
 ;;;; Main control's own commands are registered with DEFINE-COMMAND: their
 ;;;; operation is a function of the expander, the token and its meaning.
@@ -33,10 +31,6 @@ marks, inserts, math and its noads, leaders, \\shipout, \\special,
     "vadjust" "vcenter" "vfil" "vfill" "vfilneg" "vrule" "vskip" "vss"
     "xleaders"))
 
-(defun alignment-command-names ()
-  "The primitives of alignments."
-  '("cr" "crcr" "halign" "noalign" "omit" "span" "valign"))
-
 (defun input-output-command-names ()
   "Main control's commands of input, output and messages (messages.lisp,
 streams.lisp)."
@@ -45,38 +39,12 @@ streams.lisp)."
 
 (defun command-disposition (name)
   "The disposition of the TeX82 primitive NAME: :EXPANDABLE,
-:MAIN-CONTROL, :EVENT or :ALIGNMENT; NIL when NAME is no primitive."
+:MAIN-CONTROL or :EVENT; NIL when NAME is no primitive."
   (let ((primitive (find-primitive name)))
     (cond ((null primitive) nil)
           ((primitive-expandable-p primitive) :expandable)
           ((member name (event-command-names) :test #'string=) :event)
-          ((member name (alignment-command-names) :test #'string=) :alignment)
           (t :main-control))))
-
-(define-condition unhandled-command (condition)
-  ((token :initarg :token :reader unhandled-command-token
-          :documentation "The command's token.")
-   (meaning :initarg :meaning :reader unhandled-command-meaning
-            :documentation "Its meaning (NIL for a character).")
-   (disposition :initarg :disposition :reader unhandled-command-disposition
-                :documentation "Who is to carry it out: :EVENT or
-:ALIGNMENT.")
-   (mode :initarg :mode :reader unhandled-command-mode
-         :documentation "The mode main control was in."))
-  (:report (lambda (condition stream)
-             (format stream "Unhandled ~(~A~) command ~A in ~(~A~) mode"
-                     (unhandled-command-disposition condition)
-                     (unhandled-command-token condition)
-                     (unhandled-command-mode condition))))
-  (:documentation "Signalled for a command main control hands on to a
-step that has not landed (an event or an alignment command).  If no handler transfers control, the command is skipped: its
-operands, if any, are read as what follows."))
-
-(defun hand-on (expander token meaning disposition)
-  "Signal UNHANDLED-COMMAND for TOKEN with MEANING, of DISPOSITION."
-  (signal 'unhandled-command
-          :token token :meaning meaning :disposition disposition
-          :mode (list-state-mode (current-list expander))))
 
 (defmacro define-command (names (expander token meaning) &body body)
   "Install BODY as main control's operation for the primitive(s) NAMES (a

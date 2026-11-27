@@ -7,7 +7,7 @@
 (defpackage #:cl-ansi-spec/tex
   (:use #:cl)
   (:import-from #:cl-ansi-spec #:read-spec-file
-                #:find-input-file #:source-search-path)
+                #:find-input-file #:generated-file-name-p #:source-search-path)
   (:export
    ;; Category codes
    #:+escape+ #:+begin-group+ #:+end-group+ #:+math-shift+ #:+alignment-tab+
@@ -16,6 +16,7 @@
    #:catcode-name #:catcode-value #:character-code
    ;; State: equivalents and the save stack
    #:tex-state #:make-initex-state #:make-plain-state #:apply-plain-catcodes
+   #:copy-tex-state #:copy-equivalents
    #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
    #:endlinechar #:set-endlinechar #:integer-parameter #:set-integer-parameter
    #:equivalents #:make-equivalents #:equivalent #:assign #:replace-equivalent
@@ -25,7 +26,7 @@
    #:span #:make-span #:span-file #:span-start #:span-end #:span-line
    #:span-column
    #:control-sequence #:control-sequence-name #:control-sequence-active-p
-   #:intern-control-sequence #:intern-active-character
+   #:intern-control-sequence #:intern-active-character #:interned-names
    #:make-frozen-control-sequence
    #:token #:token-span #:token= #:token-text #:character-text
    #:character-token #:make-character-token #:character-token-p
@@ -33,10 +34,14 @@
    #:cs-token #:make-cs-token #:cs-token-p #:cs-token-control-sequence
    ;; Lines and the scanner
    #:line-source #:make-line-source #:open-line-source #:line-source-name
+   #:line-source-text
    #:invalid-character #:invalid-character-code #:invalid-character-span
    ;; The input stack
    #:input-stack #:make-input-stack #:directory-resolver
-   #:input-stack-file-end-hook #:end-current-file
+   #:input-stack-file-end-hook #:input-stack-u-template-end-hook
+   #:input-stack-level-end-hook #:pop-exhausted-token-lists
+   #:open-level-tags
+   #:v-template-ended-p #:end-current-file
    #:push-source #:push-file #:push-tokens #:back-input #:resolve-input
    #:push-read-line #:reading-line-p #:end-read-line #:read-line-tokens
    #:next-token #:peek-token #:input-depth #:current-file-name

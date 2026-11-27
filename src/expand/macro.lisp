@@ -38,11 +38,38 @@ as TeX does."
     (unwind-protect
          (multiple-value-bind (arguments ok) (match-parameters expander macro)
            (when ok
-             (let ((body (substitute-arguments (macro-body macro) arguments)))
-               (when body
-                 (push-tokens (expander-input expander) body :macro)))))
+             ;; A tail call ends its caller's body before it begins (§390).
+             (pop-exhausted-token-lists (expander-input expander))
+             (multiple-value-bind (action tag) (observe-call expander token macro arguments)
+               (unless (eq action :replace)
+                 (let ((body (substitute-arguments (macro-body macro) arguments)))
+                   (cond (body
+                          (push-tokens (expander-input expander) body :macro tag))
+                         (tag
+                          ;; An empty body ends at once.
+                          (end-observed-body expander tag))))))))
       (setf (expander-scanner-status expander) saved-status
             (expander-warning-index expander) saved-warning))))
+
+(defun observe-call (expander token macro arguments)
+  "Call EXPANDER's call observer, if any, on a matched call of MACRO by
+TOKEN with ARGUMENTS; return its action (NIL or :REPLACE) and tag."
+  (let ((observer (expander-call-observer expander)))
+    (if observer
+        (multiple-value-bind (action tag)
+            (funcall observer expander token macro arguments)
+          (check-type action (member nil :replace))
+          (when (and (eq action :replace) tag)
+            (error "A replaced call has no body to tag."))
+          (values action tag))
+        (values nil nil))))
+
+(defun end-observed-body (expander tag)
+  "Tell EXPANDER's level-end observer, if any, that the body of the call
+tagged TAG has ended."
+  (let ((observer (expander-level-end-observer expander)))
+    (when observer
+      (funcall observer expander tag))))
 
 (defun substitute-arguments (body arguments)
   "BODY with each parameter number replaced by its argument's tokens."

@@ -4,8 +4,9 @@
   (:use #:cl #:cl-ansi-spec #:cl-ansi-spec/tex)
   (:import-from #:parachute
                 #:define-test #:test #:status #:is #:true #:false #:fail)
-  (:local-nicknames (#:expand #:cl-ansi-spec/expand))
-  (:export #:run-tests))
+  (:local-nicknames (#:expand #:cl-ansi-spec/expand)
+                    (#:semantic #:cl-ansi-spec/semantic))
+  (:export #:run-tests #:write-snapshots))
 
 (in-package #:cl-ansi-spec/tests)
 

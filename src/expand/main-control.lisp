@@ -4,8 +4,7 @@
 ;;;; 1335): read with get_x_token and carry out each command by mode.  A
 ;;;; command first meets TeX's rules of mode (a paragraph starts, a
 ;;;; paragraph ends before a vertical command, `$' is inserted, or `You
-;;;; can't use'); then main control's own commands run their operation,
-;;;; and the rest are handed on (UNHANDLED-COMMAND, commands.lisp).  The
+;;;; can't use'); then the command's primitive runs its operation.  The
 ;;;; job ends at \end or \dump with TeX's final_cleanup.
 ;;;;
 ;;;; A command is keyed by its primitive's name, or by a keyword for a
@@ -47,7 +46,7 @@
 
 (defparameter *math-enders*
   '("par" "end" "dump" "vskip" "vfil" "vfill" "vss" "vfilneg" "unvbox"
-    "unvcopy" "valign" "hrule")
+    "unvcopy" "valign" "hrule" "endv")
   "Commands that need math to end first (§1046).")
 
 (defparameter *math-only-commands*
@@ -92,31 +91,41 @@ can't use x in y mode' (§1048).")
 ;;; The dispatch
 
 (defun character-command (expander key token meaning)
-  "Main control for a character command KEY: braces, `$', and what is
-handed on (text, `&', `^' and `_' in math)."
+  "Main control for a character command KEY: braces, `$', characters and
+spaces of text, math characters and scripts, and a misplaced `&'."
   (let ((kind (mode-kind (current-mode expander))))
     (ecase key
       (:left-brace (if (eq kind :math)
-                       (push-math expander :math)
+                       ;; §1154: an ord noad of the subformula.
+                       (progn (back-token expander token)
+                              (scan-math expander
+                                         (append-node expander
+                                                      (make-noad :ord (token-span token)))
+                                         :nucleus))
                        (new-save-level expander :simple)))
       (:right-brace (handle-right-brace expander token))
       (:math-shift (if (eq kind :horizontal)
-                       (init-math expander)
+                       (init-math expander (token-span token))
                        (if (eq (current-group-code expander) :math-shift)
-                           (after-math expander)
+                           (after-math expander (token-span token))
                            (off-save expander token meaning))))
       (:spacer (when (eq kind :horizontal)
-                 (hand-on expander token meaning :event)))
-      ((:letter :other-char :char-given :math-given :sup-mark :sub-mark)
-       (hand-on expander token meaning :event))
-      (:tab-mark (hand-on expander token meaning :alignment)))))
+                 ;; §1041
+                 (append-space expander token nil)))
+      ((:letter :other-char :char-given)
+       (if (eq kind :horizontal)
+           (append-character expander (character-code token meaning) (token-span token))
+           (math-character expander key token meaning)))
+      (:math-given (math-character expander key token meaning))
+      ((:sup-mark :sub-mark) (sub-sup expander token key))
+      (:tab-mark (align-error expander token meaning)))))
 
 (defun dispatch (expander token meaning)
   "Carry out the command TOKEN with MEANING (§1045)."
   (let* ((key (command-key token meaning))
          (kind (mode-kind (current-mode expander))))
     (ecase (mode-case key kind)
-      (:new-graf (back-token expander token) (new-graf expander t))
+      (:new-graf (back-token expander token) (new-graf expander t (token-span token)))
       (:head-for-vmode (head-for-vmode expander token meaning))
       (:insert-dollar (insert-dollar-sign expander token))
       (:illegal (report-illegal-case expander token meaning))
@@ -126,10 +135,11 @@ handed on (text, `&', `^' and `_' in math)."
                   (prefixed-command expander token meaning)
                   (character-command expander key token meaning)))
              (t
-              (let ((operation (primitive-operation (find-primitive key))))
-                (if operation
-                    (funcall operation expander token meaning)
-                    (hand-on expander token meaning (command-disposition key))))))))))
+              ;; The meaning's own operation: \endtemplate's endv is no
+              ;; primitive of the table.
+              (funcall (or (primitive-operation meaning)
+                           (error "The primitive ~A has no operation." key))
+                       expander token meaning)))))))
 
 (defun main-control (expander)
   "TeX's main_control (§1030): run EXPANDER's job until \\end or \\dump.
@@ -183,21 +193,23 @@ Returns how the job ended, :END or :DUMP."
 (define-command ("indent" "noindent") (expander token meaning)
   ;; §§1090-1093
   (cond ((eq (mode-kind (current-mode expander)) :vertical)
-         (new-graf expander (string= name "indent")))
+         (new-graf expander (string= name "indent") (token-span token)))
         ((string= name "indent")
-         ;; indent_in_hmode (§1093): the box itself is an event.
-         (let ((list (current-list expander)))
-           (when (eq (mode-kind (list-state-mode list)) :horizontal)
-             (setf (list-state-space-factor list) 1000))
-           (setf (list-state-last-node list) (list :other)))
-         (hand-on expander token meaning :event))))
+         ;; indent_in_hmode (§1093); in math the box is a noad.
+         (let ((list (current-list expander))
+               (indent (make-node :indent :span (token-span token))))
+           (if (eq (mode-kind (list-state-mode list)) :horizontal)
+               (progn (setf (list-state-space-factor list) 1000)
+                      (append-node expander indent))
+               (append-node expander (box-noad indent)))))))
 
 (define-command ("eqno" "leqno") (expander token meaning)
-  ;; §1140: outside math the mode case reports it; inline math is not
-  ;; privileged.  In a display it begins an equation number: an event.
+  ;; §§1140-1142: outside math the mode case reports it; inline math is
+  ;; not privileged.  In a display it begins an equation number, inline
+  ;; math in the display's group, ended by AFTER-MATH.
   (when (privileged-p expander token meaning)
     (if (eq (current-group-code expander) :math-shift)
-        (hand-on expander token meaning :event)
+        (enter-math expander (token-span token) name)
         (off-save expander token meaning))))
 
 (define-command "par" (expander token meaning)
@@ -207,7 +219,9 @@ Returns how the job ended, :END or :DUMP."
       (progn
         (when (minusp (expander-align-state expander))
           (off-save expander token meaning))
-        (end-graf expander))))
+        (end-graf expander (token-span token))))
+  (when (eq (current-mode expander) :vertical)
+    (build-page expander)))
 
 (define-command ("box" "copy" "lastbox" "vsplit" "vtop" "vbox" "hbox")
     (expander token meaning)
@@ -221,8 +235,8 @@ Returns how the job ended, :END or :DUMP."
 
 (defun final-cleanup (expander dump)
   "TeX's final_cleanup (§1335): report the groups and conditionals still
-open (TEX-REPORTs, not errors), then end the job; \\dump (DUMP) inside a
-group is fatal (§1304)."
+open (TEX-REPORTs, not errors), and the observed macro bodies still being
+read, then end the job; \\dump (DUMP) inside a group is fatal (§1304)."
   (let ((level (group-level (expander-tex expander))))
     (when (plusp level)
       (tex-report (esc expander "end occurred")
@@ -238,4 +252,7 @@ group is fatal (§1304)."
     (when (plusp (save-stack-depth (expander-tex expander)))
       (tex-fatal-error "You can't dump inside a group"))
     (setf (expander-trie-not-ready expander) nil))
+  ;; The observed bodies still being read end with the job.
+  (dolist (tag (open-level-tags (expander-input expander)))
+    (end-observed-body expander tag))
   (setf (expander-ended expander) (if dump :dump :end)))

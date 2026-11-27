@@ -90,6 +90,22 @@ b")
     (false (funcall resolver ""))
     (true (funcall resolver "chap-1"))))
 
+(define-test generated-files-are-empty
+  :parent input-stack
+  ;; A file a TeX run of the spec writes (chap-1.fig, chap-0.tex:26) is
+  ;; an empty source when the trees do not hold it; another missing
+  ;; file, or an unsafe generated name, is not.
+  (let* ((resolver (directory-resolver (spec-directory)))
+         (source (funcall resolver "chap-1.fig")))
+    (true source)
+    (is string= "chap-1.fig" (line-source-name source))
+    (is string= "" (line-source-text source))
+    (true (funcall resolver "main.toc"))
+    (false (funcall resolver "chap-1.tex.missing"))
+    (false (funcall resolver "nothing"))
+    (false (funcall resolver "../chap-1.fig"))
+    (false (generated-file-name-p "chap-1"))))
+
 (define-test missing-files-are-signalled
   :parent input-stack
   (let ((stack (make-input-stack (make-plain-state)
@@ -132,6 +148,39 @@ b")
       (back-input stack x)
       (is = 2 (input-depth stack))       ; ... replaced by the backed-up level
       (is equal '("x 11") (texts (read-all stack))))))
+
+(define-test templates-in-the-input-stack
+  :parent input-stack
+  ;; An inserted list goes on top of an exhausted one (TeX's
+  ;; begin_token_list); the end of a u template calls the hook when the
+  ;; list is removed; an exhausted v template is kept by back_input.
+  (let ((stack (string-stack ""))
+        (ends 0)
+        (x (make-character-token (char-code #\x) +letter+)))
+    (setf (input-stack-u-template-end-hook stack) (lambda (stack)
+                                                    (declare (ignore stack))
+                                                    (incf ends)))
+    (push-tokens stack (list x) :u-template)
+    (next-token stack)
+    (push-tokens stack (list x) :inserted)
+    (is = 3 (input-depth stack))
+    (is = 0 ends)
+    (next-token stack)
+    (back-input stack x)
+    (is = 1 ends)
+    (is = 2 (input-depth stack))
+    (push-tokens stack (list x) :v-template)
+    (next-token stack)
+    (true (v-template-ended-p stack))
+    (let ((depth (input-depth stack)))
+      (back-input stack x)
+      (is = (1+ depth) (input-depth stack)))
+    (false (v-template-ended-p stack))
+    (next-token stack)
+    (true (v-template-ended-p stack))
+    ;; get_next removes it.
+    (next-token stack)
+    (false (v-template-ended-p stack))))
 
 (define-test pushed-token-lists-are-copied
   :parent input-stack

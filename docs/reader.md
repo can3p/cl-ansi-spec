@@ -5,11 +5,11 @@ rules; the history of how they were reached is in `docs/history/m0-m1.md`.
 
 | File | Holds |
 |------|-------|
-| `state.lisp` | catcode, lccode and uccode tables, integer parameters (`integer-parameter`, read here for `\endlinechar`); the save stack (`begin-group`, `end-group`, `current-group-kind`, global assignment) and its table protocol (`make-equivalents`, `equivalent`, `assign`), which the expander's tables share; the INITEX and plain catcodes |
-| `token.lisp` | spans; control sequences and active characters, interned in one namespace per state, plus uninterned frozen ones (`make-frozen-control-sequence`); character and control-sequence tokens; `token=` ignores spans |
+| `state.lisp` | catcode, lccode and uccode tables, integer parameters (`integer-parameter`, read here for `\endlinechar`); the save stack (`begin-group`, `end-group`, `current-group-kind`, global assignment) and its table protocol (`make-equivalents`, `equivalent`, `assign`), which the expander's tables share; the INITEX and plain catcodes; `copy-tex-state` and `copy-equivalents`, for a job's copy of a format |
+| `token.lisp` | spans; control sequences and active characters, interned in one namespace per state (`interned-names` lists them), plus uninterned frozen ones (`make-frozen-control-sequence`); character and control-sequence tokens; `token=` ignores spans |
 | `line.lisp` | line sources, and line buffers that keep the file offset of every element; the empty line read at the end of a file for `\read` |
 | `scanner.lisp` | TeX's states N, M and S, comments, `^^` notation, and control words and symbols, reading the *current* catcodes at every token; the tokens of one line for `\read` (`read-line-tokens`) |
-| `input-stack.lisp` | TeX's single input stack (files, token lists, backed-up tokens) and the pluggable file resolver (`directory-resolver` over the source search path by default); the file-end hook, `\endinput` (`end-current-file`), the removal of exhausted token lists before a list is pushed; the name and line number of the innermost file (`current-file-name`, `current-line-number`, TeX's `line` for `\inputlineno`); a file found without being read (`resolve-input`, for `\openin`); the level of a line of `\read` (`push-read-line`, `reading-line-p`, `end-read-line`) |
+| `input-stack.lisp` | TeX's single input stack (files, token lists, backed-up tokens) and the pluggable file resolver (`directory-resolver` over the source search path by default); the file-end hook, `\endinput` (`end-current-file`), the removal of exhausted token lists before a token is backed up (`back-input`) or a macro body pushed; alignment templates (the u-template end hook, `v-template-ended-p`); token-list levels with a tag and the level-end hook called when one is removed (an observed macro body); the name and line number of the innermost file (`current-file-name`, `current-line-number`, TeX's `line` for `\inputlineno`); a file found without being read (`resolve-input`, for `\openin`); the level of a line of `\read` (`push-read-line`, `reading-line-p`, `end-read-line`) |
 
 Rules:
 
@@ -35,6 +35,15 @@ Rules:
   once they are read `next-token` returns `nil` until `end-read-line`
   removes the level, as TeX's get_next ends a `\read` line.  Its
   exhausted level is not removed with other exhausted token lists.
+- **Alignment templates.** A u template is a `:u-template` list: when it
+  is removed exhausted, the stack's u-template end hook runs (the
+  expander sets align_state to 0 there, TeX's end_token_list, §324).  A
+  v template is a `:v-template` list; once exhausted, only reading on
+  removes it, not backing up (§325), so that `v-template-ended-p` can
+  tell that the `\endtemplate` just read ended it (TeX's do_endv,
+  §1131).  Exhausted lists are removed before a token is backed up or a
+  macro body is pushed, as TeX's back_input and macro_call do; other
+  lists (inserted ones, `\every...`, templates) go on top of them.
 - **Resolver.** It maps a name to a line source or `nil`. Names that are
   absolute or contain `..` never resolve.
 

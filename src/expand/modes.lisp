@@ -6,9 +6,9 @@
 ;;;; entering and leaving math (with \everymath and \everydisplay), and
 ;;;; TeX's errors for commands used in the wrong mode.
 ;;;;
-;;;; No list is built (docs/tex-fidelity.md, "Not emulated"): a paragraph
-;;;; is not broken into lines, so it counts as one line for \prevgraf;
-;;;; what goes into the lists is the event layer's.
+;;;; No line breaking (docs/tex-fidelity.md, "Not emulated"): a paragraph
+;;;; becomes one paragraph node of the enclosing vertical list, and it
+;;;; counts as one line for \prevgraf.
 
 (in-package #:cl-ansi-spec/expand)
 
@@ -37,18 +37,30 @@ display math, not an inner mode or :NONE."
 
 ;;; The nest (§§216-217)
 
-(defun push-nest (expander mode)
-  "TeX's push_nest, then the new MODE: a new innermost list, empty, with
-\\prevgraf 0 and the other fields of the enclosing list until set."
+(defun push-nest (expander mode &optional span)
+  "TeX's push_nest, then the new MODE: a new innermost list, empty, begun
+at SPAN, with \\prevgraf 0 and the other fields of the enclosing list
+until set."
   (let ((outer (current-list expander)))
     (push (make-list-state :mode mode
                            :prev-depth (list-state-prev-depth outer)
-                           :space-factor (list-state-space-factor outer))
+                           :space-factor (list-state-space-factor outer)
+                           :clang (list-state-clang outer)
+                           :span span
+                           :line (current-line-number (expander-input expander)))
           (expander-nest expander))))
 
 (defun pop-nest (expander)
   "TeX's pop_nest: drop the innermost list."
   (pop (expander-nest expander)))
+
+(defun drop-list (expander)
+  "Drop the innermost list, which holds no nodes but markers, as TeX
+drops an empty paragraph; its markers go on to the enclosing list."
+  (let ((markers (remove-if-not #'marker-p
+                                (list-state-contents (pop-nest expander)))))
+    (setf (list-state-contents (current-list expander))
+          (append markers (list-state-contents (current-list expander))))))
 
 (defun begin-token-list (expander tokens kind)
   "TeX's begin_token_list for one of the \\every... parameters: TOKENS
@@ -99,22 +111,23 @@ and the language (§1091)."
           65536)
        (current-language expander))))
 
-(defun new-graf (expander indented)
-  "TeX's new_graf (§1091): begin a paragraph, indented or not, and insert
-\\everypar.  The \\parskip glue before it and the indentation box are
-recorded as the last nodes of their lists."
+(defun new-graf (expander indented &optional span)
+  "TeX's new_graf (§1091): begin a paragraph at SPAN, indented or not, and
+insert \\everypar.  The \\parskip glue goes before it, and the indentation
+is its first node."
   (let ((outer (current-list expander)))
     (setf (list-state-prev-graf outer) 0)
     (when (or (eq (list-state-mode outer) :vertical)
-              (list-state-last-node outer))
-      (setf (list-state-last-node outer)
-            (cons :glue (parameter (expander-state expander) :parskip)))))
-  (push-nest expander :horizontal)
+              (not (list-empty-p outer)))
+      (append-node expander (glue-node (parameter (expander-state expander) :parskip)
+                                       "parskip" span))))
+  (push-nest expander :horizontal span)
   (let ((list (current-list expander)))
     (setf (list-state-space-factor list) 1000
+          (list-state-clang list) (current-language expander)
           (list-state-prev-graf list) (horizontal-prev-graf expander))
     (when indented
-      (setf (list-state-last-node list) (list :other))))
+      (append-node expander (make-node :indent :span span))))
   (begin-token-list expander (parameter (expander-state expander) :everypar)
                     :every-par))
 
@@ -131,22 +144,28 @@ recorded as the last nodes of their lists."
     (when (par-shape state)
       (set-par-shape state '() :globaldefs nil))))
 
-(defun break-paragraph (expander)
-  "What line_break leaves of the paragraph that is the innermost list:
-it is popped, and the enclosing vertical list counts one more line,
-ending in a line box of unknown depth (no line breaking, §§815, 890)."
-  (pop-nest expander)
+(defun break-paragraph (expander &optional end-span)
+  "What line_break leaves of the paragraph that is the innermost list,
+ended at END-SPAN: it is popped, its final glue removed (§816), and it
+becomes one paragraph node of the enclosing vertical list, which counts
+one more line, of unknown depth (no line breaking, §§815, 890)."
+  (let ((paragraph (pop-nest expander)))
+    (when (eq (car (list-state-last-node paragraph)) :glue)
+      (remove-last-node paragraph))
+    (append-node expander (make-node :paragraph :children (list-nodes paragraph)
+                                                :span (list-state-span paragraph)
+                                                :end-span end-span)))
   (let ((list (current-list expander)))
     (incf (list-state-prev-graf list))
-    (setf (list-state-prev-depth list) 0
-          (list-state-last-node list) (list :other))))
+    (setf (list-state-prev-depth list) 0)))
 
-(defun end-graf (expander)
-  "TeX's end_graf (§1096): end the paragraph being built, if any."
+(defun end-graf (expander &optional end-span)
+  "TeX's end_graf (§1096): end the paragraph being built, if any, at
+END-SPAN; an empty one is dropped."
   (when (eq (current-mode expander) :horizontal)
-    (if (list-state-last-node (current-list expander))
-        (break-paragraph expander)
-        (pop-nest expander))
+    (if (list-empty-p (current-list expander))
+        (drop-list expander)
+        (break-paragraph expander end-span))
     (normal-paragraph expander)))
 
 (defun head-for-vmode (expander token meaning)
@@ -166,15 +185,17 @@ mode the box must end first (OFF-SAVE), and \\hrule is an error."
 
 ;;; Math (§§1136-1200)
 
-(defun push-math (expander code)
-  "TeX's push_math (§1136): inline math in a group of CODE."
-  (push-nest expander :math)
-  (new-save-level expander code))
+(defun push-math (expander code &key span context)
+  "TeX's push_math (§1136): a math list begun at SPAN, in a group of CODE
+with CONTEXT (see GROUP-RECORD)."
+  (push-nest expander :math span)
+  (new-save-level expander code :context context))
 
-(defun enter-math (expander)
-  "Go into ordinary math mode (§1139)."
+(defun enter-math (expander span &optional context)
+  "Go into ordinary math mode (§1139) at SPAN, in a math-shift group of
+CONTEXT (the command of an equation number)."
   (let ((state (expander-state expander)))
-    (push-math expander :math-shift)
+    (push-math expander :math-shift :span span :context context)
     (set-parameter state :fam -1 :globaldefs nil)
     (begin-token-list expander (parameter state :everymath) :every-math)))
 
@@ -197,16 +218,16 @@ Returns the length and the shift, in sp."
            (values (- hsize (abs hang-indent)) (max hang-indent 0)))
           (t (values hsize 0)))))
 
-(defun enter-display (expander)
-  "Go into display math mode (§§1145-1149): the paragraph so far is
-ended, then \\predisplaysize (0pt without metrics, -\\maxdimen after an
+(defun enter-display (expander span)
+  "Go into display math mode at SPAN (§§1145-1149): the paragraph so far
+is ended, then \\predisplaysize (0pt without metrics, -\\maxdimen after an
 empty paragraph), \\displaywidth and \\displayindent are set."
   (let ((state (expander-state expander))
-        (size (if (list-state-last-node (current-list expander))
-                  (progn (break-paragraph expander) 0)
-                  (progn (pop-nest expander) (- +max-dimen+)))))
+        (size (if (list-empty-p (current-list expander))
+                  (progn (drop-list expander) (- +max-dimen+))
+                  (progn (break-paragraph expander span) 0))))
     (multiple-value-bind (length shift) (display-line expander)
-      (push-math expander :math-shift)
+      (push-math expander :math-shift :span span)
       (setf (list-state-mode (current-list expander)) :display-math)
       (set-parameter state :fam -1 :globaldefs nil)
       (set-parameter state :predisplaysize size :globaldefs nil)
@@ -215,16 +236,16 @@ empty paragraph), \\displaywidth and \\displayindent are set."
       (begin-token-list expander (parameter state :everydisplay)
                         :every-display))))
 
-(defun init-math (expander)
-  "TeX's init_math (§1138), for `$' in horizontal mode: `$$' in a
-paragraph begins a display, anything else inline math.  The token after
-the first `$' is read without expansion."
+(defun init-math (expander span)
+  "TeX's init_math (§1138), for `$' read at SPAN in horizontal mode: `$$'
+in a paragraph begins a display, anything else inline math.  The token
+after the first `$' is read without expansion."
   (multiple-value-bind (token meaning) (get-token expander)
     (if (and (outer-mode-p (current-mode expander))
              (eql (command-catcode token meaning) +math-shift+))
-        (enter-display expander)
+        (enter-display expander span)
         (progn (back-token expander token)
-               (enter-math expander)))))
+               (enter-math expander span)))))
 
 (defun check-math-fonts (expander)
   "TeX's check of the math fonts at the end of a formula (§1195): family 2
@@ -242,32 +263,62 @@ only the error."
             ((insufficient-p 3 13)
              (tex-error "Math formula deleted: Insufficient extension fonts"))))))
 
-(defun resume-after-display (expander)
+(defun resume-after-display (expander span)
   "TeX's resume_after_display (§1200): the paragraph goes on after the
-display, three lines further, after an optional space."
+display, three lines further, after an optional space, as a new
+paragraph node begun at SPAN."
   (unsave expander)
   (incf (list-state-prev-graf (current-list expander)) 3)
-  (push-nest expander :horizontal)
+  (push-nest expander :horizontal span)
   (let ((list (current-list expander)))
     (setf (list-state-space-factor list) 1000
+          (list-state-clang list) (current-language expander)
           (list-state-prev-graf list) (horizontal-prev-graf expander)))
-  (scan-optional-space expander))
+  (scan-optional-space expander)
+  (when (= (length (expander-nest expander)) 2)
+    (build-page expander)))
 
-(defun after-math (expander)
-  "TeX's after_math (§1194), for the `$' that ends the current formula
-(its group is :MATH-SHIFT); a display needs a second `$'."
+(defun check-display-end (expander span)
+  "§1197: the second `$' of a display's end; returns its span, else SPAN
+after `Display math should end with $$'."
+  (multiple-value-bind (token meaning) (get-x-token expander)
+    (if (eql (command-catcode token meaning) +math-shift+)
+        (token-span token)
+        (progn
+          (back-token expander token)
+          (tex-error "Display math should end with $$"
+                     :span (and token (token-span token)))
+          span))))
+
+(defun after-math (expander span)
+  "TeX's after_math (§1194), for the `$' read at SPAN that ends the
+current formula (its group is :MATH-SHIFT); a display needs a second `$'.
+The formula becomes a math node: of the paragraph for inline math, of
+the enclosing vertical list for a display.  An equation number ends with
+its display, and is the display's last child, an :EQNO node."
   (check-math-fonts expander)
-  (let ((display (eq (current-mode expander) :display-math)))
-    (pop-nest expander)
+  (let ((display (eq (current-mode expander) :display-math))
+        (end-span span)
+        (eqno nil))
+    (multiple-value-bind (nodes math) (fin-mlist expander)
+      (when (and (not display) (eq (current-mode expander) :display-math))
+        ;; The end of an equation number (§1194).
+        (setf end-span (check-display-end expander span)
+              eqno (make-node :eqno :properties (list :command (group-record-context
+                                                                (unsave expander)))
+                                    :children nodes :span (list-state-span math)
+                                    :end-span span)
+              display t)
+        (check-math-fonts expander)
+        (multiple-value-setq (nodes math) (fin-mlist expander)))
+      (when (and display (null eqno))
+        (setf end-span (check-display-end expander span)))
+      (append-node expander (make-node :math :properties (and display (list :display t))
+                                             :children (if eqno (append nodes (list eqno)) nodes)
+                                             :span (list-state-span math)
+                                             :end-span end-span)))
     (if display
-        (multiple-value-bind (token meaning) (get-x-token expander)
-          (unless (eql (command-catcode token meaning) +math-shift+)
-            (back-token expander token)
-            (tex-error "Display math should end with $$"
-                       :span (and token (token-span token))))
-          (resume-after-display expander))
-        (let ((list (current-list expander)))
-          ;; The math node that ends the formula.
-          (setf (list-state-space-factor list) 1000
-                (list-state-last-node list) (list :other))
+        (resume-after-display expander end-span)
+        (progn
+          (setf (list-state-space-factor (current-list expander)) 1000)
           (unsave expander)))))

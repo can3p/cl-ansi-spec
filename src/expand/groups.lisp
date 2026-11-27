@@ -119,8 +119,7 @@ open."
              :span (token-span token)))
 
 (defun handle-right-brace (expander token)
-  "TeX's handle_right_brace (§1085) for the groups main control opens; the
-groups of events and alignments end in their own steps."
+  "TeX's handle_right_brace (§§1085, 1132) for every group a `}' may end."
   (let ((code (current-group-code expander)))
     (ecase code
       (:simple (unsave expander))
@@ -129,6 +128,12 @@ groups of events and alignments end in their own steps."
       ((:semi-simple :math-shift :math-left)
        (extra-right-brace-error expander token))
       ((:hbox :adjusted-hbox) (package-box expander :hbox))
-      (:vbox (end-graf expander) (package-box expander :vbox))
-      (:vtop (end-graf expander) (package-box expander :vtop))
-      (:math (unsave expander) (pop-nest expander)))))
+      (:vbox (end-graf expander (token-span token)) (package-box expander :vbox))
+      (:vtop (end-graf expander (token-span token)) (package-box expander :vtop))
+      (:disc (build-discretionary expander token))
+      (:insert (end-insert expander token))
+      (:math (end-math-group expander token))
+      (:math-choice (build-choices expander token))
+      (:vcenter (end-vcenter expander token))
+      (:align (missing-cr-error expander token))
+      (:no-align (end-no-align expander token)))))

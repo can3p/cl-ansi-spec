@@ -7,8 +7,9 @@
 ;;;; assigned.  A local assignment saves the old value on the save stack the
 ;;;; first time an entry changes inside a group; a global assignment marks
 ;;;; the entry as belonging to the outermost level, so that leaving a group
-;;;; keeps ("retains") it instead of restoring the saved value.  Nothing is
-;;;; ever copied wholesale.
+;;;; keeps ("retains") it instead of restoring the saved value.  Grouping
+;;;; never copies a table wholesale; COPY-TEX-STATE copies a whole state
+;;;; for a new job (TeX's format, docs/tex-fidelity.md, "Jobs").
 ;;;;
 ;;;; The table protocol (MAKE-EQUIVALENTS, EQUIVALENT, ASSIGN) is exported:
 ;;;; the expander keeps its own tables (meanings, registers, ...) under
@@ -53,7 +54,7 @@
   "Number of character codes held in the vector part of a character
 table.  Larger codes (possible in patched sources) live in a hash table.")
 
-(defstruct (equivalents (:constructor %make-equivalents))
+(defstruct (equivalents (:constructor %make-equivalents) (:copier nil))
   "A table of equivalents: a value and a level for every key.  Integer
 keys below the size of VALUES are stored in vectors; every other key in
 OVERFLOW, as (value . level) conses."
@@ -72,6 +73,22 @@ and whose entries all hold DEFAULT at level one."
    :default default
    :values (make-array size :initial-element default)
    :levels (make-array size :element-type 'fixnum :initial-element +level-one+)))
+
+(defun copy-equivalents (table &optional (copy-value #'identity))
+  "A new table with TABLE's entries and levels, each value passed through
+COPY-VALUE."
+  (let ((overflow (make-hash-table :test (hash-table-test
+                                          (equivalents-overflow table)))))
+    (maphash (lambda (key entry)
+               (setf (gethash key overflow)
+                     (cons (funcall copy-value (car entry)) (cdr entry))))
+             (equivalents-overflow table))
+    (%make-equivalents :name (equivalents-name table)
+                       :default (equivalents-default table)
+                       :values (map 'simple-vector copy-value
+                                    (equivalents-values table))
+                       :levels (copy-seq (equivalents-levels table))
+                       :overflow overflow)))
 
 (declaim (inline vector-key-p))
 (defun vector-key-p (table key)
@@ -102,7 +119,8 @@ and whose entries all hold DEFAULT at level one."
 
 ;;; The state: all tables plus the save stack.
 
-(defstruct (tex-state (:constructor %make-tex-state) (:conc-name state-))
+(defstruct (tex-state (:constructor %make-tex-state) (:conc-name state-)
+                      (:copier nil))
   "The equivalents TeX consults while reading, with their grouping."
   (catcodes (make-equivalents 'catcode :default +other+
                                        :size +character-table-size+)
@@ -247,6 +265,24 @@ value outside 0..255 for none."
   "Assign VALUE to \\endlinechar.  Any integer is allowed, as in TeX;
 values outside 0..255 mean that nothing is appended to input lines."
   (set-integer-parameter state :endlinechar value :global global))
+
+;;; Copies.
+
+(defun copy-tex-state (state)
+  "A new state with STATE's equivalents and interned names, sharing
+nothing mutable with it; STATE must be outside every group with an
+empty save stack (TeX's \\dump, §1304)."
+  (assert (and (= (state-level state) +level-one+)
+               (null (state-save-stack state)))
+          () "Cannot copy a TeX state inside a group.")
+  (let ((names (make-hash-table :test 'equal)))
+    (maphash (lambda (key cs) (setf (gethash key names) cs))
+             (state-names state))
+    (%make-tex-state :catcodes (copy-equivalents (state-catcodes state))
+                     :lccodes (copy-equivalents (state-lccodes state))
+                     :uccodes (copy-equivalents (state-uccodes state))
+                     :integers (copy-equivalents (state-integers state))
+                     :names names)))
 
 ;;; Initial states.
 

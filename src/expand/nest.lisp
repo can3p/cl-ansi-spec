@@ -1,12 +1,11 @@
 ;;;; src/expand/nest.lisp
 ;;;;
-;;;; TeX's semantic nest (§§211-219) without the lists themselves: what the
-;;;; scanner reads of the list being built (\spacefactor, \prevdepth,
-;;;; \prevgraf, \lastpenalty, \lastkern, \lastskip) and of the page
-;;;; (\pagegoal ... \pagedepth, §§980-982).  No list is built and no page
-;;;; is ever started (docs/tex-fidelity.md, "Not emulated"); main control
-;;;; changes modes and the event layer records the last node, so that
-;;;; these quantities read as TeX's would.
+;;;; TeX's semantic nest (§§211-219): each level is a list being built,
+;;;; with what the scanner reads of it (\spacefactor, \prevdepth,
+;;;; \prevgraf, and through its last node \lastpenalty, \lastkern,
+;;;; \lastskip), and the page (\pagegoal ... \pagedepth, §§980-982).  No
+;;;; page is ever started (docs/tex-fidelity.md, "Not emulated"): the outer
+;;;; vertical list keeps everything.  The nodes are nodes.lisp's.
 
 (in-package #:cl-ansi-spec/expand)
 
@@ -33,15 +32,27 @@ expanded (mode 0)."
   '(member :penalty :kern :glue :character :other))
 
 (defstruct (list-state (:copier nil))
-  "One level of the semantic nest.  LAST-NODE is NIL while the list is
-empty, else a cons (KIND . VALUE) with KIND a LAST-NODE-KIND: the
-penalty (an integer), kern (sp) or glue (a GLUE, mu glue in math) that
-ends it, or no value for a character or another node."
+  "One level of the semantic nest.  CONTENTS are the nodes of its list,
+newest first (nodes.lisp); its last node (§424) is read from them.
+CONTRIBUTED is the node that ended the outer vertical list when TeX's
+page builder last ran (BUILD-PAGE), NIL before: TeX would have moved it
+and everything before it to the page.
+CLANG is TeX's clang, the language of the paragraph's characters so far
+(§1034); SPAN is where the list began (the token of the command that
+opened it), NIL for the outer vertical list; LINE the input line it began
+on (TeX's mode_line), shown by \\showlists; INCOMPLEAT the generalized
+fraction of a math list waiting for its denominator (TeX's
+incompleat_noad, §1178), or NIL."
   (mode :vertical :type mode)
   (prev-depth +ignore-depth+ :type integer)
   (space-factor 1000 :type integer)
   (prev-graf 0 :type integer)
-  (last-node nil :type (or null cons)))
+  (clang 0 :type integer)
+  (contents '() :type list)
+  (contributed nil)
+  (span nil)
+  (line 0 :type integer)
+  (incompleat nil))
 
 (defstruct (page-state (:copier nil))
   "The page builder's variables the scanner reads (§§980-982, 991).  The

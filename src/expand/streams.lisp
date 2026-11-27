@@ -151,29 +151,31 @@ allowed.  Returns the expanded tokens."
         (setf (list-state-mode list) old-mode
               (expander-set-box-allowed expander) old-allowed)))))
 
-(defun write-out (expander stream tokens span)
+(defun write-out (expander stream tokens span &optional (how :immediate))
   "Carry out a \\write to STREAM of TOKENS now (§1370): an event when
-the stream is open, else an entry of the job's log."
+the stream is open, else an entry of the job's log.  HOW is :IMMEDIATE
+or :SHIPOUT, the event's flag (see OUT-WHAT)."
   (let* ((expanded (expand-write-text expander tokens span))
          (text (token-list-text expander expanded)))
     (if (and (< stream 16) (aref (expander-write-streams expander) stream))
         (emit-event expander (list :write :stream stream :tokens expanded
-                                          :text text :immediate t :span span))
+                                          :text text how t :span span))
         (log-message expander :write text :stream stream :span span))))
 
-(defun out-what (expander name stream argument span)
+(defun out-what (expander name stream argument span &optional (how :immediate))
   "TeX's out_what (§1373) for the whatsit NAME on STREAM, with the file
-name or token list ARGUMENT: what \\immediate carries out at once."
+name or token list ARGUMENT, carried out by \\immediate (HOW :IMMEDIATE)
+or by \\shipout (HOW :SHIPOUT): its event is flagged HOW."
   (if (string= name "write")
-      (write-out expander stream argument span)
+      (write-out expander stream argument span how)
       (when (< stream 16)
         (setf (aref (expander-write-streams expander) stream)
               (and (string= name "openout") argument))
         (emit-event expander
                     (if (string= name "openout")
-                        (list :openout :stream stream :file argument :immediate t
+                        (list :openout :stream stream :file argument how t
                                        :span span)
-                        (list :closeout :stream stream :immediate t :span span))))))
+                        (list :closeout :stream stream how t :span span))))))
 
 (defun do-extension (expander token name immediate)
   "TeX's do_extension (§1348) for \\openout, \\write or \\closeout NAME,
@@ -190,7 +192,6 @@ IMMEDIATE, else make it an event of the current list."
     (if immediate
         (out-what expander name stream argument span)
         (progn
-          (setf (list-state-last-node (current-list expander)) (list :other))
           (emit-event expander
                       (cond ((string= name "openout")
                              (list :openout :stream stream :file argument :span span))

@@ -55,8 +55,8 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 |---|-------|----------------|-------------------|-----------|
 | 0 | Sources | files → named line sources; patched tree | `cl-ansi-spec` (source), later `…/patch` | M0 ✅, M4 |
 | 1 | Reader | characters → tokens with spans, under the *current* catcodes | `cl-ansi-spec/tex` | M1 ✅ |
-| 2 | Expander | tokens → executed TeX: macros, conditionals, assignments, registers | `cl-ansi-spec/expand` | M2 |
-| 3 | Semantic layer | expander activity → **event stream** | `cl-ansi-spec/semantic` | M2 |
+| 2 | Expander | tokens → executed TeX: macros, conditionals, assignments, registers | `cl-ansi-spec/expand` | M2 ✅ |
+| 3 | Semantic layer | expander activity → **event stream** | `cl-ansi-spec/semantic` | M2 ✅ |
 | 4 | Model builder | event streams of all chapters → **document model**, resolved references | `cl-ansi-spec/model` | M3 |
 | 5 | Consumers | model → S-expression/JSON exports, HTML site | `…/export`, `…/html` | M3, M5 |
 
@@ -105,23 +105,35 @@ Source (`dict-conses.tex:1702`, abridged):
 \endcom
 ```
 
-Event stream, as phase 3 emits it (spans omitted):
+Event stream, as phase 3 emits it (spans and fonts omitted; each
+argument, a token list, shown as its tokens' text, as `make events`
+shows them; the paragraphs, `(:text …)`
+and `(:space)` events of the typeset text abridged):
 
 ```lisp
-(:begin :com :names ("endp") :kind "Function")
-(:mark :label :title "Syntax")
-(:begin :defun :name "endp" :lambda-list ("list") :values ("generalized-boolean"))
+(:begin :com :arguments ("endp" "Function"))
+(:mark :index-ref :arguments ("endp"))
+(:mark :label :arguments ("Syntax" ":"))
+(:begin :paragraph)
+(:begin :defun :arguments ("endp" "list" "generalized-boolean"))
+(:text "endp") (:space) (:text "list")
+(:begin :evaluates-to :arguments ()) … (:end :evaluates-to)
+(:space) (:text "generalized") (:text "-") (:text "boolean")
 (:end :defun)
-(:mark :label :title "Arguments and Values")
-(:begin :param) (:text "list") (:end :param)
-(:text "---a ") (:begin :term) (:text "list") (:end :term) (:text ",")
-(:begin :issue :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
-(:text " which might be a ") (:begin :term) (:text "dotted list") (:end :term) ...
-(:end :issue :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
-...
-(:mark :label :title "Side Effects" :none t)
-...
-(:end :com)
+(:end :paragraph)
+(:mark :label :arguments ("Arguments and Values" ":"))
+(:begin :paragraph)
+(:begin :param :arguments ("list")) (:text "list") (:end :param)
+(:text "-") (:text "-") (:text "-") (:text "a") (:space)
+(:begin :term :arguments ("list")) (:text "list") (:end :term) (:text ",") (:space)
+(:begin :issue :arguments ("DOTTED-LIST-ARGUMENTS:CLARIFY"))
+(:text "which") … (:begin :term :arguments ("dotted list")) … (:end :term) …
+(:end :issue :arguments ("DOTTED-LIST-ARGUMENTS:CLARIFY"))
+…
+(:mark :label :arguments ("Side Effects" "\\None "))
+(:mark :label-confidence :arguments ("."))
+…
+(:end :com :arguments ())
 ```
 
 Document model, as phase 4 builds it (spans and most content omitted):
@@ -167,7 +179,7 @@ has the export formats, their JSON Schema and versioning.
   export writers.
 - Each package has its own test suite under `tests/<phase>/`, and its own
   debugging tool under `tools/`: `make tokens`, and as their phases land
-  `make vocab`, `make expand`, `make events` (planned)
+  `make vocab`, `make expand`, `make events`
   and `make model` (planned).
 
 ## Status
@@ -176,7 +188,7 @@ has the export formats, their JSON Schema and versioning.
 |-------|-------|
 | 0 Sources | pristine and vendored trees, search path and resolver done; patching is M4 |
 | 1 Reader | done (M1) |
-| 2–3 Expander, semantic layer | in progress: quantities, state, the expansion core, scanning, conditionals and main control's assignments, groups, modes, input, output and messages done (`src/expand/`, `make expand`); the rest planned in [`docs/plan/m2.md`](plan/m2.md) |
+| 2–3 Expander, semantic layer | done (M2): TeX below typesetting (`src/expand/`, `make expand`), plain TeX's format, the vocabulary and its observation (`src/semantic/`, `make events`); every chapter job runs and its events are checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
 | 4–5 Model, consumers | outlined in `PLAN.md` |
 
 Related: [process](process.md) explains how work advances.

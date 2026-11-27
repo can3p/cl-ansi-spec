@@ -10,11 +10,13 @@
 
 (in-package #:cl-ansi-spec/tex)
 
-(defstruct (token-level (:constructor make-token-level (tokens kind)))
+(defstruct (token-level (:constructor make-token-level (tokens kind &optional tag)))
   "A token list being read.  KIND says where it comes from, e.g.
-:BACKED-UP, :INSERTED or :MACRO."
+:BACKED-UP, :INSERTED or :MACRO; TAG, if not NIL, is given to the stack's
+LEVEL-END-HOOK when the level is removed."
   (tokens '() :type list)
-  (kind nil :read-only t))
+  (kind nil :read-only t)
+  (tag nil :read-only t))
 
 (defstruct (input-stack (:constructor %make-input-stack
                             (state resolver skip-hook)))
@@ -22,11 +24,17 @@
 SKIP-HOOK is given to every file reader (see FILE-READER).  FILE-END-HOOK,
 if not NIL, is called with the stack and the file's name each time a file
 has been read to its end and removed; it may push tokens, which are read
-next (TeX checks for runaway text there, §362)."
+next (TeX checks for runaway text there, §362).  U-TEMPLATE-END-HOOK, if
+not NIL, is called with the stack each time an exhausted :U-TEMPLATE
+list is removed (TeX's end_token_list, §324).  LEVEL-END-HOOK, if not
+NIL, is called with the stack and the level's tag each time a token list
+with a tag is removed."
   (state nil :type tex-state :read-only t)
   (resolver nil :type function :read-only t)
   (skip-hook nil :type (or null function) :read-only t)
   (file-end-hook nil :type (or null function))
+  (u-template-end-hook nil :type (or null function))
+  (level-end-hook nil :type (or null function))
   ;; TeX's force_eof, set by \\endinput: the next file to finish a line
   ;; ends there.
   (force-eof nil :type boolean)
@@ -44,10 +52,14 @@ next (TeX checks for runaway text there, §362)."
 FIND-INPUT-FILE: type tex is tried first for a name without one, unsafe
 names never resolve, and a name found in two directories signals
 AMBIGUOUS-INPUT-FILE.  Sources are named by their file name relative to
-their directory."
+their directory.  A generated file (GENERATED-FILE-NAME-P: chap-1.fig)
+that no directory holds is an empty source of that name, as after a
+first TeX run."
   (lambda (name)
     (multiple-value-bind (file-name pathname) (find-input-file name directories)
-      (and file-name (open-line-source file-name pathname)))))
+      (cond (file-name (open-line-source file-name pathname))
+            ((generated-file-name-p name) (make-line-source name ""))
+            (t nil)))))
 
 (defun make-input-stack (state &key (resolver (apply #'directory-resolver
                                                      (source-search-path)))
@@ -70,6 +82,18 @@ Signal INPUT-FILE-MISSING if there is none."
   (push-source stack (or (funcall (input-stack-resolver stack) name)
                          (error 'input-file-missing :name name))))
 
+(defun pop-token-level (stack)
+  "Remove the exhausted token list on top of STACK; at the end of a
+:U-TEMPLATE list, call the stack's U-TEMPLATE-END-HOOK, and for a list
+with a tag its LEVEL-END-HOOK."
+  (let ((level (pop (input-stack-levels stack)))
+        (hook (input-stack-u-template-end-hook stack))
+        (end-hook (input-stack-level-end-hook stack)))
+    (when (and end-hook (token-level-tag level))
+      (funcall end-hook stack (token-level-tag level)))
+    (when (and hook (eq (token-level-kind level) :u-template))
+      (funcall hook stack))))
+
 (defun pop-exhausted-token-lists (stack)
   "Remove the exhausted token lists on top of STACK, as TeX does before it
 backs up a token or starts a macro body, so that tail calls do not grow
@@ -79,14 +103,18 @@ END-READ-LINE removes it."
   (loop for top = (first (input-stack-levels stack))
         while (and (token-level-p top) (null (token-level-tokens top))
                    (not (member (token-level-kind top) '(:v-template :read-line))))
-        do (pop (input-stack-levels stack))))
+        do (pop-token-level stack)))
 
-(defun push-tokens (stack tokens &optional (kind :inserted))
-  "Insert the list TOKENS to be read next, as a level of KIND, after
-removing exhausted token lists.  TOKENS is copied, never modified.
-Returns no values."
-  (pop-exhausted-token-lists stack)
-  (push (make-token-level (copy-list tokens) kind) (input-stack-levels stack))
+(defun push-tokens (stack tokens &optional (kind :inserted) tag)
+  "Insert the list TOKENS to be read next, as a level of KIND.  For a
+:MACRO body the exhausted token lists are removed first, as TeX's
+macro_call does (§390); other lists (TeX's begin_token_list and
+back_list) go on top of them, which ends a u template later.  TOKENS is
+copied, never modified.  A non-NIL TAG is given to the stack's
+LEVEL-END-HOOK when the level is removed.  Returns no values."
+  (when (eq kind :macro)
+    (pop-exhausted-token-lists stack))
+  (push (make-token-level (copy-list tokens) kind tag) (input-stack-levels stack))
   (values))
 
 (defun resolve-input (stack name)
@@ -101,6 +129,13 @@ of one line, are read next.  Once they are read, NEXT-TOKEN returns NIL
 (TeX's `\\read line has ended', §360) until END-READ-LINE removes the
 level.  Returns no values."
   (push-tokens stack tokens :read-line))
+
+(defun open-level-tags (stack)
+  "The tags of the token-list levels of STACK not yet removed, innermost
+first."
+  (loop for level in (input-stack-levels stack)
+        when (and (token-level-p level) (token-level-tag level))
+          collect (token-level-tag level)))
 
 (defun reading-line-p (stack)
   "True when the top level of STACK is a line PUSH-READ-LINE pushed, so
@@ -118,7 +153,9 @@ lists on top of STACK and the line PUSH-READ-LINE pushed below them."
   (values))
 
 (defun back-input (stack token)
-  "Put TOKEN back so that it is the next token read from STACK."
+  "TeX's back_input (§325): remove the exhausted token lists, then put
+TOKEN back so that it is the next token read from STACK."
+  (pop-exhausted-token-lists stack)
   (push-tokens stack (list token) :backed-up)
   token)
 
@@ -141,7 +178,7 @@ levels (finished token lists, files at their end) are removed."
                 (return (pop (token-level-tokens top))))
                ((eq (token-level-kind top) :read-line)
                 (return nil))
-               (t (pop (input-stack-levels stack)))))
+               (t (pop-token-level stack))))
         (file-reader
          (let ((token (next-file-token top (input-stack-state stack)
                                        (lambda ()
@@ -158,6 +195,19 @@ levels (finished token lists, files at their end) are removed."
     (when token
       (back-input stack token))
     token))
+
+(defun v-template-ended-p (stack)
+  "True when the token just read ended the :V-TEMPLATE list on STACK:
+below exhausted token lists of other kinds, the next level is that list,
+exhausted (TeX's check in do_endv, §1131)."
+  (let ((level (find-if-not (lambda (level)
+                              (and (token-level-p level)
+                                   (null (token-level-tokens level))
+                                   (not (eq (token-level-kind level) :v-template))))
+                            (input-stack-levels stack))))
+    (and (token-level-p level)
+         (eq (token-level-kind level) :v-template)
+         (null (token-level-tokens level)))))
 
 (defun input-depth (stack)
   "Return the number of levels on STACK."

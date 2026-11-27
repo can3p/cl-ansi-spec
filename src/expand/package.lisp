@@ -7,12 +7,14 @@
 ;;;; parameters, codes and fonts over the reader's save stack), the
 ;;;; expansion of macros and expandable primitives, scanning,
 ;;;; conditionals, and main control: assignments, groups, modes, input,
-;;;; output and messages.
+;;;; output and messages, and the lists of nodes it builds (text, spaces,
+;;;; paragraphs, glue, kerns, penalties, rules, boxes, whatsits, math,
+;;;; alignments), and the formats jobs start from.
 
 (defpackage #:cl-ansi-spec/expand
   (:use #:cl)
   (:import-from #:cl-ansi-spec/tex
-                #:tex-state #:make-initex-state
+                #:tex-state #:make-initex-state #:copy-tex-state #:copy-equivalents
                 #:make-equivalents #:equivalent #:assign #:replace-equivalent
                 #:begin-group #:end-group #:current-group-kind #:group-level
                 #:save-stack-depth
@@ -20,6 +22,7 @@
                 #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
                 #:character-code #:catcode-value
                 #:control-sequence #:token #:token= #:span #:token-span
+                #:make-span #:span-file #:span-start #:span-end #:span-line #:span-column
                 #:+begin-group+ #:+end-group+ #:+parameter+ #:+space+
                 #:+letter+ #:+other+ #:+math-shift+ #:+alignment-tab+
                 #:+superscript+ #:+subscript+
@@ -30,6 +33,9 @@
                 #:make-frozen-control-sequence
                 #:control-sequence-name #:control-sequence-active-p
                 #:input-stack #:make-input-stack #:input-stack-file-end-hook
+                #:input-stack-u-template-end-hook #:input-stack-level-end-hook #:pop-exhausted-token-lists
+                #:open-level-tags
+                #:v-template-ended-p
                 #:next-token #:back-input #:push-tokens #:push-file
                 #:end-current-file #:input-file-missing #:current-line-number
                 #:resolve-input #:push-read-line #:reading-line-p #:end-read-line
@@ -91,6 +97,8 @@
    #:expander #:make-expander #:expander-state #:expander-input
    #:expander-job-name #:expander-scanner-status #:expander-align-state
    #:expander-marks #:scanner-status
+   #:expander-call-observer #:expander-level-end-observer
+   #:expander-definition-observer #:expander-append-observer
    #:get-next #:get-token #:get-x-token #:back-token #:insert-tokens
    #:expand #:expandable-p #:frozen-control-sequence #:dont-expand-meaning
    #:cs-name-text #:token-list-text #:meaning-text #:string-tokens
@@ -99,7 +107,14 @@
    #:+ignore-depth+ #:mode #:mode-kind #:last-node-kind
    #:list-state #:make-list-state #:list-state-p #:list-state-mode
    #:list-state-prev-depth #:list-state-space-factor #:list-state-prev-graf
-   #:list-state-last-node
+   #:list-state-last-node #:list-state-contents #:list-state-clang
+   #:list-state-span
+   ;; Nodes (nodes.lisp, list-commands.lisp)
+   #:node #:node-p #:make-node #:node-kind #:node-properties #:node-value
+   #:node-children #:node-composite #:node-span #:node-end-span #:node-via
+   #:node-last-item #:list-nodes #:outer-list #:append-node #:remove-last-node
+   #:flatten-nodes #:font-style-name
+   #:make-marker #:marker-p #:append-marker #:list-tail #:list-empty-p
    #:page-state #:page-state-so-far #:page-state-contents
    #:page-state-output-active #:page-state-last-penalty
    #:page-state-last-kern #:page-state-last-glue #:page-state-dead-cycles
@@ -122,14 +137,11 @@
    #:expander-read-streams #:if-limit #:if-test-names #:pass-text #:box-kind
    ;; Main control (commands.lisp, groups.lisp, modes.lisp, boxes.lisp,
    ;; prefixed.lisp, assignments.lisp, main-control.lisp)
-   #:command-disposition #:event-command-names #:alignment-command-names
-   #:input-output-command-names
-   #:unhandled-command #:unhandled-command-token #:unhandled-command-meaning
-   #:unhandled-command-disposition #:unhandled-command-mode
+   #:command-disposition #:event-command-names #:input-output-command-names
    #:group-code #:group-record #:group-record-code #:group-record-line
    #:current-group #:current-group-code
    #:tex-box #:tex-box-p #:make-tex-box #:tex-box-kind #:tex-box-spec
-   #:tex-box-contents
+   #:tex-box-contents #:tex-box-command
    #:expander-after-token #:expander-interaction #:expander-patterns
    #:expander-hyphenation-exceptions #:expander-trie-not-ready
    #:expander-ended
@@ -139,4 +151,7 @@
    #:log-entry-stream #:log-entry-help #:log-entry-span
    #:job-output #:job-output-item #:job-log #:job-events
    #:expander-write-streams #:expander-set-box-allowed
-   #:read-toks))
+   #:read-toks
+   ;; Formats and jobs (format.lisp)
+   #:tex-format #:tex-format-p #:load-plain-format #:format-error
+   #:format-error-detail #:make-job #:start-job))
