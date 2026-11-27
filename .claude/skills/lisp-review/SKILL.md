@@ -7,7 +7,8 @@ description: Pre-commit quality gate for this repository — run the build/test 
 
 1. `make test 2>&1 | tail -5` must exit 0 (any compiler warning fails the build).
 2. `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` must pass: `spec/tex/` is never edited.
-3. Spawn a review sub-agent (a mid-size model is enough) on `git diff` / new
+3. Spawn a review sub-agent, of the tier the step's *Review* names
+   (`docs/process.md`, "A step"; `sonnet` when none), on `git diff` / new
    files, excluding `spec/tex/`. Give it the diff command and
    `docs/architecture.md`; it reads only the diff, the files the diff touches
    (by line range), and the docs the step names. Ask for a ranked list (bug /

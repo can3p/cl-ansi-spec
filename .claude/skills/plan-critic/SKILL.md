@@ -1,6 +1,6 @@
 ---
 name: plan-critic
-description: Adversarial review of a proposed plan step BEFORE implementing it. Use every time a new step or milestone is planned in docs/plan/<id>.md - spawn a cheap sub-agent with a self-contained brief, then revise the plan on its feedback.
+description: Adversarial review of a proposed plan BEFORE implementing it. Use once when a milestone is planned in docs/plan/<id>.md, and before a step marked Critic full - spawn a cheap sub-agent with a self-contained brief, then revise the plan on its feedback. Steps marked Critic none skip it.
 ---
 
 # Plan critic
@@ -10,9 +10,17 @@ sub-agent's cost is fixed: every spawn starts from ~60-70k tokens of
 system prompt and tool schemas, even with one tool call. So **spawn
 rarely**, and keep the reading small:
 
-- **Pair it with the previous step's review.** When a step closes, the one
-  `lisp-review` sub-agent also critiques the next step (one spawn, two
-  answers). Spawn a critic alone only for the first step of a session.
+- **Only where design is decided.** A step marked *Critic* `none`
+  (`docs/process.md`, "A step") gets no critic: its contract is already
+  fixed by the plan, the docs and the tests.
+- **Pair it with a review.** When a step closes and a `full` step comes
+  next in the same session, the one `lisp-review` sub-agent also critiques
+  it (one spawn, two answers). Spawn a critic alone only for the first
+  `full` step of a session.
+- **Whole milestone.** Also check that each step's *Wave*, *After*,
+  *Owns*, *Model*, *Critic* and *Review* hold: steps of one wave touch
+  disjoint files; a cheaper tier gets only steps whose contract is fixed;
+  `none` is never given to a step that reads a rule from the sources.
 - The coordinator already knows the context, so it *hands it over*
   instead of making the critic rediscover it.
 

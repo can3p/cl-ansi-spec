@@ -40,11 +40,24 @@ blocks and `docs/history/` (the past) are not checked.
 
 ## A step
 
-1. **Plan.** Run the `plan-critic` skill on the step in
-   `docs/plan/<id>.md`. Revise the file on the feedback, or note in it why a
-   point was rejected.
-2. **Implement**, with tests. Use the cheapest model tier that fits; the
-   coordinator keeps design and review (`AGENTS.md`).
+Each step in `docs/plan/<id>.md` names, besides its text and *Docs:*:
+*Wave*, *After* (steps that must be merged first), *Owns* (when not
+obvious: the files only it changes), *Model* (the tier that implements
+it), *Critic* (`full` or `none`) and *Review* (the tier of the
+`lisp-review` sub-agent).  The milestone's planning sets them; the
+whole-milestone critic checks them.
+
+1. **Plan.** If the step says *Critic* `full`, run the `plan-critic`
+   skill on it and revise the file on the feedback, or note in it why a
+   point was rejected.  `full` is for steps that decide design (a
+   contract other steps build on, a rule read from the sources).  `none`
+   is for steps whose contract the plan text, the docs it names and its
+   tests already fix (generators, utilities, writers, tools, docs); they
+   go straight to implementation.
+2. **Implement**, with tests, at the step's *Model* tier: start the
+   session with that model, or have a coordinator hand the step to a
+   sub-agent of that tier.  The coordinator keeps design and review
+   (`AGENTS.md`).
 3. **Close the step** (`step-close` skill):
    - The docs the step names under *Docs:* describe the code as it now is.
      So do `docs/architecture.md` (package table, status), `AGENTS.md`
@@ -55,10 +68,11 @@ blocks and `docs/history/` (the past) are not checked.
      are regenerated. A step that finds a schema definition or its
      documentation wrong fixes it there and then, even if the definition
      belongs to an earlier step (`docs/exports.md`, "Versioning").
-   - Run `lisp-review` on everything, plan tick included; fix or justify
-     every finding.
-   - Tick the step in `docs/plan/<id>.md` (the first unticked step is the
-     current one; `PLAN.md` names only the milestone).
+   - Run `lisp-review` on everything, plan tick included, with a reviewer
+     of the step's *Review* tier; fix or justify every finding.  Never
+     skip it: the gate is cheap next to a bad merge.
+   - Tick the step in `docs/plan/<id>.md` (only your own step; `PLAN.md`
+     names only the milestones).
    - Make one commit containing code, tests, docs and the plan tick.
      A change of the events of the whole spec is meant: say in the
      message why they changed, and regenerate `tests/snapshots.sexp`
@@ -66,11 +80,44 @@ blocks and `docs/history/` (the past) are not checked.
 
 `main` stays usable after every step.
 
+## Parallel waves
+
+A milestone's steps are grouped into **waves**: the steps of one wave
+start from the same `main` and can run at the same time, one session (and
+branch, and pull request) each.  A wave's gate names the steps that must
+be merged before the next wave starts; a step may start as soon as its
+*After* steps are merged, even before its wave's gate.
+
+- **Disjoint files.**  The first step of a milestone that runs in waves
+  reserves the files the others fill: packages, stub files listed in
+  `cl-ansi-spec.asd`, one section per step in the topic doc they share,
+  extension tables (handlers, generators) instead of central `case`s.  A
+  step changes the files it owns, its tests, its own sections of docs and
+  its own plan item; anything else it needs goes into its pull request's
+  description for the coordinator.
+- **Shared files on merge.**  `cl-ansi-spec.asd`, package export lists,
+  `Makefile`: keep both sides.  Generated files (`tests/snapshots.sexp`,
+  the JSON Schema, the reference doc): take either side, then run
+  `make snapshots` or `make generate` (planned) and commit the result.
+  `docs/plan/<id>.md`: each step ticks only its own item, so ticks merge.
+- **Coordinator only**: `PLAN.md`, `AGENTS.md`, the skills, a change to
+  another phase (the semantic layer's vocabulary, the expander) that a
+  wave step finds it needs: the step stops, reports it, and the
+  coordinator lands it before or between waves.
+- **Merging.**  A step's pull request merges after `make test` passes on
+  it merged with the current `main`; the second of two conflicting
+  steps merges `main` in and re-runs `make test`.  At a wave's gate the
+  coordinator reads the merged plan, adjusts the next wave's steps where
+  this one taught something, and runs no critic for steps marked `none`.
+
 ## A milestone
 
-Plan it as a file `docs/plan/<id>.md` and run `plan-critic` on the whole
-file once (record the date in the file); afterwards `plan-critic` runs per
-step, before the step is implemented. When every step is ticked, close it with the
+Plan it as a file `docs/plan/<id>.md`: steps, waves, and each step's
+*Model*, *Critic* and *Review*.  Run `plan-critic` on the whole file once
+(record the date in the file), with a stronger model if the milestone
+sets contracts; afterwards `plan-critic` runs only before steps marked
+*Critic* `full`.  Two milestones may run at once when their steps own
+disjoint files; `PLAN.md` lists both. When every step is ticked, close it with the
 `milestone-close` skill: fold decisions into the topic docs, audit the
 schema documentation against what the model now holds, prune what the
 milestone made stale, write `docs/history/<id>.md`, delete the plan file,

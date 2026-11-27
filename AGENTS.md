@@ -10,6 +10,7 @@
 * End goal is a clean render based on the source spec
 * Any future adjustments to the spec will should go as a list of indepentent patches.
 * Defer simple work to simple models, smart models set direction and coordinate
+  (each plan step names its tier)
 * Save tokens, make tools that help reducing the usage and encode their usage in this file
 * main branch should be usable at any point in time
 * do not improvise, plan your actions
@@ -80,11 +81,24 @@
 
 See `docs/process.md`. In short:
 
-* New session: read `PLAN.md`, `docs/architecture.md` and the current
-  `docs/plan/<id>.md`; continue at its first unchecked step.
-* Before implementing a step: `plan-critic` skill. To finish it: `step-close`
-  skill (docs up to date, `lisp-review`, plan ticked, one commit). To finish
-  a milestone: `milestone-close` skill.
+* New session: read `PLAN.md`, `docs/architecture.md` and the
+  `docs/plan/<id>.md` of the step you are given (or, if none, the first
+  unticked step whose *After* steps are all ticked).  Read no other plan
+  file.
+* Each step names its *Wave*, *After*, *Model*, *Critic* and *Review*
+  (`docs/process.md`, "A step").  Implement at the *Model* tier; run the
+  `plan-critic` skill only when *Critic* is `full`. To finish a step:
+  `step-close` skill (docs up to date, `lisp-review` at the *Review* tier,
+  own plan item ticked, one commit). To finish a milestone:
+  `milestone-close` skill.
+* Parallel waves: one session and branch per step; a step changes only
+  the files it owns; `PLAN.md`, `AGENTS.md`, the skills and changes to
+  another phase are the coordinator's (`docs/process.md`, "Parallel
+  waves").
+* Tiers: opus sets contracts (declarations, protocols, rules read from
+  the sources) and integrates; sonnet implements against a fixed
+  contract and reviews; haiku does mechanical work (generators from a
+  registry, digests, CI steps, docs from a template) and reviews it.
 
 # Reading economy
 
