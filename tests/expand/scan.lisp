@@ -316,7 +316,13 @@ value, the expansion of the rest of the input and every error message."
   (check-expansion "\\the\\lastpenalty" "0")
   (check-expansion "\\the\\lastskip" "0.0pt")
   (flet ((last-node (expander node)
-           (setf (expand:list-state-last-node (expand:current-list expander)) node)))
+           ;; A node whose last item (§424) is NODE, a cons (KIND . VALUE).
+           (expand:append-node expander
+                               (expand:make-node (if (eq (car node) :character)
+                                                     :text
+                                                     (car node))
+                                                 :value (or (cdr node) "x")
+                                                 :properties (list :style "x")))))
     (check-expansion "\\the\\lastpenalty" "50"
                      :setup ((last-node expander '(:penalty . 50))))
     (check-expansion "\\the\\lastkern" "0.0pt"

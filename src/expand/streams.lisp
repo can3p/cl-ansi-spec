@@ -190,7 +190,6 @@ IMMEDIATE, else make it an event of the current list."
     (if immediate
         (out-what expander name stream argument span)
         (progn
-          (setf (list-state-last-node (current-list expander)) (list :other))
           (emit-event expander
                       (cond ((string= name "openout")
                              (list :openout :stream stream :file argument :span span))

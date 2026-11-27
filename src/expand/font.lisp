@@ -25,7 +25,10 @@ PARAMETER-COUNT is TeX's font_params: known only for \\nullfont (7,
   (dimens (make-array 0 :adjustable t :initial-element 0) :read-only t)
   (hyphen-char 0 :type integer)
   (skew-char 0 :type integer)
-  (parameter-count nil :type (or null (integer 0))))
+  (parameter-count nil :type (or null (integer 0)))
+  ;; The font's name as the :STYLE of text (FONT-STYLE-NAME), made on
+  ;; first use.
+  (style nil :type (or null string)))
 
 (defun normalize-font-size (size)
   "SIZE, one of NIL (the design size), (:AT sp) or (:SCALED n), in the form

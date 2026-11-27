@@ -51,7 +51,7 @@
 
 (define-test let-and-futurelet
   :parent assignments
-  (check-job "\\let\\a=b\\a" "\\a ")
+  (check-job "\\let\\a=b\\a" "b")
   (check-job "\\let\\a=\\relax\\ifx\\a\\relax y\\fi" "y")
   (check-job "\\let\\a\\undefined\\a" "" :errors ("Undefined control sequence"))
   (check-job "\\let\\a={\\a\\aftergroup x}" "x")
@@ -61,7 +61,7 @@
 (define-test shorthands
   :parent assignments
   (is = 65 (count-after "\\chardef\\c=65 \\count1=\\c" 1))
-  (check-job "\\chardef\\c=65 \\c" "\\c ")
+  (check-job "\\chardef\\c=65 \\c" "A")
   (is = 7 (count-after "\\countdef\\c=5 \\c=7 " 5))
   (is = (* 3 65536)
       (job-value "\\dimendef\\d=2 \\d=3pt"

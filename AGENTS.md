@@ -61,10 +61,15 @@
   on to later steps (events, alignments),
   `FILE:LINE:COL<tab>TOKEN<tab>MODE`, TeX errors as `!! …`, TeX's notes
   as `-- (…)`, what the job prints (`\message`, `\show`, …) as
-  `>> kind[ stream]: text` and its events (`\write`) as
-  `FILE:LINE:COL<tab>== kind properties`.  Always
+  `>> kind[ stream]: text` and the nodes it appends to lists, except
+  text and spaces, as `FILE:LINE:COL<tab>== (kind properties)`.  Always
   pass `LINES`, and a timeout: while jobs do not load plain TeX first, a
   chapter job may loop for ever, as TeX would.
+* `make events FILE=chap-1 [LINES=10-20]` — the same job, printing instead
+  the events (`docs/events.md`) of the nodes appended while `LINES` were
+  read, `FILE:LINE:COL<tab>EVENT`, nested events indented, then the lists
+  still open (`-- open <mode> list`).  Errors as for `make expand`.  Same
+  rules: always pass `LINES` and a timeout.
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine

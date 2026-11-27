@@ -7,7 +7,8 @@
 ;;;; parameters, codes and fonts over the reader's save stack), the
 ;;;; expansion of macros and expandable primitives, scanning,
 ;;;; conditionals, and main control: assignments, groups, modes, input,
-;;;; output and messages.
+;;;; output and messages, and the lists of nodes it builds (text, spaces,
+;;;; paragraphs, glue, kerns, penalties, rules, boxes, whatsits).
 
 (defpackage #:cl-ansi-spec/expand
   (:use #:cl)
@@ -20,6 +21,7 @@
                 #:catcode #:set-catcode #:lccode #:set-lccode #:uccode #:set-uccode
                 #:character-code #:catcode-value
                 #:control-sequence #:token #:token= #:span #:token-span
+                #:make-span #:span-file #:span-start #:span-end #:span-line #:span-column
                 #:+begin-group+ #:+end-group+ #:+parameter+ #:+space+
                 #:+letter+ #:+other+ #:+math-shift+ #:+alignment-tab+
                 #:+superscript+ #:+subscript+
@@ -99,7 +101,13 @@
    #:+ignore-depth+ #:mode #:mode-kind #:last-node-kind
    #:list-state #:make-list-state #:list-state-p #:list-state-mode
    #:list-state-prev-depth #:list-state-space-factor #:list-state-prev-graf
-   #:list-state-last-node
+   #:list-state-last-node #:list-state-contents #:list-state-clang
+   #:list-state-span
+   ;; Nodes (nodes.lisp, list-commands.lisp)
+   #:node #:node-p #:make-node #:node-kind #:node-properties #:node-value
+   #:node-children #:node-composite #:node-span #:node-end-span #:node-via
+   #:node-last-item #:list-nodes #:outer-list #:append-node #:remove-last-node
+   #:flatten-nodes #:font-style-name
    #:page-state #:page-state-so-far #:page-state-contents
    #:page-state-output-active #:page-state-last-penalty
    #:page-state-last-kern #:page-state-last-glue #:page-state-dead-cycles
@@ -129,7 +137,7 @@
    #:group-code #:group-record #:group-record-code #:group-record-line
    #:current-group #:current-group-code
    #:tex-box #:tex-box-p #:make-tex-box #:tex-box-kind #:tex-box-spec
-   #:tex-box-contents
+   #:tex-box-contents #:tex-box-command
    #:expander-after-token #:expander-interaction #:expander-patterns
    #:expander-hyphenation-exceptions #:expander-trie-not-ready
    #:expander-ended

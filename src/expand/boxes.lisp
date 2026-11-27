@@ -6,20 +6,24 @@
 ;;;; (a box register for \setbox, else the current list).  \box, \copy and
 ;;;; \vsplit take a register's box.  A TEX-BOX has no dimensions of its
 ;;;; own (docs/tex-fidelity.md, "Not emulated"): \wd, \ht and \dp read 0
-;;;; unless assigned.  What a box holds is the event layer's; placing a
-;;;; box in a list, \lastbox, leaders and \shipout are events.
+;;;; unless assigned.  A box holds the nodes of its list; placed in a list
+;;;; it is a box node.  \lastbox, leaders and \shipout are step 9b's.
 ;;;;
 ;;;; A box context (TeX's box_context) is :APPEND, the current list, or
 ;;;; (:SETBOX n global), a box register.
 
 (in-package #:cl-ansi-spec/expand)
 
-(defstruct (tex-box (:constructor make-tex-box (kind &key spec contents))
+(defstruct (tex-box (:constructor make-tex-box (kind &key spec contents
+                                                       (command (string-downcase
+                                                                 (symbol-name kind)))))
                     (:copier nil))
-  "A box: KIND :HBOX or :VBOX (\\vtop makes a :VBOX), the SPEC it was made
-with (see GROUP-RECORD), its CONTENTS (events, kept by the event layer)
-and the dimensions \\wd, \\ht and \\dp assigned to it."
+  "A box: KIND :HBOX or :VBOX (\\vtop makes a :VBOX), the COMMAND that made
+it (\"hbox\", \"vbox\" or \"vtop\"), the SPEC it was made with (see
+GROUP-RECORD), its CONTENTS (nodes, oldest first) and the dimensions
+\\wd, \\ht and \\dp assigned to it."
   (kind :hbox :type (member :hbox :vbox) :read-only t)
+  (command "hbox" :type string :read-only t)
   (spec nil :read-only t)
   (contents '() :type list)
   (width 0 :type integer)
@@ -45,6 +49,7 @@ and the dimensions \\wd, \\ht and \\dp assigned to it."
   "TeX's copy_node_list of a box register's contents, for \\copy."
   (and box
        (let ((copy (make-tex-box (tex-box-kind box) :spec (tex-box-spec box)
+                                                    :command (tex-box-command box)
                                                     :contents (copy-list (tex-box-contents box)))))
          (setf (tex-box-width copy) (tex-box-width box)
                (tex-box-height copy) (tex-box-height box)
@@ -59,20 +64,38 @@ and the dimensions \\wd, \\ht and \\dp assigned to it."
                :test #'string=)
        t))
 
+(defun box-node (box span)
+  "The node of BOX placed in a list by the command read at SPAN: its
+kind, the command that made it, its spec and the dimensions assigned to
+it; its children are its contents."
+  (destructuring-bind (&optional spec-kind (amount 0)) (tex-box-spec box)
+    (make-node :box
+               :properties (append (list :kind (tex-box-kind box)
+                                         :command (tex-box-command box))
+                                   (when (or (eq spec-kind :exactly) (/= amount 0))
+                                     (list :spec (list spec-kind (format-dimen amount))))
+                                   (loop for (key value) in
+                                         (list (list :width (tex-box-width box))
+                                               (list :height (tex-box-height box))
+                                               (list :depth (tex-box-depth box)))
+                                         unless (zerop value)
+                                           append (list key (format-dimen value))))
+               :value box :children (tex-box-contents box) :span span)))
+
 (defun box-end (expander context box token meaning)
   "TeX's box_end (§1075): BOX, made by TOKEN with MEANING, goes where
 CONTEXT says.  A void box placed in a list is nothing; a box placed in a
-list is an event."
+list is a box node."
+  (declare (ignore meaning))
   (if (eq context :append)
       (when box
-        ;; What appending the box does to the list (§§1076, 679); the
-        ;; box itself is an event.
+        ;; What appending the box does to the list (§§1076, 679).
+        (append-node expander (box-node box (token-span token)))
         (let ((list (current-list expander)))
           (case (mode-kind (list-state-mode list))
-            (:vertical (setf (list-state-prev-depth list) (tex-box-depth box)))
-            (:horizontal (setf (list-state-space-factor list) 1000)))
-          (setf (list-state-last-node list) (list :other)))
-        (hand-on expander token meaning :event))
+            (:vertical (setf (list-state-prev-depth list) (tex-box-depth box))
+             (when (eq (list-state-mode list) :vertical) (build-page expander)))
+            (:horizontal (setf (list-state-space-factor list) 1000)))))
       (destructuring-bind (setbox n global) context
         (assert (eq setbox :setbox))
         ;; \setbox applied \globaldefs when it was read (§1241).
@@ -154,11 +177,13 @@ CONTEXT.  \\hbox, \\vbox and \\vtop open their group and inner mode
 (defun package-box (expander kind)
   "TeX's package (§1086): end the box group of KIND (:HBOX, :VBOX or
 :VTOP), make the box and give it to its context."
-  (let ((group (unsave expander)))
-    (pop-nest expander)
+  (let* ((group (unsave expander))
+         (list (pop-nest expander)))
     (box-end expander (group-record-context group)
              (make-tex-box (if (eq kind :hbox) :hbox :vbox)
-                           :spec (group-record-spec group))
+                           :command (string-downcase (symbol-name kind))
+                           :spec (group-record-spec group)
+                           :contents (list-nodes list))
              (group-record-token group) (group-record-meaning group))))
 
 (defun scan-box (expander context)

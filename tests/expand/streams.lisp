@@ -191,6 +191,6 @@ given) and FATAL message."
   ;; More: \endwrite is \outer, so the text is a runaway.
   (check-log "\\def\\l{{\\iffalse}\\fi}\\immediate\\write16{a\\l b}"
              ((:write "a{b} " 16)) :errors ("Forbidden control sequence found"))
-  (check-job "\\setbox0\\hbox{}" "\\hbox " :errors ("Improper")
+  (check-job "\\setbox0\\hbox{}" "[hbox]" :errors ("Improper")
                                     :setup ((setf (expand:expander-set-box-allowed expander)
                                                   nil))))

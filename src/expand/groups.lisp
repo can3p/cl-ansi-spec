@@ -129,6 +129,11 @@ groups of events and alignments end in their own steps."
       ((:semi-simple :math-shift :math-left)
        (extra-right-brace-error expander token))
       ((:hbox :adjusted-hbox) (package-box expander :hbox))
-      (:vbox (end-graf expander) (package-box expander :vbox))
-      (:vtop (end-graf expander) (package-box expander :vtop))
-      (:math (unsave expander) (pop-nest expander)))))
+      (:vbox (end-graf expander (token-span token)) (package-box expander :vbox))
+      (:vtop (end-graf expander (token-span token)) (package-box expander :vtop))
+      ;; A math group's noad is 9d's; until then its nodes go on in the
+      ;; enclosing list.
+      (:math (unsave expander)
+       (let ((group (pop-nest expander)))
+         (dolist (node (list-nodes group))
+           (append-node expander node)))))))

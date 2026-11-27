@@ -26,9 +26,9 @@
 
 (defun run-main-control (expander)
   "Run EXPANDER's job with main control, recovering from TeX errors.
-Returns the handed-on commands as a string, the error messages, their
-contexts, the modes of the handed-on commands, and the message of a
-fatal error or NIL."
+Returns the characters, spaces and boxes ([hbox] ...) appended to lists,
+with the handed-on commands, as a string, the error messages, their contexts, the modes of
+the handed-on commands, and the message of a fatal error or NIL."
   (let ((errors '()) (contexts '()) (modes '()) (fatal nil))
     (let ((output
             (with-output-to-string (out)
@@ -38,7 +38,19 @@ fatal error or NIL."
                                      (write-string (token-display
                                                     (expand:unhandled-command-token condition))
                                                    out)
-                                     (push (expand:unhandled-command-mode condition) modes))))
+                                     (push (expand:unhandled-command-mode condition) modes)))
+                                 (expand:job-output
+                                   (lambda (condition)
+                                     (let ((node (expand:job-output-item condition)))
+                                       (when (expand:node-p node)
+                                         (case (expand:node-kind node)
+                                           (:text (let ((text (expand:node-value node)))
+                                                    (write-char (char text (1- (length text)))
+                                                                out)))
+                                           (:space (write-char #\Space out))
+                                           (:box (format out "[~A]"
+                                                         (getf (expand:node-properties node)
+                                                               :command)))))))))
                     (expand:call-recovering-tex-errors
                      (lambda () (expand:main-control expander))
                      (lambda (condition)
@@ -83,6 +95,23 @@ needs no fonts' metrics.")
 
 ;;; Dispositions
 
+(defparameter *pending-event-commands*
+  '(;; Boxes (step 9b)
+    "leaders" "cleaders" "xleaders" "lower" "raise" "moveleft" "moveright"
+    "unhbox" "unhcopy" "unvbox" "unvcopy"
+    ;; The other nodes (step 9c)
+    "-" "discretionary" "accent" "insert" "vadjust" "mark" "special"
+    "setlanguage" "shipout" "showbox" "showlists"
+    ;; Math (step 9d)
+    "above" "abovewithdelims" "atop" "atopwithdelims" "delimiter"
+    "displaylimits" "displaystyle" "left" "limits" "mathaccent" "mathbin"
+    "mathchar" "mathchoice" "mathclose" "mathinner" "mathop" "mathopen"
+    "mathord" "mathpunct" "mathrel" "mkern" "mskip" "nolimits" "nonscript"
+    "over" "overline" "overwithdelims" "radical" "right" "scriptscriptstyle"
+    "scriptstyle" "textstyle" "underline" "vcenter")
+  "The :EVENT primitives whose operations have not landed: they are still
+handed on.")
+
 (define-test dispositions
   :parent main-control
   (let ((names (append (expand:tex82-command-names) (expand:tex82-expandable-names)
@@ -96,9 +125,12 @@ needs no fonts' metrics.")
         (true disposition "~S has a disposition" name)
         (when (eq disposition :main-control)
           (true operation "~S has an operation" name))
-        (when (member disposition '(:event :alignment))
-          (unless (member name '("lastbox" "eqno" "leqno") :test #'string=)
-            (false operation "~S is handed on" name))))))
+        (when (eq disposition :alignment)
+          (false operation "~S is handed on" name))
+        (when (eq disposition :event)
+          (if (member name *pending-event-commands* :test #'string=)
+              (false operation "~S is handed on" name)
+              (true operation "~S has an operation" name))))))
   (dolist (name (expand:input-output-command-names))
     (is eq :main-control (expand:command-disposition name)))
   (is eq :event (expand:command-disposition "hskip"))
@@ -110,11 +142,8 @@ needs no fonts' metrics.")
 
 (define-test handed-on-commands
   :parent main-control
-  ;; A paragraph starts before \hskip; \end ends it.
-  (check-job "\\hskip 3pt" "\\hskip 3pt" :modes (:horizontal :horizontal :horizontal
-                                                   :horizontal))
   (check-job "\\halign" "\\halign ")
-  (check-job "a&" "a&" :modes (:horizontal :horizontal))
+  (check-job "a&" "a&" :modes (:horizontal))
   (check-job "\\relax  " ""))
 
 ;;; Groups
@@ -154,7 +183,7 @@ needs no fonts' metrics.")
         (reports "\\iftrue\\end")))
   (check-job "{\\iftrue" "")
   (check-job "x" "x" :fatal "*** (job aborted, no legal \\end found)")
-  (check-job "\\vbox{\\end}" "\\vbox " :errors ("You can't use")
+  (check-job "\\vbox{\\end}" "[vbox]" :errors ("You can't use")
                                      :contexts ("`\\end' in internal vertical mode"))
   ;; \end in a paragraph ends it first.
   (let ((expander (job-state "x")))
@@ -174,7 +203,7 @@ needs no fonts' metrics.")
   (check-job "\\noindent\\par\\ifnum\\prevgraf=0 y\\fi" "y")
   (check-job "\\indent\\par\\ifnum\\prevgraf=1 y\\fi" "y")
   (check-job "\\ifvmode\\noindent\\ifhmode\\ifinner\\else y\\fi\\fi\\fi" "y")
-  (check-job "x\\indent\\noindent" "x\\indent ")
+  (check-job "x\\indent\\noindent" "x")
   ;; normal_paragraph
   (let ((state (expand:expander-state
                 (job-state "\\hangindent=3pt \\looseness=2 \\hangafter=5
@@ -184,8 +213,10 @@ needs no fonts' metrics.")
     (is = 1 (expand:parameter state :hangafter))
     (is eq nil (expand:par-shape state)))
   ;; A vertical command ends the paragraph; \par is inserted.
-  (check-job "x\\vskip" "x\\vskip " :modes (:horizontal :vertical))
-  (check-job "x\\hrule" "x\\hrule "))
+  (check-job "x\\vskip1pt\\ifvmode v\\fi" "xv")
+  (check-job "x\\hrule\\ifvmode v\\fi" "xv")
+  ;; A paragraph starts before \hskip; \end ends it.
+  (check-job "\\hskip 3pt\\ifhmode h\\fi" "h"))
 
 (define-test mode-errors
   :parent main-control
@@ -196,9 +227,9 @@ needs no fonts' metrics.")
   (check-job "\\lastskip" "" :errors ("You can't use"))
   (check-job "x\\moveleft" "x" :errors ("You can't use")
                                :contexts ("`\\moveleft' in horizontal mode"))
-  (check-job "\\hbox{\\hrule}" "\\hbox " :errors ("You can't use")
+  (check-job "\\hbox{\\hrule}" "[hbox]" :errors ("You can't use")
                                        :contexts ("`\\hrule' here except with leaders"))
-  (check-job "\\hbox{\\vskip}" "\\hbox \\vskip "
+  (check-job "\\hbox{\\vskip1pt}\\ifvmode v\\fi" "[hbox]v"
              :errors ("Missing } inserted" "Too many }'s"))
   (check-job "\\eqno" "" :errors ("You can't use"))
   (check-job (with-math-fonts "$\\eqno$") "" :errors ("You can't use")
@@ -209,9 +240,9 @@ needs no fonts' metrics.")
 
 (define-test boxes
   :parent main-control
-  (check-job "\\hbox{\\ifinner i\\fi}" "i\\hbox " :modes (:restricted-horizontal :vertical))
-  (check-job "\\vbox{x}" "x\\vbox " :modes (:horizontal :vertical))
-  (check-job "\\everyhbox{h}\\everyvbox{v}\\hbox{}\\vtop{}" "h\\hbox v\\vtop ")
+  (check-job "\\hbox{\\ifinner i\\fi}" "i[hbox]")
+  (check-job "\\vbox{x\\ifhmode y\\fi}" "xy[vbox]")
+  (check-job "\\everyhbox{h}\\everyvbox{v}\\hbox{}\\vtop{}" "h[hbox]v[vtop]")
   (check-job "\\setbox1\\hbox{}\\ifhbox1 h\\fi\\setbox2\\vtop{}\\ifvbox2 v\\fi
 \\setbox3\\box1 \\ifvoid1 e\\fi\\ifhbox3 m\\fi" "hvem")
   (check-job "{\\setbox1\\hbox{}}\\ifvoid1 y\\fi" "y")
@@ -223,13 +254,13 @@ needs no fonts' metrics.")
   (check-job "\\setbox1\\hbox{}\\setbox2\\vsplit1 to 3pt\\ifhbox1 a\\fi\\ifvoid2 b\\fi" "ab"
              :errors ("\\vsplit needs a \\vbox"))
   (check-job "\\setbox1=x" "x" :errors ("A <box> was supposed to be here"))
-  (check-job "\\setbox1\\hbox{}\\box1 \\box1 " "\\box ")
+  (check-job "\\setbox1\\hbox{}\\box1 \\box1 " "[hbox]")
   (check-job "\\lastbox" "\\lastbox ")
   (check-job "\\setbox1\\vbox{}\\setbox2\\vsplit1 3pt" "" :errors ("Missing `to' inserted"))
   ;; Placing a box sets the list's space factor and depth (§§1076, 679).
-  (check-job "x\\spacefactor=3 \\hbox{}\\ifnum\\spacefactor=1000 y\\fi" "x\\hbox y")
-  (check-job "\\setbox1\\hbox{}\\dp1=2pt \\box1 \\ifdim\\prevdepth=2pt y\\fi" "\\box y")
-  (check-job "x\\spacefactor=3 \\indent\\ifnum\\spacefactor=1000 y\\fi" "x\\indent y")
+  (check-job "x\\spacefactor=3 \\hbox{}\\ifnum\\spacefactor=1000 y\\fi" "x[hbox]y")
+  (check-job "\\setbox1\\hbox{}\\dp1=2pt \\box1 \\ifdim\\prevdepth=2pt y\\fi" "[hbox]y")
+  (check-job "x\\spacefactor=3 \\indent\\ifnum\\spacefactor=1000 y\\fi" "xy")
   ;; \afterassignment's token comes before \everyhbox (§1279).
   (check-job "\\everyhbox{b}\\def\\a{a}\\afterassignment\\a\\setbox0\\hbox{c}" "abc")
   (let ((box (expand:register (expand:expander-state
@@ -243,7 +274,7 @@ needs no fonts' metrics.")
 (define-test math-shifts
   :parent main-control
   (check-job (with-math-fonts "a$b$$$c$$\\par d") "abcd"
-             :modes (:horizontal :math :display-math :horizontal))
+             :modes (:math :display-math))
   (check-job (with-math-fonts "$$x$$\\par\\ifnum\\prevgraf=4 y\\fi") "xy")
   (check-job (with-math-fonts "$$x$y") "xy" :errors ("Display math should end with $$"))
   (check-job (with-math-fonts "\\noindent$$\\ifdim\\predisplaysize<-16000pt y\\fi$$") "y")
@@ -254,8 +285,8 @@ needs no fonts' metrics.")
              :modes (:math :math))
   (check-job (with-math-fonts "$$\\ifinner\\else a\\fi{\\ifinner b\\fi}$$") "ab")
   (check-job (with-math-fonts "\\everymath{m}\\everydisplay{d}$x$$$y$$") "mxdy")
-  (check-job (with-math-fonts "\\hbox{$$x$$}") "x\\hbox "
-             :modes (:restricted-horizontal :vertical))
+  ;; $$ in restricted horizontal mode is an empty formula.
+  (check-job (with-math-fonts "\\hbox{$$x$$}") "x[hbox]")
   (check-job (with-math-fonts "\\fam=3 $\\ifnum\\fam=-1 y\\fi$\\ifnum\\fam=3 z\\fi") "yz")
   (check-job (with-math-fonts "^") "^" :errors ("Missing $ inserted" "Missing $ inserted"))
   (check-job (with-math-fonts "$\\par$") "" :errors ("Missing $ inserted" "Missing $ inserted"))

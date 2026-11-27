@@ -67,12 +67,11 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     sp) and negation: registers and their shorthands, parameters, codes,
     `\parshape`, font identifiers and family fonts, `\fontdimen`,
     `\hyphenchar`, `\skewchar`, `\inputlineno`, and what belongs to lists
-    and pages.  Those last read TeX's semantic nest, kept without its
-    lists (`nest.lisp`): mode, `\prevdepth` (−1000pt at first),
-    `\spacefactor` (each "Improper" outside its mode), `\prevgraf`, and
-    the last node of the list (penalty, kern, glue or other), which the
-    event layer records; an empty main vertical list shows the page
-    builder's last values.  No page is ever started, so `\pagegoal` is
+    and pages.  Those last read TeX's semantic nest (`nest.lisp`): mode,
+    `\prevdepth` (−1000pt at first), `\spacefactor` (each "Improper"
+    outside its mode), `\prevgraf`, and the last node of the list
+    (penalty, kern, glue or other, see Lists and nodes); an empty main
+    vertical list shows the page builder's last values.  No page is ever started, so `\pagegoal` is
     `\maxdimen` and the other page totals 0; `\badness` is 0.  `\wd`,
     `\ht` and `\dp` go through the generic function `box-dimension` and
     its setter (a void box reads 0 and ignores assignments); the box
@@ -121,8 +120,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     `\openin` opens one.
 - Main control (`src/expand/`: `commands.lisp`, `groups.lisp`,
   `modes.lisp`, `boxes.lisp`, `prefixed.lisp`, `assignments.lisp`,
-  `main-control.lisp`, `log.lisp`, `messages.lisp`, `streams.lisp`),
-  §§1029-1298, 1335, 1340-1375:
+  `main-control.lisp`, `log.lisp`, `messages.lisp`, `streams.lisp`,
+  `nodes.lisp`, `list-commands.lisp`), §§1029-1298, 1335, 1340-1375:
   - *Every primitive has one disposition* (`command-disposition`):
     expandable, main control's own, an event, or an alignment command.
     What main control does not carry out yet is handed on as the
@@ -177,14 +176,14 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     `\aftergroup` tokens are put back in the order they were saved;
     outside every group they are forgotten.
   - *Modes and the nest*: a paragraph begins with `\everypar` (after
-    `\parskip` glue and the indentation box, recorded as the last nodes
-    of their lists) and ends with normal_paragraph (`\looseness`,
+    `\parskip` glue in the enclosing list and the indentation node in
+    its own) and ends with normal_paragraph (`\looseness`,
     `\hangindent`, `\hangafter`, `\parshape` reset locally, ignoring
     `\globaldefs`).  `\hbox`, `\vbox` and `\vtop` read `to`/`spread`,
     push restricted horizontal or internal vertical mode with
     `\everyhbox`/`\everyvbox` (a `\vbox` also normal_paragraph) and at
     their `}` end the paragraph inside and make a box; `\setbox` puts it
-    in the register; anywhere else placing it is an event, after which
+    in the register; anywhere else it becomes a box node, after which
     the list's `\spacefactor` is 1000 or its `\prevdepth` the box's
     depth (`\indent` in a paragraph sets the space factor too).  `\box`,
     `\copy` and `\vsplit` take a register's box (`\box` voids the
@@ -195,7 +194,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     `\parshape` or `\hangindent`/`\hangafter`), anything else inline
     math (with `\everymath`); `\fam` is -1 inside.  A display must end
     with `$$` ("Display math should end with $$"); the paragraph then
-    resumes three lines further on, after an optional space.  Math
+    resumes three lines further on, after an optional space, as a new
+    paragraph node.  Math
     without families 2 and 3 of enough parameters (`\nullfont`'s 7) is
     "Math formula deleted: Insufficient symbol/extension fonts".
   - `\relax`, `\ignorespaces`, `\endcsname` ("Extra \endcsname"),
@@ -248,6 +248,64 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     and its friends are false, and `\setbox` is "Improper"), then
     becomes an event with `:text` when its stream is open, else a
     `:write` log entry with the stream number (17: the log only).
+- Lists and nodes (`src/expand/`: `nodes.lisp`, `list-commands.lisp`,
+  with `modes.lisp` and `boxes.lisp`), §§1034-1044, 1056-1061,
+  1091-1096, 1103-1113, 1376: each list of the nest keeps its nodes, as
+  TeX's tail_append adds them, and what TeX reads back of the last one
+  (§424: `\lastpenalty`, `\lastkern`, `\lastskip`) is read from them.
+  The job's events are the outer vertical list's nodes, flattened
+  (`docs/events.md`).  Each primitive, and what it appends:
+  - *Characters* (a letter or other character, `\char`, a `\chardef`
+    or a control sequence `\let` to one) in horizontal mode: TeX's main
+    loop without ligatures and kerns (which need metrics), so
+    `\noboundary` does nothing.  `\sfcode` sets `\spacefactor`
+    (adjust_space_factor); in a paragraph (not in a restricted box) a
+    `\language` other than the paragraph's current one first appends a
+    `:language` whatsit with the hyphenation minimums (fix_language).
+    A character extends the `:text` node that ends the list when it has
+    the same font and its span is in the same file and not before the
+    node's end; else it begins a new one.  The style is the font's file
+    and size (`cmr10`, `cmr10 at 12.0pt`, `cmr10 scaled 1200`).
+  - *Spaces*: a blank in horizontal mode and `\ ` anywhere append a
+    `:space` node holding app_space's glue: `\xspaceskip` at a space
+    factor of 2000 or more, else `\spaceskip` or the font's
+    `\fontdimen` 2-4 (0 unless assigned), the width plus `\fontdimen` 7
+    at 2000 or more, the stretch and shrink scaled by the space factor
+    (`xn_over_d`); `\ ` and a space factor of 1000 take the glue
+    unscaled.  A glue of zero width, stretch and shrink counts as
+    zero_glue (trap_zero_glue).
+  - *Paragraphs*: `\par` (and what ends a paragraph) makes the
+    horizontal list one `:paragraph` node of the enclosing vertical
+    list, without its final glue (§816); an empty list makes none.
+    TeX's `\parfillskip`, `\leftskip`, `\rightskip` and interline glue
+    are layout and not kept.  Math is a `:math` node (`:display t` in
+    the vertical list for a display), its nodes those of the math list
+    (noads are not built yet).
+  - *Glue, kerns, penalties, rules*: `\hskip`, `\vskip` and the
+    `fil`/`fill`/`ss`/`filneg` commands make `:glue` nodes, `\kern`
+    `:kern`, `\penalty` `:penalty`, `\hrule`/`\vrule` `:rule` with
+    scan_rule_spec's dimensions (an `\hrule` 0.4pt high, a `\vrule` 0.4pt
+    wide, the rest running; then `\prevdepth` is ignore_depth or the
+    space factor 1000); `\/` a kern of 0 after a character (and always
+    in math), since the italic correction needs metrics.  The keywords
+    of a rule are scanned with expansion, before it is appended.
+  - *Removing*: `\unskip`, `\unkern` and `\unpenalty` remove the last
+    node when it is glue (a space or leaders too), a kern or a penalty.
+  - *The page builder's traces*: where TeX runs build_page (after a
+    paragraph, a box or a penalty in the outer vertical list, after a
+    display), the list's nodes stay in it (they are the job's output) but
+    count as moved to the page: the list reads as empty, and the page's
+    last glue, penalty and kern are those of its last node (§996), which
+    `\lastskip` and friends then read.  From an empty outer list
+    `\unkern` and `\unpenalty` are "You can't use", and so is `\unskip`
+    when the page's last node was glue.
+  - *Boxes* placed in a list are `:box` nodes (kind, command, spec,
+    assigned dimensions) whose children are the box's list.  The
+    deferred `\openout`, `\write` and `\closeout` are nodes of the
+    current list, so a box holds them; the `\immediate` ones are nodes
+    of the outer list, appended when they are carried out.
+  Every node appended (and each character added to a `:text` node) is
+  signalled as `job-output`.
 - Registers and parameters have INITEX defaults; TeX's integer,
   dimension and glue arithmetic is exact (see Quantities).
 - Quantities (`src/expand/`, files `arithmetic.lisp`, `units.lisp`,
@@ -312,11 +370,11 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
   `\vsplit` takes the whole box. `\wd`, `\ht` and `\dp` are 0 unless
   assigned.
 - No line breaking and no page builder. `\pagetotal` and `\prevdepth` are 0.
-  A paragraph counts as one line (`\prevgraf`), ending in a line box of
+  A paragraph counts as one line (`\prevgraf`), its paragraph node, of
   depth 0; `\predisplaysize` is 0pt after a nonempty paragraph.  `\end`
   never waits for the page builder or `\output`.
-  `\lastskip`, `\lastpenalty` and `\lastkern` look at the last event of the
-  current list. `\output` is stored and never run; `\shipout` is an event.
+  `\lastskip`, `\lastpenalty` and `\lastkern` look at the last node of the
+  current list, or of the page (see Lists and nodes). `\output` is stored and never run; `\shipout` is an event.
 - `\write` and `\openout` write nothing; writes are events, and
   `\immediate\write`s to no open file are log entries.
 

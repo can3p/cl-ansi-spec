@@ -62,10 +62,8 @@ end-of-file checks."
   (write-streams (make-array 16 :initial-element nil) :read-only t)
   ;; TeX's set_box_allowed (§1241): false while a \write is expanded.
   (set-box-allowed t :type boolean)
-  ;; What the job printed (log.lisp), and the events it emitted, newest
-  ;; first.
+  ;; What the job printed (log.lisp), newest first.
   (log '() :type list)
-  (events '() :type list)
   ;; The token \afterassignment saved (after_token, §1266), or NIL.
   (after-token nil)
   ;; The interaction mode last set (§1264); recorded only: every job

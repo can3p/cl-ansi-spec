@@ -3,7 +3,7 @@
 SBCL ?= sbcl
 LISP := $(SBCL) --noinform --non-interactive --no-sysinit --no-userinit
 
-.PHONY: all deps test tokens vocab expand clean distclean
+.PHONY: all deps test tokens vocab expand events clean distclean
 
 all: test
 
@@ -25,6 +25,10 @@ vocab: deps
 # Expand a spec file as a TeX job: make expand FILE=chap-1 [LINES=10-20]
 expand: deps
 	@FILE='$(FILE)' LINES='$(LINES)' $(LISP) --load tools/expand.lisp
+
+# The events of a spec file's lines: make events FILE=chap-1 [LINES=10-20]
+events: deps
+	@FILE='$(FILE)' LINES='$(LINES)' EVENTS=1 $(LISP) --load tools/expand.lisp
 
 # Remove build outputs (fasls).
 clean:

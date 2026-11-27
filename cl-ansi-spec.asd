@@ -33,6 +33,7 @@ Lisp draft standard (dpANS3)."
                              (:file "primitives")
                              (:file "nest")
                              (:file "expander")
+                             (:file "nodes")
                              (:file "show")
                              (:file "macro")
                              (:file "expandable")
@@ -50,7 +51,8 @@ Lisp draft standard (dpANS3)."
                              (:file "main-control")
                              (:file "log")
                              (:file "messages")
-                             (:file "streams")))
+                             (:file "streams")
+                             (:file "list-commands")))
                (:module "inventory"
                 :serial t
                 :components ((:file "package")
@@ -80,7 +82,8 @@ Lisp draft standard (dpANS3)."
                              (:file "conditionals")
                              (:file "main-control")
                              (:file "assignments")
-                             (:file "streams")))
+                             (:file "streams")
+                             (:file "events")))
                (:file "inventory"))
   :perform (test-op (operation component)
              (declare (ignore operation component))
