@@ -62,5 +62,8 @@
    #:*fonts* #:font-entry #:register-handler #:*layout-codes* #:*ligatures* #:font-file #:font-class
    #:convert-text #:install-text-handlers #:*plain-text-containers*
    #:plain-text-container-p
+   ;; Syntax (build-bnf.lisp)
+   #:install-bnf-handlers #:*bnf-containers* #:*bnf-leaves* #:*bnf-marks*
+   #:*bnf-glyphs* #:bnf-rule-name #:bnf-rule-definition
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))

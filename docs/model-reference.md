@@ -697,7 +697,14 @@ Categories: `:block`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The non-terminal defined. |
-| `definition` | inline list | yes | The right side, with its notation and line breaks. |
+| `definition` | inline list | yes | The right side, with its notation and line breaks; the name and the glyphs the notation macros typeset (brackets, parentheses, stars) are not repeated in it. |
+
+Example:
+
+```lisp
+(:bnf-rule :name "wholevar" :definition
+ ((:bnf-bracketed :content ("&whole var"))))
+```
 
 ### Node kind `:bnf-break`
 
@@ -706,6 +713,12 @@ A line break within the right side of a BNF rule: \CR.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-break)
+```
 
 ### Node kind `:bnf-optional`
 
@@ -718,6 +731,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The optional part. |
 
+Example:
+
+```lisp
+(:bnf-optional :content ("supplied-p-parameter"))
+```
+
 ### Node kind `:bnf-zero-or-more`
 
 What may appear any number of times, starred: \star.
@@ -727,6 +746,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What repeats. |
+
+Example:
+
+```lisp
+(:bnf-zero-or-more :content ((:bnf-group :content ("var"))))
+```
 
 ### Node kind `:bnf-one-or-more`
 
@@ -738,6 +763,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | What repeats. |
 
+Example:
+
+```lisp
+(:bnf-one-or-more :content ("var"))
+```
+
 ### Node kind `:bnf-repeat-previous`
 
 A plus alone: what precedes appears one or more times (\prevplus,
@@ -746,6 +777,12 @@ after a group split over lines).
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-repeat-previous)
+```
 
 ### Node kind `:bnf-group`
 
@@ -758,6 +795,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The group's content. |
 
+Example:
+
+```lisp
+(:bnf-group :content ("var"))
+```
+
 ### Node kind `:bnf-parenthesized`
 
 Its content in literal parentheses: \paren, or \lparen … \rparen.
@@ -767,6 +810,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What the parentheses hold. |
+
+Example:
+
+```lisp
+(:bnf-parenthesized :content ("keyword-name var"))
+```
 
 ### Node kind `:bnf-bracketed`
 
@@ -779,6 +828,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | What the brackets hold. |
 
+Example:
+
+```lisp
+(:bnf-bracketed :content ("&rest var"))
+```
+
 ### Node kind `:bnf-interleave`
 
 Alternatives in any order, each at most once: \interleave, or
@@ -790,6 +845,14 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The alternatives. |
 
+Example:
+
+```lisp
+(:bnf-interleave :content
+ ((:bnf-required :content ("A")) " " (:bnf-required :content ("B"))
+  " B"))
+```
+
 ### Node kind `:bnf-required`
 
 Within an interleaving, what must appear exactly once: \one.
@@ -799,6 +862,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What is required. |
+
+Example:
+
+```lisp
+(:bnf-required :content ("A"))
+```
 
 ### Node kind `:bnf-indirection`
 
@@ -810,6 +879,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The non-terminal. |
 
+Example:
+
+```lisp
+(:bnf-indirection :name "pattern")
+```
+
 ### Node kind `:bnf-caret`
 
 The caret character `^' of a syntax description: \hat.
@@ -817,6 +892,12 @@ The caret character `^' of a syntax description: \hat.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-caret)
+```
 
 ### Node kind `:angle-name`
 
@@ -828,6 +909,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The name, e.g. "Newline". |
+
+Example:
+
+```lisp
+(:angle-name :name "Newline")
+```
 
 ## Math
 

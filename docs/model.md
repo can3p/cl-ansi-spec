@@ -374,7 +374,29 @@ events into strings, and font runs into inlines.
 
 ### Syntax
 
-*Step 3.15.* Not written yet.
+*Step 3.15* (`src/model/build-bnf.lisp`).  The BNF notation is built
+from the begin/end pairs of the vocabulary: a macro with an argument and
+its opening and closing forms (`\lbrac` … `\rbrac`) report the same
+`:begin`/`:end` of one key, so the model does not tell them apart.
+
+- `:bnf-rule` (`\auxbnf`): `name` is the first argument; `definition` is
+  what the rule typeset after it, without the leading `name::`.
+- `:bnf-optional`, `:bnf-zero-or-more`, `:bnf-group`,
+  `:bnf-parenthesized`, `:bnf-bracketed`, `:bnf-required` and
+  `:bnf-one-or-more` hold their `content`.  The glyphs a macro typesets
+  as text (`[ ]`, `( )`, a trailing `*`, `*bnf-glyphs*`) are removed from
+  the content, since the node says it; braces and plus signs are math
+  characters and never were text.
+- `:bnf-interleave` likewise.  `\interleave` calls `\begininterleave`, so
+  an interleaving that begins with no argument right inside one that has
+  no content yet is the same one, not a nested node.
+- `:bnf-break` (`\CR`) and `:bnf-repeat-previous` (`\prevplus`) are leaf
+  nodes, as are `:bnf-caret` (`\hat`; what it draws is dropped),
+  `:angle-name` (`\ang`, `name`) and `:bnf-indirection` (`\down`, `name`).
+- Not done here: the `\param` that follows a `\down` is a separate inline
+  (inlines), so the parameter's name appears twice until the two are
+  merged; the rule's alignment cells belong to tables and figures, and an
+  unhandled alignment event is reported, not dropped silently.
 
 ### Math
 
