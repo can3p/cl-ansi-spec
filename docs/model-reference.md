@@ -397,6 +397,12 @@ Categories: `:inline`.
 | `sense` | integer | no | The glossary sense meant, from the \meaning that follows; absent when none does. |
 | `target` | reference (target `:glossary`) | no | The glossary entry of the term; absent while unresolved. |
 
+Example:
+
+```lisp
+(:term-ref :text "dotted lists" :target (:glossary "dotted list"))
+```
+
 ### Node kind `:operator-ref`
 
 A reference to a defined name: \clref and its wrappers.
@@ -409,6 +415,12 @@ Categories: `:inline`.
 | `via` | enumeration `reference-kind` | yes | The macro the reference was written with. |
 | `target` | reference (target `:entry`) | no | The dictionary entry of the name; absent while unresolved. |
 
+Example:
+
+```lisp
+(:operator-ref :text "endp" :via :function :target (:entry "endp"))
+```
+
 ### Node kind `:section-ref`
 
 A reference to a section or a chapter: \secref.
@@ -419,6 +431,13 @@ Categories: `:inline`.
 |---|---|---|---|
 | `label` | string | yes | The label referred to, as written after \secref. |
 | `target` | reference (target `:section`, `:chapter`) | no | The section or chapter of the label; absent while unresolved. |
+
+Example:
+
+```lisp
+(:section-ref :label "OrdinaryLambdaLists" :target
+ (:section "OrdinaryLambdaLists"))
+```
 
 ### Node kind `:figure-ref`
 
@@ -431,6 +450,12 @@ Categories: `:inline`.
 | `label` | string | yes | The label referred to, as written after \figref. |
 | `target` | reference (target `:figure`) | no | The figure of the label; absent while unresolved. |
 
+Example:
+
+```lisp
+(:figure-ref :label "FigConses" :target (:figure "14-1"))
+```
+
 ### Node kind `:this-section`
 
 The words `this section': \thissection, \Thissection, a reference to
@@ -441,6 +466,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `target` | reference (target `:section`) | no | The section the words are in; absent while unresolved. |
+
+Example:
+
+```lisp
+(:this-section :target (:section "Conses"))
+```
 
 ### Node kind `:next-figure`
 
@@ -453,6 +484,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `target` | reference (target `:figure`) | no | The next figure; absent while unresolved. |
 
+Example:
+
+```lisp
+(:next-figure :target (:figure "14-1"))
+```
+
 ### Node kind `:param`
 
 A parameter of the operator described: \param.
@@ -462,6 +499,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The parameter's name. |
+
+Example:
+
+```lisp
+(:param :name "list")
+```
 
 ### Node kind `:metavariable`
 
@@ -473,6 +516,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The metavariable's name. |
 
+Example:
+
+```lisp
+(:metavariable :name "var")
+```
+
 ### Node kind `:format-directive`
 
 A format directive: \formatOp, \formatdirective.
@@ -482,6 +531,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The directive after its tilde, e.g. "A". |
+
+Example:
+
+```lisp
+(:format-directive :name "A")
+```
 
 ### Node kind `:lambda-list-keyword`
 
@@ -494,6 +549,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The keyword with its ampersand, e.g. "&optional". |
 
+Example:
+
+```lisp
+(:lambda-list-keyword :name "&optional")
+```
+
 ### Node kind `:code`
 
 Code within text: \f, \ff, and text in the typewriter font outside
@@ -505,6 +566,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The code's text. |
 
+Example:
+
+```lisp
+(:code :content ("(endp nil)"))
+```
+
 ### Node kind `:emphasis`
 
 Emphasis: \i, \j, and italic text outside vocabulary entries.
@@ -514,6 +581,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | The emphasised text. |
+
+Example:
+
+```lisp
+(:emphasis :content ("true"))
+```
 
 ### Node kind `:strong`
 
@@ -525,6 +598,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The text set in bold. |
 
+Example:
+
+```lisp
+(:strong :content ("Examples:"))
+```
+
 ### Node kind `:evaluates-to`
 
 The arrow `evaluates to' of an example: \EV.
@@ -532,6 +611,12 @@ The arrow `evaluates to' of an example: \EV.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:evaluates-to)
+```
 
 ### Node kind `:may-evaluate-to`
 
@@ -542,6 +627,12 @@ Categories: `:inline`.
 
 _No fields._
 
+Example:
+
+```lisp
+(:may-evaluate-to)
+```
+
 ### Node kind `:does-not-evaluate-to`
 
 The arrow `does not evaluate to' of an example: \NV.
@@ -549,6 +640,12 @@ The arrow `does not evaluate to' of an example: \NV.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:does-not-evaluate-to)
+```
 
 ### Node kind `:equivalent`
 
@@ -558,6 +655,12 @@ Categories: `:inline`.
 
 _No fields._
 
+Example:
+
+```lisp
+(:equivalent)
+```
+
 ### Node kind `:output`
 
 The triangle that marks the output of an example, which follows it:
@@ -566,6 +669,12 @@ The triangle that marks the output of an example, which follows it:
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:output)
+```
 
 ### Node kind `:input`
 
@@ -577,6 +686,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The input. |
 
+Example:
+
+```lisp
+(:input :content ("(read)"))
+```
+
 ### Node kind `:citation`
 
 The title of a work the standard cites: \CLtL, \CLtLTwo and the
@@ -587,6 +702,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | The title as set. |
+
+Example:
+
+```lisp
+(:citation :content ("CLtL"))
+```
 
 ### Node kind `:index-entry`
 
@@ -600,6 +721,12 @@ Categories: `:inline`, `:block`.
 | `index-kind` | enumeration `index-kind` | yes | What is indexed. |
 | `text` | string | yes | The indexed text, as written. |
 
+Example:
+
+```lisp
+(:index-entry :index-kind :ref :text "endp")
+```
+
 ### Node kind `:issue-start`
 
 Where the text an X3J13 issue brought begins: \issue.  Issues are
@@ -611,6 +738,12 @@ Categories: `:inline`, `:block`.
 |---|---|---|---|
 | `name` | string | yes | The issue's name, e.g. "DOTTED-LIST-ARGUMENTS:CLARIFY". |
 
+Example:
+
+```lisp
+(:issue-start :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
+```
+
 ### Node kind `:issue-end`
 
 Where the text an X3J13 issue brought ends: \endissue, the one end
@@ -621,6 +754,12 @@ Categories: `:inline`, `:block`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The issue's name. |
+
+Example:
+
+```lisp
+(:issue-end :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
+```
 
 ### Enumeration `reference-kind`
 
@@ -751,7 +890,14 @@ Categories: `:block`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The non-terminal defined. |
-| `definition` | inline list | yes | The right side, with its notation and line breaks. |
+| `definition` | inline list | yes | The right side, with its notation and line breaks; the name and the glyphs the notation macros typeset (brackets, parentheses, stars) are not repeated in it. |
+
+Example:
+
+```lisp
+(:bnf-rule :name "wholevar" :definition
+ ((:bnf-bracketed :content ("&whole var"))))
+```
 
 ### Node kind `:bnf-break`
 
@@ -760,6 +906,12 @@ A line break within the right side of a BNF rule: \CR.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-break)
+```
 
 ### Node kind `:bnf-optional`
 
@@ -772,6 +924,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The optional part. |
 
+Example:
+
+```lisp
+(:bnf-optional :content ("supplied-p-parameter"))
+```
+
 ### Node kind `:bnf-zero-or-more`
 
 What may appear any number of times, starred: \star.
@@ -781,6 +939,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What repeats. |
+
+Example:
+
+```lisp
+(:bnf-zero-or-more :content ((:bnf-group :content ("var"))))
+```
 
 ### Node kind `:bnf-one-or-more`
 
@@ -792,6 +956,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | What repeats. |
 
+Example:
+
+```lisp
+(:bnf-one-or-more :content ("var"))
+```
+
 ### Node kind `:bnf-repeat-previous`
 
 A plus alone: what precedes appears one or more times (\prevplus,
@@ -800,6 +970,12 @@ after a group split over lines).
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-repeat-previous)
+```
 
 ### Node kind `:bnf-group`
 
@@ -812,6 +988,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The group's content. |
 
+Example:
+
+```lisp
+(:bnf-group :content ("var"))
+```
+
 ### Node kind `:bnf-parenthesized`
 
 Its content in literal parentheses: \paren, or \lparen … \rparen.
@@ -821,6 +1003,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What the parentheses hold. |
+
+Example:
+
+```lisp
+(:bnf-parenthesized :content ("keyword-name var"))
+```
 
 ### Node kind `:bnf-bracketed`
 
@@ -833,6 +1021,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | What the brackets hold. |
 
+Example:
+
+```lisp
+(:bnf-bracketed :content ("&rest var"))
+```
+
 ### Node kind `:bnf-interleave`
 
 Alternatives in any order, each at most once: \interleave, or
@@ -844,6 +1038,14 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The alternatives. |
 
+Example:
+
+```lisp
+(:bnf-interleave :content
+ ((:bnf-required :content ("A")) " " (:bnf-required :content ("B"))
+  " B"))
+```
+
 ### Node kind `:bnf-required`
 
 Within an interleaving, what must appear exactly once: \one.
@@ -853,6 +1055,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What is required. |
+
+Example:
+
+```lisp
+(:bnf-required :content ("A"))
+```
 
 ### Node kind `:bnf-indirection`
 
@@ -864,6 +1072,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The non-terminal. |
 
+Example:
+
+```lisp
+(:bnf-indirection :name "pattern")
+```
+
 ### Node kind `:bnf-caret`
 
 The caret character `^' of a syntax description: \hat.
@@ -871,6 +1085,12 @@ The caret character `^' of a syntax description: \hat.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-caret)
+```
 
 ### Node kind `:angle-name`
 
@@ -882,6 +1102,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The name, e.g. "Newline". |
+
+Example:
+
+```lisp
+(:angle-name :name "Newline")
+```
 
 ## Math
 

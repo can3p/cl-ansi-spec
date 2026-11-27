@@ -3701,17 +3701,26 @@
         "text": {
           "type": "string",
           "title": "text",
-          "description": "The term as written, inflected (\"dotted lists\")."
+          "description": "The term as written, inflected (\"dotted lists\").",
+          "examples": [
+            "dotted lists"
+          ]
         },
         "defining": {
           "type": "boolean",
           "title": "defining",
-          "description": "True for \\newterm and \\newtermidx: the use defines the term."
+          "description": "True for \\newterm and \\newtermidx: the use defines the term.",
+          "examples": [
+            true
+          ]
         },
         "sense": {
           "type": "integer",
           "title": "sense",
-          "description": "The glossary sense meant, from the \\meaning that follows;\nabsent when none does."
+          "description": "The glossary sense meant, from the \\meaning that follows;\nabsent when none does.",
+          "examples": [
+            1
+          ]
         },
         "target": {
           "oneOf": [
@@ -3723,7 +3732,13 @@
             }
           ],
           "title": "target",
-          "description": "The glossary entry of the term; absent while unresolved."
+          "description": "The glossary entry of the term; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "glossary",
+              "id": "dotted list"
+            }
+          ]
         }
       },
       "required": [
@@ -3732,7 +3747,17 @@
         "text",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "term-ref",
+          "text": "dotted lists",
+          "target": {
+            "kind": "glossary",
+            "id": "dotted list"
+          }
+        }
+      ]
     },
     "operator-ref": {
       "type": "object",
@@ -3749,12 +3774,18 @@
         "text": {
           "type": "string",
           "title": "text",
-          "description": "The name as the reference sets it."
+          "description": "The name as the reference sets it.",
+          "examples": [
+            "endp"
+          ]
         },
         "via": {
           "$ref": "#/$defs/enum-reference-kind",
           "title": "via",
-          "description": "The macro the reference was written with."
+          "description": "The macro the reference was written with.",
+          "examples": [
+            "function"
+          ]
         },
         "target": {
           "oneOf": [
@@ -3766,7 +3797,13 @@
             }
           ],
           "title": "target",
-          "description": "The dictionary entry of the name; absent while unresolved."
+          "description": "The dictionary entry of the name; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "entry",
+              "id": "endp"
+            }
+          ]
         }
       },
       "required": [
@@ -3776,7 +3813,18 @@
         "via",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "operator-ref",
+          "text": "endp",
+          "via": "function",
+          "target": {
+            "kind": "entry",
+            "id": "endp"
+          }
+        }
+      ]
     },
     "section-ref": {
       "type": "object",
@@ -3793,7 +3841,10 @@
         "label": {
           "type": "string",
           "title": "label",
-          "description": "The label referred to, as written after \\secref."
+          "description": "The label referred to, as written after \\secref.",
+          "examples": [
+            "OrdinaryLambdaLists"
+          ]
         },
         "target": {
           "oneOf": [
@@ -3808,7 +3859,13 @@
             }
           ],
           "title": "target",
-          "description": "The section or chapter of the label; absent while unresolved."
+          "description": "The section or chapter of the label; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "section",
+              "id": "OrdinaryLambdaLists"
+            }
+          ]
         }
       },
       "required": [
@@ -3817,7 +3874,17 @@
         "label",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "section-ref",
+          "label": "OrdinaryLambdaLists",
+          "target": {
+            "kind": "section",
+            "id": "OrdinaryLambdaLists"
+          }
+        }
+      ]
     },
     "figure-ref": {
       "type": "object",
@@ -3834,7 +3901,10 @@
         "label": {
           "type": "string",
           "title": "label",
-          "description": "The label referred to, as written after \\figref."
+          "description": "The label referred to, as written after \\figref.",
+          "examples": [
+            "FigConses"
+          ]
         },
         "target": {
           "oneOf": [
@@ -3846,7 +3916,13 @@
             }
           ],
           "title": "target",
-          "description": "The figure of the label; absent while unresolved."
+          "description": "The figure of the label; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "figure",
+              "id": "14-1"
+            }
+          ]
         }
       },
       "required": [
@@ -3855,7 +3931,17 @@
         "label",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "figure-ref",
+          "label": "FigConses",
+          "target": {
+            "kind": "figure",
+            "id": "14-1"
+          }
+        }
+      ]
     },
     "this-section": {
       "type": "object",
@@ -3879,7 +3965,13 @@
             }
           ],
           "title": "target",
-          "description": "The section the words are in; absent while unresolved."
+          "description": "The section the words are in; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "section",
+              "id": "Conses"
+            }
+          ]
         }
       },
       "required": [
@@ -3887,7 +3979,16 @@
         "span",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "this-section",
+          "target": {
+            "kind": "section",
+            "id": "Conses"
+          }
+        }
+      ]
     },
     "next-figure": {
       "type": "object",
@@ -3911,7 +4012,13 @@
             }
           ],
           "title": "target",
-          "description": "The next figure; absent while unresolved."
+          "description": "The next figure; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "figure",
+              "id": "14-1"
+            }
+          ]
         }
       },
       "required": [
@@ -3919,7 +4026,16 @@
         "span",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "next-figure",
+          "target": {
+            "kind": "figure",
+            "id": "14-1"
+          }
+        }
+      ]
     },
     "param": {
       "type": "object",
@@ -3936,7 +4052,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The parameter's name."
+          "description": "The parameter's name.",
+          "examples": [
+            "list"
+          ]
         }
       },
       "required": [
@@ -3944,7 +4063,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "param",
+          "name": "list"
+        }
+      ]
     },
     "metavariable": {
       "type": "object",
@@ -3961,7 +4086,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The metavariable's name."
+          "description": "The metavariable's name.",
+          "examples": [
+            "var"
+          ]
         }
       },
       "required": [
@@ -3969,7 +4097,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "metavariable",
+          "name": "var"
+        }
+      ]
     },
     "format-directive": {
       "type": "object",
@@ -3986,7 +4120,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The directive after its tilde, e.g. \"A\"."
+          "description": "The directive after its tilde, e.g. \"A\".",
+          "examples": [
+            "A"
+          ]
         }
       },
       "required": [
@@ -3994,7 +4131,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "format-directive",
+          "name": "A"
+        }
+      ]
     },
     "lambda-list-keyword": {
       "type": "object",
@@ -4011,7 +4154,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The keyword with its ampersand, e.g. \"&optional\"."
+          "description": "The keyword with its ampersand, e.g. \"&optional\".",
+          "examples": [
+            "&optional"
+          ]
         }
       },
       "required": [
@@ -4019,7 +4165,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "lambda-list-keyword",
+          "name": "&optional"
+        }
+      ]
     },
     "code": {
       "type": "object",
@@ -4160,7 +4312,15 @@
             ]
           },
           "title": "content",
-          "description": "The code's text."
+          "description": "The code's text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "(endp nil)"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4168,7 +4328,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "code",
+          "content": [
+            {
+              "kind": "text",
+              "text": "(endp nil)"
+            }
+          ]
+        }
+      ]
     },
     "emphasis": {
       "type": "object",
@@ -4309,7 +4480,15 @@
             ]
           },
           "title": "content",
-          "description": "The emphasised text."
+          "description": "The emphasised text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "true"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4317,7 +4496,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "emphasis",
+          "content": [
+            {
+              "kind": "text",
+              "text": "true"
+            }
+          ]
+        }
+      ]
     },
     "strong": {
       "type": "object",
@@ -4458,7 +4648,15 @@
             ]
           },
           "title": "content",
-          "description": "The text set in bold."
+          "description": "The text set in bold.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Examples:"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4466,7 +4664,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "strong",
+          "content": [
+            {
+              "kind": "text",
+              "text": "Examples:"
+            }
+          ]
+        }
+      ]
     },
     "evaluates-to": {
       "type": "object",
@@ -4485,7 +4694,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "evaluates-to"
+        }
+      ]
     },
     "may-evaluate-to": {
       "type": "object",
@@ -4504,7 +4718,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "may-evaluate-to"
+        }
+      ]
     },
     "does-not-evaluate-to": {
       "type": "object",
@@ -4523,7 +4742,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "does-not-evaluate-to"
+        }
+      ]
     },
     "equivalent": {
       "type": "object",
@@ -4542,7 +4766,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "equivalent"
+        }
+      ]
     },
     "output": {
       "type": "object",
@@ -4561,7 +4790,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "output"
+        }
+      ]
     },
     "input": {
       "type": "object",
@@ -4702,7 +4936,15 @@
             ]
           },
           "title": "content",
-          "description": "The input."
+          "description": "The input.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "(read)"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4710,7 +4952,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "input",
+          "content": [
+            {
+              "kind": "text",
+              "text": "(read)"
+            }
+          ]
+        }
+      ]
     },
     "citation": {
       "type": "object",
@@ -4851,7 +5104,15 @@
             ]
           },
           "title": "content",
-          "description": "The title as set."
+          "description": "The title as set.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "CLtL"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4859,7 +5120,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "citation",
+          "content": [
+            {
+              "kind": "text",
+              "text": "CLtL"
+            }
+          ]
+        }
+      ]
     },
     "index-entry": {
       "type": "object",
@@ -4876,12 +5148,18 @@
         "index-kind": {
           "$ref": "#/$defs/enum-index-kind",
           "title": "index-kind",
-          "description": "What is indexed."
+          "description": "What is indexed.",
+          "examples": [
+            "ref"
+          ]
         },
         "text": {
           "type": "string",
           "title": "text",
-          "description": "The indexed text, as written."
+          "description": "The indexed text, as written.",
+          "examples": [
+            "endp"
+          ]
         }
       },
       "required": [
@@ -4890,7 +5168,14 @@
         "index-kind",
         "text"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "index-entry",
+          "index-kind": "ref",
+          "text": "endp"
+        }
+      ]
     },
     "issue-start": {
       "type": "object",
@@ -4907,7 +5192,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The issue's name, e.g. \"DOTTED-LIST-ARGUMENTS:CLARIFY\"."
+          "description": "The issue's name, e.g. \"DOTTED-LIST-ARGUMENTS:CLARIFY\".",
+          "examples": [
+            "DOTTED-LIST-ARGUMENTS:CLARIFY"
+          ]
         }
       },
       "required": [
@@ -4915,7 +5203,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "issue-start",
+          "name": "DOTTED-LIST-ARGUMENTS:CLARIFY"
+        }
+      ]
     },
     "issue-end": {
       "type": "object",
@@ -4932,7 +5226,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The issue's name."
+          "description": "The issue's name.",
+          "examples": [
+            "DOTTED-LIST-ARGUMENTS:CLARIFY"
+          ]
         }
       },
       "required": [
@@ -4940,7 +5237,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "issue-end",
+          "name": "DOTTED-LIST-ARGUMENTS:CLARIFY"
+        }
+      ]
     },
     "glossary-group": {
       "type": "object",
@@ -5502,7 +5805,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The non-terminal defined."
+          "description": "The non-terminal defined.",
+          "examples": [
+            "wholevar"
+          ]
         },
         "definition": {
           "type": "array",
@@ -5631,7 +5937,20 @@
             ]
           },
           "title": "definition",
-          "description": "The right side, with its notation and line breaks."
+          "description": "The right side, with its notation and line breaks; the name and\nthe glyphs the notation macros typeset (brackets, parentheses, stars) are\nnot repeated in it.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-bracketed",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "&whole var"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5640,7 +5959,24 @@
         "name",
         "definition"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-rule",
+          "name": "wholevar",
+          "definition": [
+            {
+              "kind": "bnf-bracketed",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "&whole var"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "bnf-break": {
       "type": "object",
@@ -5659,7 +5995,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-break"
+        }
+      ]
     },
     "bnf-optional": {
       "type": "object",
@@ -5800,7 +6141,15 @@
             ]
           },
           "title": "content",
-          "description": "The optional part."
+          "description": "The optional part.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "supplied-p-parameter"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5808,7 +6157,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-optional",
+          "content": [
+            {
+              "kind": "text",
+              "text": "supplied-p-parameter"
+            }
+          ]
+        }
+      ]
     },
     "bnf-zero-or-more": {
       "type": "object",
@@ -5949,7 +6309,20 @@
             ]
           },
           "title": "content",
-          "description": "What repeats."
+          "description": "What repeats.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-group",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "var"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5957,7 +6330,23 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-zero-or-more",
+          "content": [
+            {
+              "kind": "bnf-group",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "var"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "bnf-one-or-more": {
       "type": "object",
@@ -6098,7 +6487,15 @@
             ]
           },
           "title": "content",
-          "description": "What repeats."
+          "description": "What repeats.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6106,7 +6503,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-one-or-more",
+          "content": [
+            {
+              "kind": "text",
+              "text": "var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-repeat-previous": {
       "type": "object",
@@ -6125,7 +6533,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-repeat-previous"
+        }
+      ]
     },
     "bnf-group": {
       "type": "object",
@@ -6266,7 +6679,15 @@
             ]
           },
           "title": "content",
-          "description": "The group's content."
+          "description": "The group's content.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6274,7 +6695,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-group",
+          "content": [
+            {
+              "kind": "text",
+              "text": "var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-parenthesized": {
       "type": "object",
@@ -6415,7 +6847,15 @@
             ]
           },
           "title": "content",
-          "description": "What the parentheses hold."
+          "description": "What the parentheses hold.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "keyword-name var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6423,7 +6863,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-parenthesized",
+          "content": [
+            {
+              "kind": "text",
+              "text": "keyword-name var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-bracketed": {
       "type": "object",
@@ -6564,7 +7015,15 @@
             ]
           },
           "title": "content",
-          "description": "What the brackets hold."
+          "description": "What the brackets hold.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "&rest var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6572,7 +7031,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-bracketed",
+          "content": [
+            {
+              "kind": "text",
+              "text": "&rest var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-interleave": {
       "type": "object",
@@ -6713,7 +7183,24 @@
             ]
           },
           "title": "content",
-          "description": "The alternatives."
+          "description": "The alternatives.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-required",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "A"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": " B"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6721,7 +7208,40 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-interleave",
+          "content": [
+            {
+              "kind": "bnf-required",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "A"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "bnf-required",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "B"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " B"
+            }
+          ]
+        }
+      ]
     },
     "bnf-required": {
       "type": "object",
@@ -6862,7 +7382,15 @@
             ]
           },
           "title": "content",
-          "description": "What is required."
+          "description": "What is required.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "A"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6870,7 +7398,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-required",
+          "content": [
+            {
+              "kind": "text",
+              "text": "A"
+            }
+          ]
+        }
+      ]
     },
     "bnf-indirection": {
       "type": "object",
@@ -6887,7 +7426,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The non-terminal."
+          "description": "The non-terminal.",
+          "examples": [
+            "pattern"
+          ]
         }
       },
       "required": [
@@ -6895,7 +7437,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-indirection",
+          "name": "pattern"
+        }
+      ]
     },
     "bnf-caret": {
       "type": "object",
@@ -6914,7 +7462,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-caret"
+        }
+      ]
     },
     "angle-name": {
       "type": "object",
@@ -6931,7 +7484,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The name, e.g. \"Newline\"."
+          "description": "The name, e.g. \"Newline\".",
+          "examples": [
+            "Newline"
+          ]
         }
       },
       "required": [
@@ -6939,7 +7495,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "angle-name",
+          "name": "Newline"
+        }
+      ]
     },
     "math": {
       "type": "object",
