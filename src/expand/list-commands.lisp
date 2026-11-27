@@ -1,10 +1,11 @@
 ;;;; src/expand/list-commands.lisp
 ;;;;
 ;;;; The commands that append simple nodes to the current list (TeX: The
-;;;; Program, §§1034-1044, 1056-1061, 1103-1113): characters (TeX's main
-;;;; loop without ligatures or kerns, which need metrics), interword
-;;;; spaces, glue, kerns, penalties, rules, the italic correction, and the
-;;;; commands that remove the last node (\unskip, \unkern, \unpenalty).
+;;;; Program, §§1034-1044, 1056-1061, 1101, 1103-1113): characters (TeX's
+;;;; main loop without ligatures or kerns, which need metrics), interword
+;;;; spaces, glue, kerns, penalties, rules, the italic correction, the
+;;;; commands that remove the last node (\unskip, \unkern, \unpenalty)
+;;;; and marks.
 ;;;; Math characters and math glue are math's (step 9d).
 
 (in-package #:cl-ansi-spec/expand)
@@ -53,8 +54,10 @@ from the paragraph's language so far."
 
 (defun text-continues-p (node style span)
   "True when a character of STYLE read at SPAN extends the :TEXT NODE:
-same font, and both spans absent or in the same file, in order."
+same font, both spans absent or in the same file, in order, and NODE not
+replayed from a box (\\unhbox)."
   (and (eq (node-kind node) :text)
+       (null (node-via node))
        (eq (getf (node-properties node) :style) style)
        (let ((old (node-span node)))
          (if (and old span)
@@ -71,7 +74,7 @@ which extends the text node that ends the list when it can."
     (fix-language expander span))
   (let* ((list (current-list expander))
          (style (font-style-name (current-font (expander-state expander))))
-         (last (and (list-state-last-node list) (first (list-state-contents list))))
+         (last (last-node list))
          (char (code-char code)))
     (if (and last (text-continues-p last style span))
         (progn
@@ -244,3 +247,13 @@ height and depth, each a dimension in sp or :RUNNING."
              (report-illegal-case expander token meaning)))
           ((and last (eq (car last) kind))
            (remove-last-node list)))))
+
+;;; Marks (§1101)
+
+(define-command "mark" (expander token meaning)
+  ;; make_mark: the text is expanded as \edef's body is.
+  (let ((tokens (scan-toks expander :xpand t
+                                    :warning-index (and (cs-token-p token)
+                                                        (cs-token-control-sequence token)))))
+    (append-node expander (make-node :tex-mark :properties (list :tokens tokens)
+                                               :value tokens :span (token-span token)))))

@@ -18,9 +18,11 @@
 
 (defstruct (node (:constructor make-node
                      (kind &key properties value (children '() composite)
-                             span end-span)))
+                             span end-span))
+                 (:copier nil))
   "A node of KIND (a keyword: :TEXT, :SPACE, :GLUE, :KERN, :PENALTY,
-:RULE, :INDENT, :LANGUAGE, :PARAGRAPH, :MATH, :WRITE, ...) with its event
+:RULE, :INDENT, :LANGUAGE, :PARAGRAPH, :BOX, :LEADERS, :TEX-MARK, :MATH,
+:WRITE, ...) with its event
 PROPERTIES (a plist), its VALUE (see the file header) and its SPAN.  A
 COMPOSITE node holds CHILDREN, a list of nodes oldest first, and flattens
 to (:begin KIND ...), its children's events and (:end KIND), the latter
@@ -73,6 +75,11 @@ unless given.  It is signalled as a JOB-OUTPUT."
 (defun remove-last-node (list)
   "Remove the last node of LIST and return it."
   (pop (list-state-contents list)))
+
+(defun last-node (list)
+  "The last node of LIST itself, or NIL when LIST-STATE-LAST-NODE says it
+is empty."
+  (and (list-state-last-node list) (first (list-state-contents list))))
 
 ;;; The page builder (§§994-996)
 

@@ -243,3 +243,189 @@ ERRORS and, when given, its LOG (as LOG-OF shows it)."
   ;; Inside a box the list is the box's own.
   (check-events "\\vbox{\\penalty5 \\unpenalty}"
                 ((:begin :box :kind :vbox :command "vbox") (:end :box))))
+
+;;; Boxes: shifts, replays, unboxing, \lastbox, marks and leaders (§§977-979,
+;;; 1071-1110)
+
+(define-test shifted-boxes
+  :parent events
+  (check-events "\\noindent\\raise2pt\\hbox{}\\lower1pt\\hbox{}\\par"
+                ((:glue :glue "0.0pt" :command "parskip") (:begin :paragraph)
+                 (:begin :box :kind :hbox :command "hbox" :shift "-2.0pt") (:end :box)
+                 (:begin :box :kind :hbox :command "hbox" :shift "1.0pt") (:end :box)
+                 (:end :paragraph)))
+  (check-events "\\moveleft3pt\\vbox{}\\moveright0pt\\hbox{}\\setbox1\\hbox{}\\moveright1pt\\box1"
+                ((:begin :box :kind :vbox :command "vbox" :shift "-3.0pt") (:end :box)
+                 (:begin :box :kind :hbox :command "hbox" :shift "0.0pt") (:end :box)
+                 (:begin :box :kind :hbox :command "hbox" :shift "1.0pt") (:end :box)))
+  ;; A void box is nothing; anything but a box is read again.
+  (check-events "\\moveleft1pt\\box9" ())
+  (check-events "\\moveleft1pt\\kern2pt" ((:kern :width "2.0pt"))
+                :errors ("A <box> was supposed to be here")))
+
+(defun via-columns (text &optional (index 0))
+  "The columns of the :VIA spans of the event INDEX (the first by default)
+of the job TEXT, and the column of its :SPAN."
+  (let ((expander (make-test-expander (concatenate 'string text "\\end"))))
+    (run-job expander)
+    (let* ((event (nth index (expand:job-events expander)))
+           (plist (nthcdr (if (member (first event) '(:begin :end :text)) 2 1) event)))
+      (list (mapcar #'span-column (getf plist :via))
+            (span-column (getf plist :span))))))
+
+(define-test replayed-boxes
+  :parent events
+  ;; The box keeps the span where it was made; \box, \copy, \vsplit and
+  ;; \lastbox add theirs to its :via, newest first.
+  (is equal '((29 23) 8) (via-columns "\\setbox1\\hbox{}\\setbox2\\box1 \\copy2"))
+  (is equal '((37 23) 8) (via-columns "\\setbox1\\vbox{}\\setbox2\\vsplit1 to0pt\\box2"))
+  (is equal '((58 49 29) 8)
+      (via-columns "\\setbox1\\hbox{}\\setbox2\\vbox{\\box1\\global\\setbox3\\lastbox}\\box3"))
+  ;; A box made in place has no :via.
+  (is equal '(() 0) (via-columns "\\hbox{}")))
+
+(define-test unboxing
+  :parent events
+  (check-events "\\setbox1\\hbox{a\\kern1pt}\\noindent\\unhbox1 b\\unhbox1\\ifvoid1 c\\fi\\par"
+                ((:glue :glue "0.0pt" :command "parskip") (:begin :paragraph)
+                 (:text "a" :style "nullfont") (:kern :width "1.0pt")
+                 (:text "bc" :style "nullfont") (:end :paragraph)))
+  ;; What \unhcopy places is a copy: the register's text does not grow.
+  (check-events "\\setbox1\\hbox{a}\\unhcopy1 b\\par\\noindent\\unhcopy1\\par"
+                ((:glue :glue "0.0pt" :command "parskip") (:begin :paragraph) (:indent)
+                 (:text "a" :style "nullfont") (:text "b" :style "nullfont")
+                 (:end :paragraph)
+                 (:glue :glue "0.0pt" :command "parskip") (:begin :paragraph)
+                 (:text "a" :style "nullfont") (:end :paragraph)))
+  (check-events "\\setbox1\\vbox{\\penalty3 \\hbox{x}}\\unvcopy1\\unvbox1\\unvbox1"
+                ((:penalty :value 3) (:begin :box :kind :hbox :command "hbox")
+                 (:text "x" :style "nullfont") (:end :box)
+                 (:penalty :value 3) (:begin :box :kind :hbox :command "hbox")
+                 (:text "x" :style "nullfont") (:end :box)))
+  ;; Each spliced node gets the command's span.
+  (is equal '((23) 14) (via-columns "\\setbox1\\vbox{\\kern1pt}\\unvbox1"))
+  (is equal '((25) 14) (via-columns "\\setbox1\\hbox{a}\\noindent\\unhcopy1\\par" 2))
+  ;; A copy is deep: a box inside the copied one is the copy's own.
+  (check-events "\\setbox1\\hbox{\\hbox{a}}\\setbox2\\hbox{\\unhcopy1}\\setbox3\\copy1
+\\setbox4\\hbox{\\unhbox3 \\setbox5\\lastbox\\unhbox5 b}\\box1"
+                ((:begin :box :kind :hbox :command "hbox")
+                 (:begin :box :kind :hbox :command "hbox") (:text "a" :style "nullfont")
+                 (:end :box) (:end :box)))
+  (check-events "\\setbox1\\vbox{}\\noindent\\unhbox1\\par\\setbox1\\hbox{}\\unvbox1"
+                ((:glue :glue "0.0pt" :command "parskip"))
+                :errors ("Incompatible list can't be unboxed"
+                         "Incompatible list can't be unboxed"))
+  (check-job "\\setbox1\\hbox{}\\noindent$\\unhbox1$\\ifhbox1 y\\fi" "y"
+             :errors ("Incompatible list can't be unboxed"
+                      "Math formula deleted: Insufficient symbol fonts")))
+
+(define-test last-box
+  :parent events
+  ;; The last box of an internal vertical list or a horizontal list.
+  (check-events "\\setbox1\\vbox{\\hbox{a}\\kern1pt\\hbox{b}\\global\\setbox2\\lastbox}\\box2\\box1"
+                ((:begin :box :kind :hbox :command "hbox") (:text "b" :style "nullfont")
+                 (:end :box)
+                 (:begin :box :kind :vbox :command "vbox")
+                 (:begin :box :kind :hbox :command "hbox") (:text "a" :style "nullfont")
+                 (:end :box) (:kern :width "1.0pt") (:end :box)))
+  (check-events "\\noindent\\hbox{x}\\setbox3\\lastbox\\par\\box3"
+                ((:glue :glue "0.0pt" :command "parskip")
+                 (:begin :box :kind :hbox :command "hbox") (:text "x" :style "nullfont")
+                 (:end :box)))
+  ;; The box loses its shift.
+  (check-events "\\vbox{\\moveright1pt\\hbox{}\\global\\setbox1\\lastbox}\\box1"
+                ((:begin :box :kind :vbox :command "vbox") (:end :box)
+                 (:begin :box :kind :hbox :command "hbox") (:end :box)))
+  ;; Anything else stays; the box is void.
+  (check-events "\\vbox{\\kern1pt\\setbox1\\lastbox\\ifvoid1 \\penalty1 \\fi}"
+                ((:begin :box :kind :vbox :command "vbox") (:kern :width "1.0pt")
+                 (:penalty :value 1) (:end :box)))
+  ;; A paragraph is one line: an \hbox of its contents.
+  (check-events "\\setbox1\\vbox{\\noindent a b\\par\\global\\setbox2\\lastbox}\\box2"
+                ((:begin :box :kind :hbox :command "hbox") (:text "a" :style "nullfont")
+                 (:space) (:text "b" :style "nullfont") (:end :box)))
+  ;; Nothing to take from the page, nor in math.
+  (check-job "\\hbox{}\\setbox1\\lastbox\\ifvoid1 y\\fi" "[hbox]y"
+             :errors ("You can't use") :contexts ("`\\lastbox' in vertical mode"))
+  (check-job "\\noindent$\\setbox1\\lastbox$" ""
+             :errors ("You can't use" "Math formula deleted: Insufficient symbol fonts")
+             :contexts ("`\\lastbox' in math mode" nil)))
+
+(define-test tex-marks
+  :parent events
+  (check-events "\\count1=4 \\mark{a\\the\\count1}\\noindent\\mark{b}\\par"
+                ((:tex-mark :tokens "a4") (:glue :glue "0.0pt" :command "parskip")
+                 (:begin :paragraph) (:tex-mark :tokens "b") (:end :paragraph)))
+  ;; \vsplit's marks: those of the box's list, and those TeX's line
+  ;; breaking or an \hbox placed or moved in vertical mode moves into it
+  ;; (§§655, 1083), not those inside other boxes.
+  (check-log "\\setbox1\\vbox{\\mark{x}\\noindent a\\mark{y}\\par\\hbox{\\mark{z}}%
+\\vbox{\\mark{w}}\\moveright0pt\\hbox{\\mark{v}}}\\setbox2\\vsplit1 to 0pt
+\\message{\\splitfirstmark,\\splitbotmark}\\setbox1\\vbox{}\\setbox2\\vsplit1 to 0pt
+\\message{[\\splitfirstmark]}"
+             ((:message "x,v") (:message "[]")))
+  (check-log "\\setbox1\\vbox{\\noindent a\\mark{y}\\par\\hbox{\\mark{z}}}\\setbox2\\vsplit1 to 0pt
+\\message{\\splitfirstmark,\\splitbotmark}"
+             ((:message "y,z")))
+  (check-job "\\setbox1\\hbox{}\\setbox2\\vsplit1 to0pt" ""
+             :errors ("\\vsplit needs a \\vbox")))
+
+(define-test leaders
+  :parent events
+  (check-events "\\leaders\\hbox{.}\\vfil\\leaders\\box9\\vskip1pt"
+                ((:begin :leaders :kind :leaders :glue "0.0pt plus 1.0fil" :command "vfil")
+                 (:begin :box :kind :hbox :command "hbox") (:text "." :style "nullfont")
+                 (:end :box) (:end :leaders)
+                 (:glue :glue "1.0pt" :command "vskip")))
+  (check-events "\\noindent\\cleaders\\hrule height1pt\\relax\\hfil\\xleaders\\vrule\\hskip 2pt x\\par"
+                ((:glue :glue "0.0pt" :command "parskip") (:begin :paragraph)
+                 (:begin :leaders :kind :cleaders :glue "0.0pt plus 1.0fil" :command "hfil")
+                 (:rule :kind :hrule :width :running :height "1.0pt" :depth "0.0pt")
+                 (:end :leaders)
+                 (:begin :leaders :kind :xleaders :glue "2.0pt" :command "hskip")
+                 (:rule :kind :vrule :width "0.4pt" :height :running :depth :running)
+                 (:end :leaders)
+                 (:text "x" :style "nullfont") (:end :paragraph)))
+  ;; Leaders are glue: \lastskip reads them, \unskip and the end of a
+  ;; paragraph remove them.
+  (check-events "\\noindent\\leaders\\hrule\\hskip3pt\\message{\\the\\lastskip}\\unskip
+a\\leaders\\hrule\\hfil\\par"
+                ((:glue :glue "0.0pt" :command "parskip") (:begin :paragraph)
+                 (:text "a" :style "nullfont") (:end :paragraph))
+                :log ((:message "3.0pt")))
+  (check-events "\\leaders\\hrule\\kern1pt\\noindent\\leaders\\hrule\\vskip1pt"
+                ((:kern :width "1.0pt") (:glue :glue "0.0pt" :command "parskip")
+                 (:glue :glue "1.0pt" :command "vskip"))
+                :errors ("Leaders not followed by proper glue"
+                         "Leaders not followed by proper glue"))
+  (check-events "\\setbox1\\hbox{}\\leaders\\copy1\\vfil\\ifhbox1 \\penalty1 \\fi"
+                ((:begin :leaders :kind :leaders :glue "0.0pt plus 1.0fil" :command "vfil")
+                 (:begin :box :kind :hbox :command "hbox") (:end :box) (:end :leaders)
+                 (:penalty :value 1)))
+  (check-events "\\leaders x"
+                ((:glue :glue "0.0pt" :command "parskip") (:begin :paragraph) (:indent)
+                 (:text "x" :style "nullfont") (:end :paragraph))
+                :errors ("A <box> was supposed to be here")))
+
+(define-test dobegincom-path
+  :parent events
+  ;; setup-aux.tex:866-878, \dobegincom's body for the name CAR, with
+  ;; stand-ins for the macros it uses (plain TeX's \llap: scanning
+  ;; `0pt' expands the token after it).
+  (check-events "\\chardef\\comline=4 \\def\\incomtrue{\\let\\ifincom\\iftrue}%
+\\def\\bfsixteen{}\\def\\dospecialcomma{}\\def\\llap#1{\\hbox to0pt{\\hss#1}}\\begingroup
+\\leftskip0pc\\rightskip0pc plus10pc\\bfsixteen
+\\baselineskip 16pt
+\\dospecialcomma\\let\\break=\\ignorespaces
+\\global\\setbox1=\\vbox{\\hsize 40pc\\lowercase{CAR}}
+\\vbadness 10000
+\\setbox0=\\vsplit1 to 16pt
+\\setbox0=\\vbox{\\unvbox0\\global\\setbox3\\lastbox}
+\\global\\setbox1\\hbox{\\unhbox3\\relax\\ifdim\\ht1>0pt\\llap{, $\\ldots$}\\fi}
+\\global\\incomtrue
+\\global\\setbox\\comline\\box1
+\\endgroup
+\\ifvoid1 \\ifvoid3 \\ifincom\\penalty0 \\fi\\fi\\fi\\box\\comline"
+                ((:penalty :value 0)
+                 (:begin :box :kind :hbox :command "hbox") (:indent)
+                 (:text "car" :style "nullfont") (:end :box))))

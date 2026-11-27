@@ -96,11 +96,8 @@ needs no fonts' metrics.")
 ;;; Dispositions
 
 (defparameter *pending-event-commands*
-  '(;; Boxes (step 9b)
-    "leaders" "cleaders" "xleaders" "lower" "raise" "moveleft" "moveright"
-    "unhbox" "unhcopy" "unvbox" "unvcopy"
-    ;; The other nodes (step 9c)
-    "-" "discretionary" "accent" "insert" "vadjust" "mark" "special"
+  '(;; The other nodes (step 9c)
+    "-" "discretionary" "accent" "insert" "vadjust" "special"
     "setlanguage" "shipout" "showbox" "showlists"
     ;; Math (step 9d)
     "above" "abovewithdelims" "atop" "atopwithdelims" "delimiter"
@@ -255,7 +252,7 @@ handed on.")
              :errors ("\\vsplit needs a \\vbox"))
   (check-job "\\setbox1=x" "x" :errors ("A <box> was supposed to be here"))
   (check-job "\\setbox1\\hbox{}\\box1 \\box1 " "[hbox]")
-  (check-job "\\lastbox" "\\lastbox ")
+  (check-job "\\lastbox" "" :errors ("You can't use"))
   (check-job "\\setbox1\\vbox{}\\setbox2\\vsplit1 3pt" "" :errors ("Missing `to' inserted"))
   ;; Placing a box sets the list's space factor and depth (§§1076, 679).
   (check-job "x\\spacefactor=3 \\hbox{}\\ifnum\\spacefactor=1000 y\\fi" "x[hbox]y")

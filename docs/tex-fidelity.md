@@ -38,7 +38,9 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
   - *Shown as TeX shows them* (`\string`, `\meaning`): `print_cs` spacing,
     `\escapechar`, match characters, `\long`/`\outer` prefixes.  Without
     metrics, a font loaded `scaled` shows no size.
-  - Marks expand to nothing until boxes and `\vsplit` set them.  Tracing
+  - `\topmark`, `\firstmark` and `\botmark` expand to nothing (no page
+    is ever built); `\splitfirstmark` and `\splitbotmark` to what
+    `\vsplit` set (see Lists and nodes).  Tracing
     (`\tracingmacros` and the like) writes no log.
 - Scanning (`src/expand/`: `scan.lisp`, `internal.lisp`,
   `dimen-scan.lisp`, `toks.lisp`, `nest.lisp`), §§402-479:
@@ -186,9 +188,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     in the register; anywhere else it becomes a box node, after which
     the list's `\spacefactor` is 1000 or its `\prevdepth` the box's
     depth (`\indent` in a paragraph sets the space factor too).  `\box`,
-    `\copy` and `\vsplit` take a register's box (`\box` voids the
-    register at its own level; `\vsplit` takes the whole box, voids the
-    split marks, and gives a void box and an error for an `\hbox`).
+    `\copy`, `\vsplit` and `\lastbox` give a box that exists (`\box`
+    voids the register at its own level; see Lists and nodes).
     `$` reads the next token unexpanded: `$$` in a paragraph is a display
     (with `\everydisplay`, `\displaywidth` and `\displayindent` from
     `\parshape` or `\hangindent`/`\hangafter`), anything else inline
@@ -249,8 +250,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     becomes an event with `:text` when its stream is open, else a
     `:write` log entry with the stream number (17: the log only).
 - Lists and nodes (`src/expand/`: `nodes.lisp`, `list-commands.lisp`,
-  with `modes.lisp` and `boxes.lisp`), §§1034-1044, 1056-1061,
-  1091-1096, 1103-1113, 1376: each list of the nest keeps its nodes, as
+  with `modes.lisp` and `boxes.lisp`), §§977-979, 1034-1044, 1056-1061,
+  1071-1113, 1376: each list of the nest keeps its nodes, as
   TeX's tail_append adds them, and what TeX reads back of the last one
   (§424: `\lastpenalty`, `\lastkern`, `\lastskip`) is read from them.
   The job's events are the outer vertical list's nodes, flattened
@@ -300,8 +301,47 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     `\unkern` and `\unpenalty` are "You can't use", and so is `\unskip`
     when the page's last node was glue.
   - *Boxes* placed in a list are `:box` nodes (kind, command, spec,
-    assigned dimensions) whose children are the box's list.  The
-    deferred `\openout`, `\write` and `\closeout` are nodes of the
+    assigned dimensions) whose children are the box's list; the span is
+    where the box was made.  `\raise`/`\lower` (horizontal and math
+    modes) and `\moveleft`/`\moveright` (vertical) scan a dimension and
+    a box, placed with `:shift` (down or right positive: `\raise` and
+    `\moveleft` negate).  `\box`, `\copy`, `\vsplit` and `\lastbox`
+    add their span to the box's `:via`, newest first (it stays with the
+    box through registers).  What leaves a register for a list without
+    voiding it (`\copy`, `\unhcopy`, `\unvcopy`) is a deep copy, so a
+    list's text never grows the register's.
+  - *Unboxing* (§1110): `\unhbox`/`\unhcopy` in horizontal mode and
+    `\unvbox`/`\unvcopy` in vertical mode splice the register's nodes
+    (copies) into the current list, each with the command's span added
+    to its `:via`; a void register gives nothing; any other kind of
+    box, and math mode, are "Incompatible list can't be unboxed" and
+    the register is kept.  `\unhbox` voids it.  A text node that came
+    from a box is never extended by later characters.
+  - *`\lastbox`* (§§1080-1081) removes the last node of the current list
+    when it is a box, its shift dropped, or a paragraph, taken as the
+    `\hbox` of its contents that TeX's one line would be; else the box
+    is void.  In math mode, and from an empty outer vertical list (also
+    after build_page), it is "You can't use" and void.
+  - *`\mark{…}`* (§1101): its text expanded as `\edef`'s, a `:tex-mark`
+    node holding the tokens.  `\vsplit` (§§977-979, 1082: "Missing `to'
+    inserted"; "\vsplit needs a \vbox" for an `\hbox`, which stays)
+    takes the whole box, voiding the register, and sets
+    `\splitfirstmark`/`\splitbotmark` to the first and last marks of
+    its list, counting those that TeX's line breaking or an adjusted
+    `\hbox` (one placed or moved in vertical mode, §§655, 1083) would
+    have moved out of
+    a paragraph or box at its top level; nodes stay where they were
+    appended.  Both marks are cleared first.
+  - *Leaders* (§1078): `\leaders`, `\cleaders` and `\xleaders` scan a
+    box (or a rule), then, expanding, skip blanks and `\relax`: a glue
+    command of the mode (`\hskip` family outside vertical mode, `\vskip`
+    family inside it) makes a `:leaders` node (`:kind`, the glue, the
+    glue's command) whose child is the box or rule; anything else is
+    "Leaders not followed by proper glue", read again, the leaders
+    dropped.  A void box makes no leaders, and the glue is then plain
+    glue.  Leaders are glue for `\lastskip`, `\unskip` and a paragraph's
+    final glue.
+  - The deferred `\openout`, `\write` and `\closeout` are nodes of the
     current list, so a box holds them; the `\immediate` ones are nodes
     of the outer list, appended when they are carried out.
   Every node appended (and each character added to a `:text` node) is
@@ -365,8 +405,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
 
 - **No font metrics.** Characters have no width, height or depth.
   `\fontdimen` returns what was assigned, else 0.
-- **Boxes hold events, not dimensions.** `\box`, `\copy`, `\unhbox` and
-  `\unvbox` replay the events. `\lastbox` removes the last box event.
+- **Boxes hold nodes, not dimensions.** `\box`, `\copy`, `\unhbox` and
+  `\unvbox` replay the nodes. `\lastbox` removes the last box node.
   `\vsplit` takes the whole box. `\wd`, `\ht` and `\dp` are 0 unless
   assigned.
 - No line breaking and no page builder. `\pagetotal` and `\prevdepth` are 0.

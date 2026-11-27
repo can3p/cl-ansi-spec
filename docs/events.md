@@ -18,7 +18,9 @@ next.
 | `(:kern :width d)`, `(:penalty :value n)` | `\kern` (`:italic t` for `\/`) and `\penalty`. |
 | `(:rule :kind k :width w :height h :depth d)` | `\hrule` or `\vrule` (`k` `:hrule` or `:vrule`); each dimension `"0.4pt"` or `:running`. |
 | `(:language :number n :left-hyphen-min l :right-hyphen-min r)` | The paragraph's language changes before the next character (`\language`). |
-| `(:begin :box :kind k :command c …)` … `(:end :box)` | A box placed in a list: `k` `:hbox` or `:vbox`, `c` `"hbox"`, `"vbox"` or `"vtop"`, then `:spec (:exactly d)`/`(:additional d)` when given and the `:width`, `:height`, `:depth` assigned to it. |
+| `(:begin :box :kind k :command c …)` … `(:end :box)` | A box placed in a list: `k` `:hbox` or `:vbox`, `c` `"hbox"`, `"vbox"` or `"vtop"`, then `:spec (:exactly d)`/`(:additional d)` when given, `:shift d` when moved (`\raise`, `\lower`, `\moveleft`, `\moveright`; down or right positive) and the `:width`, `:height`, `:depth` assigned to it.  A paragraph taken by `\lastbox` is an `"hbox"` with the paragraph's span. |
+| `(:begin :leaders :kind k :glue g :command c)` … `(:end :leaders)` | Leaders: `k` `:leaders`, `:cleaders` or `:xleaders`, the glue `g` of the glue command `c` (`"hfil"`, `"vskip"`, …); the one child is the box or `(:rule …)` repeated. |
+| `(:tex-mark :tokens …)` | A `\mark`, its text expanded. |
 | `(:begin :math)` … `(:end :math)` | A formula (`:display t` for a display, which comes between paragraphs). |
 | `(:begin :table …)`, `(:row)`, `(:cell)` | Alignments (planned). |
 | `(:write :stream s :tokens …)` | A `\write`, its token list as scanned, unexpanded (TeX expands it only when the page holding it is shipped out). It carries index and reference data. Nothing is written to disk. `s` is 0–15, 16 (above 15: the terminal) or 17 (negative: the log). |
@@ -31,8 +33,10 @@ Every event has a `:span`: where the command, character or list began
 events as nodes of TeX's lists (`src/expand/nodes.lisp`, `docs/tex-fidelity.md`,
 "Lists and nodes"); `job-events` flattens the outer vertical list.
 Properties hold strings, numbers, keywords, tokens, spans and lists of
-them.  A box that is replayed (`\box`, `\copy`; planned)
-keeps its original spans and gets the replay's span in its `:via` list.
+them.  A box given again (`\box`, `\copy`, `\vsplit`, `\lastbox`)
+keeps its original spans and gets the command's span in its `:via` list
+(newest first); so does each node spliced by `\unhbox`, `\unhcopy`,
+`\unvbox` or `\unvcopy`.
 
 ## Properties tests rely on
 
