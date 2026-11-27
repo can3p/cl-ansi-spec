@@ -373,6 +373,46 @@
 (:entry "down" :indirection
  :why "A non-terminal whose definition is spliced in place (setup-document.tex:316; concept-definitions.tex:188-197).")
 
+;;; The glossary (concept-glossary.tex defines its own macros)
+
+(:entry "gentry" :glossary-entry :kind :mark
+ :why "A glossary entry, its term; it runs to the next one, as a label does, and its body is \\itemitem, \\b and \\idxterm, whose events follow (concept-glossary.tex:49).")
+(:entry "gexample" :glossary-example
+ :why "An example of a glossary sense, in quotes (concept-glossary.tex:50).")
+(:entry "firstindextab" :glossary-letter :kind :mark
+ :why "The heading of the glossary's first group, non-alphabetic terms (concept-glossary.tex:52).")
+(:entry "indextab" :glossary-letter :kind :mark
+ :why "The heading of a group of glossary entries, a letter; it ends one list and begins another (concept-glossary.tex:51).")
+(:entry "Noun" :part-of-speech :kind :wrapper
+ :why "A glossary sense's part of speech, `n.'; the \\i it calls has the text (concept-glossary.tex:55).")
+(:entry "Verb" :part-of-speech :kind :wrapper
+ :why "A glossary sense's part of speech, `v.'; the \\i it calls has the text (concept-glossary.tex:56).")
+(:entry "TransitiveVerb" :part-of-speech :kind :wrapper
+ :why "A glossary sense's part of speech, `v.t.'; the \\i it calls has the text (concept-glossary.tex:57).")
+(:entry "Adjective" :part-of-speech :kind :wrapper
+ :why "A glossary sense's part of speech, `adj.'; the \\i it calls has the text (concept-glossary.tex:58).")
+(:entry "Adverb" :part-of-speech :kind :wrapper
+ :why "A glossary sense's part of speech, `adv.'; the \\i it calls has the text (concept-glossary.tex:59).")
+(:entry "ANSI" :usage :kind :wrapper
+ :why "Where a glossary sense comes from or is used, `ANSI'; the \\i it calls has the text (concept-glossary.tex:61).")
+(:entry "IEEE" :usage :kind :wrapper
+ :why "Where a glossary sense comes from or is used, `IEEE'; the \\i it calls has the text (concept-glossary.tex:62).")
+(:entry "ISO" :usage :kind :wrapper
+ :why "Where a glossary sense comes from or is used, `ISO'; the \\i it calls has the text (concept-glossary.tex:63).")
+(:entry "Traditional" :usage :kind :wrapper
+ :why "Where a glossary sense comes from or is used, `Trad.'; the \\i it calls has the text (concept-glossary.tex:64).")
+(:entry "Mathematics" :usage :kind :wrapper
+ :why "Where a glossary sense comes from or is used, `Math.'; the \\i it calls has the text (concept-glossary.tex:65).")
+(:entry "Idiomatic" :usage :kind :wrapper
+ :why "Where a glossary sense comes from or is used, `Idiom.'; the \\i it calls has the text (concept-glossary.tex:66).")
+(:entry "Computers" :usage :kind :wrapper
+ :why "Where a glossary sense comes from or is used, `Comp.'; the \\i it calls has the text (concept-glossary.tex:67).")
+(:entry "meaning" :sense
+ :why "The sense of the term before it, a number set as a subscript (setup-document.tex:452); it redefines the primitive \\meaning.")
+(:entry "pronounced" :pronunciation
+ :why "How a glossary term is pronounced, in brackets (setup-document.tex:450).")
+
+
 ;;; The other macros
 
 (:class :reference-name
@@ -449,6 +489,36 @@
  :names ("\\Vtop" "\\vtop" "\\blankline" "\\more" "\\xparen" "\\xbrac" "\\xttbrac"
          "\\xcurly" "\\extrainterleave")
  :why "Layout of syntax (setup-document.tex:94-98, 133, 282-309): \\Vtop aligns a signature's lines; \\x... are spacers as wide as an opening bracket, set in a box that is thrown away, so the entries inside them leave no event.")
+
+(:class :phrase
+ :names ("\\beginsubSection" "\\beginsubsection" "\\chapref" "\\begincom")
+ :why "\\let copies of entries, or macros that call one at once: \\beginsubsection is \\beginSubsection (setup-aux.tex:787-788), \\chapref is \\secref (:1119), \\begincom changes catcodes and calls \\dobegincom (:842).")
+(:class :presentational
+ :names ("\\endSubsection" "\\endsubsubsection" "\\endsubsubsubsection"
+         "\\endsubsubsubsubsection" "\\endsubSection" "\\endsubsection"
+         "\\endSection" "\\endchapter" "\\endSimpleChapter")
+ :why "The ends of sections and chapters (setup-aux.tex:782-807): page breaks, or \\empty; phase 4 nests sections by level.")
+(:class :presentational
+ :names ("\\deffigrefs" "\\defsecrefs" "\\Head" "\\HeadI" "\\chapline")
+ :why "\\deffigrefs and \\defsecrefs define \\figref and \\secref (setup-aux.tex:1100, 1118); \\Head and \\HeadI set the headings \\beginchapter marks (:471-476), and the cover's title lines in chap-0.tex:6-8, kept as text; \\chapline is the running title.")
+(:class :option
+ :names ("\\draftcomment")
+ :why "Text for the running foot of a draft (setup-aux.tex:260).")
+(:class :phrase
+ :names ("\\bookline" "\\longbookline" "\\DocumentNumber" "\\rev"
+         "\\TypographyCaveats")
+ :why "Text: the standard's name, its document number and revision (setup-title.tex:11-27, setup-version.tex:5), a note on the pronunciation key (setup-document.tex:447).")
+(:class :presentational
+ :names ("\\maybeStress" "\\Stress" "\\stress" "\\harda" "\\harde" "\\hardo"
+         "\\schwa")
+ :why "Accents and stress marks of the glossary's pronunciations (setup-document.tex:429-446), inside \\pronounced.")
+(:class :phrase
+ :names ("\\SatisfyTest" "\\DocMethods" "\\Meth" "\\realtypespec" "\\writekeys"
+         "\\writekeydescriptions" "\\ExplainRecursiveP")
+ :why "Text and entries a chapter defines for itself (dict-conses.tex:3, dict-environment.tex:981-983, dict-numbers.tex:3, dict-printer.tex:7-11, dict-streams.tex:3).")
+(:class :presentational
+ :names ("\\Qfont" "\\alfa" "\\subOne" "\\subN" "\\Result" "\\starY" "\\starN")
+ :why "Fonts, symbols and table marks a chapter defines for itself (\\starY is an asterisk, its text kept; \\starN its blank width) (concept-numbers.tex:575, dict-characters.tex:553, dict-flow.tex:5436-5437, dict-numbers.tex:1486-1488).")
 
 (:class :unreviewed
  :files ("setup-document.tex" "setup-aux.tex" "concept-glossary.tex"

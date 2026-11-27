@@ -147,11 +147,14 @@ are the authors' markup (`\term`, `\param`, `\i`, `\f`, …), the
 references (`\clref` and its wrappers `\funref`, `\kwd`, …), the
 notation of examples (`\EV`, `\OUT`, …), index entries (`\idx…`,
 marks keyed by the kind of entry), cited works (`\CLtL`, `:cite`),
-self-references (`\thissection`) and the structure; font changes written
+self-references (`\thissection`), the glossary (`\gentry` marks an
+entry, which runs to the next one or to its group's end; `\Noun` and
+the other parts of speech and usages are wrappers of the `\i` they
+call) and the structure; font changes written
 directly (`{\tt …}`) stay presentational and phase 4 reads them outside
 entries only.  A macro of plain TeX the setup files redefine as an entry
-(`\b`, `\i`, `\j`, `\hat`, and `\item`, `\itemitem`) is reported in
-every job.  A redefinition of a plain macro that plain itself calls
+(`\b`, `\i`, `\j`, `\hat`, `\star`, `\item`, `\itemitem`, and the
+primitive `\meaning`) is reported in every job.  A redefinition of a plain macro that plain itself calls
 cannot be an entry: setup-terms.tex makes `\empty` the empty list `()`
 in the code font, which phase 4 sees only as code-font text. Every macro the
 sources define and use in text (on a certain line, in the survey below)

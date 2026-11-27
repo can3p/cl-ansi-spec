@@ -98,9 +98,11 @@ vocabulary, or by one of KEYS when given, as SEMANTIC-EVENTS shows them."
 
 (defparameter *setup-redefinitions*
   '((:redefined "item") (:redefined "itemitem") (:redefined "b")
-    (:redefined "i") (:redefined "j") (:redefined "hat") (:redefined "star"))
+    (:redefined "i") (:redefined "j") (:redefined "hat") (:redefined "star")
+    (:redefined "meaning"))
   "The reports of every job: the setup files redefine plain's \\item,
-\\itemitem, \\b, \\i, \\j, \\hat and \\star, which are entries.")
+\\itemitem, \\b, \\i, \\j, \\hat and \\star, and the primitive
+\\meaning, which are entries.")
 
 (defmacro check-vocabulary (text events &key (reports '*setup-redefinitions*) keys)
   "Run TEXT after the setup files; check its vocabulary EVENTS (only
@@ -389,6 +391,49 @@ REPORTS (a form, by default *SETUP-REDEFINITIONS*)."
                      (:end :input)
                      (:begin :angle :arguments ("Newline"))
                      (:end :angle))))
+
+(define-test glossary-events
+  :parent spec-vocabulary
+  ;; concept-glossary.tex:49-67 defines the glossary's macros; :155-163,
+  ;; the first entries: letters, entries, a pronunciation, parts of
+  ;; speech (wrappers of \\i).  concept-bvl.tex:113, a sense.
+  (check-vocabulary (concatenate 'string (spec-lines "concept-glossary" 49 67)
+                                 (spec-lines "concept-glossary" 155 163))
+                    ((:mark :glossary-letter :arguments ("Non-alphabetic"))
+                     (:mark :glossary-entry :arguments ("()"))
+                     (:mark :index-term :arguments ("()"))
+                     (:begin :pronunciation :arguments ("\\Stress {nil}"))
+                     (:end :pronunciation)
+                     (:begin :part-of-speech :arguments ("n.") :through :emphasis)
+                     (:end :part-of-speech)
+                     (:mark :glossary-letter :arguments ("A"))
+                     (:mark :glossary-entry :arguments ("absolute"))
+                     (:mark :index-term :arguments ("absolute"))
+                     (:begin :part-of-speech :arguments ("adj.") :through :emphasis)
+                     (:end :part-of-speech))
+                    :keys (:glossary-letter :glossary-entry :index-term :pronunciation
+                           :part-of-speech))
+  ;; :106-107, an example; :217, a usage after a part of speech.
+  (check-vocabulary (concatenate 'string (spec-lines "concept-glossary" 49 67)
+                                 (spec-lines "concept-glossary" 106 107)
+                                 (spec-lines "concept-glossary" 217 217))
+                    ((:begin :glossary-example :arguments ("This is an example of an example."))
+                     (:end :glossary-example)
+                     (:mark :glossary-entry :arguments ("actual argument"))
+                     (:begin :part-of-speech :arguments ("n.") :through :emphasis)
+                     (:end :part-of-speech)
+                     (:begin :usage :arguments ("Trad.") :through :emphasis)
+                     (:end :usage))
+                    :keys (:glossary-example :glossary-entry :part-of-speech :usage))
+  ;; concept-arrays.tex:3: \\beginsubsection is a \\let copy of
+  ;; \\beginSubsection, observed as it.
+  (check-vocabulary (spec-lines "concept-arrays" 3 3)
+                    ((:mark :subsection :arguments ("Array Elements"))))
+  (check-vocabulary (spec-lines "concept-bvl" 113 113)
+                    ((:begin :term :arguments ("keyword"))
+                     (:end :term)
+                     (:begin :sense :arguments ("1"))
+                     (:end :sense))))
 
 (defun why-place (why)
   "The first FILE.tex:LINE that WHY names, as (FILE LINE), or NIL: the
