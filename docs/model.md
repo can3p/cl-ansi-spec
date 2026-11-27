@@ -366,7 +366,35 @@ events into strings, and font runs into inlines.
 
 ### Inlines
 
-*Step 3.13.* Not written yet.
+*Step 3.13* (`src/model/build-inlines.lisp`; `make model` shows them).
+The node shapes are those of "Node shapes" above; what the builder
+decides:
+
+- **Containers for the macros with an extent, anchors for the rest.**
+  A vocabulary `:begin` opens a container of its key; its `:end`
+  closes it. The text inside a term, parameter, reference or notation
+  is dropped, because the node says it (`:term-ref` and `:operator-ref`
+  keep the *argument* text, not the typeset one: `\term{dotted list}`
+  inflected as `dotted lists` is `:text "dotted list"`). Only
+  `:emphasis`, `:strong`, `:code`, `:citation` and `:input` keep their
+  content, read as plain text (their keys are plain-text containers, so
+  the font does not make a second `:code` inside a `:code`).
+- **References are unresolved.** `:operator-ref` takes its `:via` from
+  the macro's key (`*reference-vias*`) and its `:text` from the *last*
+  argument, as the reference sets it: `\kwd{test}` is `":test"`, `\keyref{key}`
+  is `"\\&key"`. `:section-ref` and `:figure-ref` hold the label as
+  written, trimmed (`"\\OrdinaryLambdaLists"`). No `:target` is set;
+  3.17-3.19 resolve them.
+- **`:lambda-list-keyword`** has no argument: its name is the text its
+  macro typeset (`"&allow-other-keys"`).
+- **Notation** (`:evaluates-to` …, `:output`, `:this-section`) has no
+  field; the math or text the macro typesets is dropped.
+- **Index entries and issues are anchors.** `:index-*` marks are
+  `:index-entry` nodes (`:index-kind` from `*index-kinds*`, `:text` the
+  first argument). `\issue` and `\endissue` are an `:issue-start` and an
+  `:issue-end`, each with the name its macro was called with; the text
+  between them stays in the surrounding container.
+- `\thenextfigure` (`:next-figure`) is built by the figures' step 3.11.
 
 ### Glossary
 
