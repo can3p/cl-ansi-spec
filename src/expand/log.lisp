@@ -18,12 +18,15 @@
 empty: TeX's fixed help texts are not kept), :SHOW
 (\\show and \\showthe, which TeX reports as errors; here they are only
 logged)
+or :DIAGNOSTIC (what TeX's begin_diagnostic prints in the log: the
+sublist a discretionary deleted, the box \\shipout ships when
+\\tracingoutput is positive),
 or :WRITE (an \\immediate\\write to no open file, STREAM being its
 number: 17 for a negative one, which goes to the log only, else to the
 terminal and the log).  TEXT is what TeX prints, as one string: for
 :SHOW, what follows `> ', without the error's final `.'.  SPAN is the
 span of the command's token."
-  (kind nil :type (member :message :errmessage :show :write) :read-only t)
+  (kind nil :type (member :message :errmessage :show :diagnostic :write) :read-only t)
   (text "" :type string :read-only t)
   (stream nil :type (or null integer) :read-only t)
   (help nil :type (or null string) :read-only t)
@@ -49,14 +52,15 @@ appended to it).  Nothing needs to handle it."))
 (defun emit-event (expander event)
   "Make EVENT, a list (KIND . PROPERTIES) as docs/events.md describes it,
 a node: of the outer vertical list when it was carried out at once
-(:IMMEDIATE), else of the current list, as TeX's whatsits."
+(:IMMEDIATE) or by \\shipout (:SHIPOUT), else of the current list, as
+TeX's whatsits."
   (destructuring-bind (kind &rest properties) event
     (append-node expander
                  (make-node kind :properties (loop for (key value) on properties by #'cddr
                                                    unless (eq key :span)
                                                      append (list key value))
                                  :span (getf properties :span))
-                 :list (if (getf properties :immediate)
+                 :list (if (or (getf properties :immediate) (getf properties :shipout))
                            (outer-list expander)
                            (current-list expander)))))
 

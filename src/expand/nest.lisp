@@ -39,7 +39,8 @@ page builder last ran (BUILD-PAGE), NIL before: TeX would have moved it
 and everything before it to the page.
 CLANG is TeX's clang, the language of the paragraph's characters so far
 (§1034); SPAN is where the list began (the token of the command that
-opened it), NIL for the outer vertical list."
+opened it), NIL for the outer vertical list; LINE the input line it began
+on (TeX's mode_line), shown by \\showlists."
   (mode :vertical :type mode)
   (prev-depth +ignore-depth+ :type integer)
   (space-factor 1000 :type integer)
@@ -47,7 +48,8 @@ opened it), NIL for the outer vertical list."
   (clang 0 :type integer)
   (contents '() :type list)
   (contributed nil)
-  (span nil))
+  (span nil)
+  (line 0 :type integer))
 
 (defstruct (page-state (:copier nil))
   "The page builder's variables the scanner reads (§§980-982, 991).  The

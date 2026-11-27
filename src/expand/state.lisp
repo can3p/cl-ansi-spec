@@ -70,7 +70,9 @@ INITEX's nonzero integer parameters are assigned globally, so TEX should
 have no open group."
   (let ((state (%make-expander-state
                 tex (make-tex-font "nullfont" :identifier "nullfont"
-                                :parameter-count 7))))
+                                :parameter-count 7
+                                ;; §552: hyphen_char "-", skew_char -1.
+                                :hyphen-char (char-code #\-) :skew-char -1))))
     (loop for (name value) on (initex-integer-parameters) by #'cddr
           do (set-integer-parameter tex name value :global t))
     state))

@@ -17,10 +17,15 @@ next.
 | `(:glue :glue g :command c)` | Glue `g` as `\the` shows it (`"1.0pt plus 1.0fil"`), from the command `c` (`"hskip"`, `"vfil"`, …, or `"parskip"` before a paragraph). |
 | `(:kern :width d)`, `(:penalty :value n)` | `\kern` (`:italic t` for `\/`) and `\penalty`. |
 | `(:rule :kind k :width w :height h :depth d)` | `\hrule` or `\vrule` (`k` `:hrule` or `:vrule`); each dimension `"0.4pt"` or `:running`. |
-| `(:language :number n :left-hyphen-min l :right-hyphen-min r)` | The paragraph's language changes before the next character (`\language`). |
+| `(:language :number n :left-hyphen-min l :right-hyphen-min r)` | The paragraph's language changes before the next character (`\language`), or `\setlanguage`. |
 | `(:begin :box :kind k :command c …)` … `(:end :box)` | A box placed in a list: `k` `:hbox` or `:vbox`, `c` `"hbox"`, `"vbox"` or `"vtop"`, then `:spec (:exactly d)`/`(:additional d)` when given, `:shift d` when moved (`\raise`, `\lower`, `\moveleft`, `\moveright`; down or right positive) and the `:width`, `:height`, `:depth` assigned to it.  A paragraph taken by `\lastbox` is an `"hbox"` with the paragraph's span. |
 | `(:begin :leaders :kind k :glue g :command c)` … `(:end :leaders)` | Leaders: `k` `:leaders`, `:cleaders` or `:xleaders`, the glue `g` of the glue command `c` (`"hfil"`, `"vskip"`, …); the one child is the box or `(:rule …)` repeated. |
 | `(:tex-mark :tokens …)` | A `\mark`, its text expanded. |
+| `(:begin :discretionary :command c)` … `(:end :discretionary)` | `\-` or `\discretionary` (`c` `"-"` or `"discretionary"`): its non-empty lists, `(:begin :pre-break)` … `(:end :pre-break)`, then `:post-break`, then `:no-break` (the text when there is no break). |
+| `(:begin :accent)` … `(:end :accent)` | `\accent`: the accent's `(:text …)`, then the accented character's when there is one. |
+| `(:begin :insert :number n :split-top-skip g :split-max-depth d :floating-penalty p)` … `(:end :insert)`, `(:begin :vadjust)` … `(:end :vadjust)` | `\insert n{…}` and `\vadjust{…}`, their vertical lists. |
+| `(:special :tokens …)` | `\special`, its text expanded. |
+| `(:begin :shipout)` … `(:end :shipout)` | `\shipout`: the box shipped, in the outer list.  The writes it carries out follow it, as `\immediate`'s, flagged `:shipout t` instead of `:immediate t`. |
 | `(:begin :math)` … `(:end :math)` | A formula (`:display t` for a display, which comes between paragraphs). |
 | `(:begin :table …)`, `(:row)`, `(:cell)` | Alignments (planned). |
 | `(:write :stream s :tokens …)` | A `\write`, its token list as scanned, unexpanded (TeX expands it only when the page holding it is shipped out). It carries index and reference data. Nothing is written to disk. `s` is 0–15, 16 (above 15: the terminal) or 17 (negative: the log). |

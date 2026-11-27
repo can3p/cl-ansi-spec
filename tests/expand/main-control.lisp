@@ -96,10 +96,7 @@ needs no fonts' metrics.")
 ;;; Dispositions
 
 (defparameter *pending-event-commands*
-  '(;; The other nodes (step 9c)
-    "-" "discretionary" "accent" "insert" "vadjust" "special"
-    "setlanguage" "shipout" "showbox" "showlists"
-    ;; Math (step 9d)
+  '(;; Math (step 9d)
     "above" "abovewithdelims" "atop" "atopwithdelims" "delimiter"
     "displaylimits" "displaystyle" "left" "limits" "mathaccent" "mathbin"
     "mathchar" "mathchoice" "mathclose" "mathinner" "mathop" "mathopen"

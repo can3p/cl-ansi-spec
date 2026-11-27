@@ -250,8 +250,10 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     becomes an event with `:text` when its stream is open, else a
     `:write` log entry with the stream number (17: the log only).
 - Lists and nodes (`src/expand/`: `nodes.lisp`, `list-commands.lisp`,
-  with `modes.lisp` and `boxes.lisp`), §§977-979, 1034-1044, 1056-1061,
-  1071-1113, 1376: each list of the nest keeps its nodes, as
+  with `modes.lisp`, `boxes.lisp`, `discretionaries.lisp`, `inserts.lisp`,
+  `whatsits.lisp` and `show-lists.lisp`), §§180-198, 218, 638-640,
+  977-979, 1034-1044, 1056-1061, 1071-1125, 1293-1298, 1354, 1366-1377:
+  each list of the nest keeps its nodes, as
   TeX's tail_append adds them, and what TeX reads back of the last one
   (§424: `\lastpenalty`, `\lastkern`, `\lastskip`) is read from them.
   The job's events are the outer vertical list's nodes, flattened
@@ -341,9 +343,76 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
     dropped.  A void box makes no leaders, and the glue is then plain
     glue.  Leaders are glue for `\lastskip`, `\unskip` and a paragraph's
     final glue.
-  - The deferred `\openout`, `\write` and `\closeout` are nodes of the
-    current list, so a box holds them; the `\immediate` ones are nodes
-    of the outer list, appended when they are carried out.
+  - *Discretionaries* (§§1117-1121): `\-` and `\discretionary` append a
+    `:discretionary` node whose children are its non-empty lists,
+    `:pre-break`, `:post-break` and `:no-break`.  `\-` pre-breaks the
+    font's `\hyphenchar` when it is 0-255 (`-` for INITEX's
+    `\nullfont`, §552).  `\discretionary` reads three disc groups (each
+    `{` after blanks and `\relax`, each list restricted horizontal at
+    space factor 1000).  A list is pruned at its first node other than
+    a character, box (the indentation too), rule or kern: that node and
+    the rest are deleted, "Improper discretionary list" and a
+    `:diagnostic` log entry showing them (§1121).  A non-empty no-break
+    list is "Illegal math \discretionary" in math, and dropped; one of
+    more than 255 nodes (each character one) is "Discretionary list is
+    too long", and its nodes follow the disc node as ordinary ones.
+    TeX puts the no-break list after the disc node (replace_count); here
+    it is nested, with the same effect on every command reading the
+    list's end: `\lastkern` and friends and `\/` see the no-break
+    list's last node, while `\unskip`, `\unkern`, `\unpenalty` and
+    `\lastbox` do not take it (§§424, 1080, 1105, 1113), and characters
+    after the node begin a new `:text` node.
+  - *`\accent`* (§§1122-1125) in horizontal mode (in math it is 9d's):
+    the accent's code, then do_assignments (blanks, `\relax` and
+    assignments, `\setbox` "Improper"), then a character, `\chardef` or
+    `\char` is the accented character, anything else read again.  An
+    `:accent` node holds the accent's `:text` node (in the font before
+    the assignments) and the character's (in the font after them); its
+    last node for `\lastkern` and `\/` is the character.  The space
+    factor becomes 1000; TeX's kerns are 0 without metrics and not kept.
+  - *`\insert n{…}`* and *`\vadjust{…}`* (§§1097-1100): an insert group
+    and an internal vertical list (normal_paragraph first,
+    `\prevdepth` ignored); "You can't \insert255" makes it `\insert0`;
+    `\vadjust` is illegal in vertical mode.  At the `}` the paragraph
+    inside ends and the list is an `:insert` node (number, and the
+    `\splittopskip`, `\splitmaxdepth` and `\floatingpenalty` in force
+    inside the group) or a `:vadjust` node; in the outer list the page
+    builder's traces follow.  Both stay where appended.  `\vsplit`'s
+    marks include those at the top of a `\vadjust`'s list in a
+    paragraph, an adjusted `\hbox` or a display, and those of math in
+    them (math becomes part of the list it is in; §§655, 1199).
+  - *Whatsits*: the deferred `\openout`, `\write` and `\closeout` are
+    nodes of the current list, so a box holds them; the `\immediate`
+    ones are nodes of the outer list, appended when they are carried
+    out.  `\special` is a `:special` node of its text, expanded at once
+    (§1354).  `\setlanguage n` (horizontal modes only, else "You can't
+    use") is a `:language` node as fix_language's, `n` outside 1-255
+    being 0, and it becomes the list's current language (§1377).
+  - *`\shipout`* (§§638-640, 1366-1374) scans a box (only a box: "A
+    <box> was supposed to be here"); a void one is nothing.  The box
+    becomes a `:shipout` node of the outer vertical list, wherever
+    `\shipout` is read, then its `\openout`, `\write` and `\closeout`
+    nodes are carried out as `\immediate` would (`docs/events.md`:
+    events flagged `:shipout`, or log entries), in the order hlist_out
+    and vlist_out meet them: depth first through boxes, paragraphs (as
+    their lines), math and no-break lists, not leaders, inserts or break
+    lists; a `\vadjust`'s list (also one in math) after the paragraph,
+    adjusted `\hbox` or display holding it.  The writes expand under the state of the moment.  Then
+    `\deadcycles` is 0.  With `\tracingoutput` positive the box is
+    shown in a `:diagnostic` log entry.  The `[\count0]` TeX prints on
+    the terminal is not kept.
+  - *`\showbox n`* and *`\showlists`* (§§180-198, 218-219, 1293-1298)
+    are `:show` log entries, like `\show`'s (not errors).  The format
+    is our own, since nodes have no dimensions: each node on a line, as
+    its event without spans after a `.` per level, levels deeper than
+    `\showboxdepth` as ` []`, nodes beyond `\showboxbreadth` (5 when
+    not positive) as `etc.`.  `\showbox` shows `\box n=` and the box or
+    `void`; `\showlists` each list of the nest, innermost first: `###
+    <mode> entered at line n` (a paragraph's hyphenation data unless
+    TeX's defaults), its nodes, then `prevdepth`/`prevgraf` or
+    `spacefactor` and the current language, as TeX's.  Of the outer
+    list only TeX's "recent contributions" are shown (the nodes not
+    yet on the page); no page is kept.
   Every node appended (and each character added to a `:text` node) is
   signalled as `job-output`.
 - Registers and parameters have INITEX defaults; TeX's integer,
@@ -404,7 +473,9 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
 ## Not emulated (no typesetting)
 
 - **No font metrics.** Characters have no width, height or depth.
-  `\fontdimen` returns what was assigned, else 0.
+  `\fontdimen` returns what was assigned, else 0.  Every character code
+  0-255 is taken to exist in every font, so TeX's new_character never
+  fails (`\-`, `\accent`, discretionaries).
 - **Boxes hold nodes, not dimensions.** `\box`, `\copy`, `\unhbox` and
   `\unvbox` replay the nodes. `\lastbox` removes the last box node.
   `\vsplit` takes the whole box. `\wd`, `\ht` and `\dp` are 0 unless
@@ -414,7 +485,8 @@ What phases 1–3 do exactly as TeX does, and what they deliberately do not do.
   depth 0; `\predisplaysize` is 0pt after a nonempty paragraph.  `\end`
   never waits for the page builder or `\output`.
   `\lastskip`, `\lastpenalty` and `\lastkern` look at the last node of the
-  current list, or of the page (see Lists and nodes). `\output` is stored and never run; `\shipout` is an event.
+  current list, or of the page (see Lists and nodes). `\output` is stored and never run; `\shipout` makes no DVI (see
+  Lists and nodes).
 - `\write` and `\openout` write nothing; writes are events, and
   `\immediate\write`s to no open file are log entries.
 

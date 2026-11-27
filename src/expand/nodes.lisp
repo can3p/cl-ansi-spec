@@ -22,26 +22,47 @@
                  (:copier nil))
   "A node of KIND (a keyword: :TEXT, :SPACE, :GLUE, :KERN, :PENALTY,
 :RULE, :INDENT, :LANGUAGE, :PARAGRAPH, :BOX, :LEADERS, :TEX-MARK, :MATH,
-:WRITE, ...) with its event
+:DISCRETIONARY, :ACCENT, :INSERT, :VADJUST, :WRITE, :SPECIAL, :SHIPOUT,
+...) with its event
 PROPERTIES (a plist), its VALUE (see the file header) and its SPAN.  A
 COMPOSITE node holds CHILDREN, a list of nodes oldest first, and flattens
 to (:begin KIND ...), its children's events and (:end KIND), the latter
 with END-SPAN (the span of what ended it) when known.  VIA are the spans
 of the commands that replayed the node, newest first.  The text of a
 :TEXT node is its VALUE, a string that grows while characters are
-appended."
+appended.  The CHILDREN of a :DISCRETIONARY grow while its lists are
+read (§1119)."
   (kind :other :type keyword :read-only t)
   (properties '() :type list :read-only t)
   (value nil)
-  (children '() :type list :read-only t)
+  (children '() :type list)
   (composite nil :type boolean :read-only t)
   (span nil)
   (end-span nil)
   (via '() :type list))
 
+(defun visible-tail (node)
+  "The node TeX's tail is when NODE ends a list: the base character of an
+:ACCENT (§1125); for a :DISCRETIONARY, the last node of its no-break
+list, which TeX puts after the disc node (§1120), else NODE itself."
+  (case (node-kind node)
+    (:accent (car (last (node-children node))))
+    (:discretionary
+     (let ((no-break (find :no-break (node-children node) :key #'node-kind)))
+       (if no-break (car (last (node-children no-break))) node)))
+    (t node)))
+
+(defun protected-tail-p (node)
+  "True when TeX's tail, at the end of NODE, is part of a discretionary,
+which \\unskip, \\unkern, \\unpenalty and \\lastbox leave (§§1080,
+1105)."
+  (and (eq (node-kind node) :discretionary)
+       (not (eq (visible-tail node) node))))
+
 (defun node-last-item (node)
   "What \\lastpenalty, \\lastkern and \\lastskip see of NODE (§424): a
-cons (KIND . VALUE), KIND a LAST-NODE-KIND."
+cons (KIND . VALUE), KIND a LAST-NODE-KIND, of its VISIBLE-TAIL."
+  (setf node (visible-tail node))
   (case (node-kind node)
     (:text (list :character))
     ((:space :glue :leaders) (cons :glue (node-value node)))

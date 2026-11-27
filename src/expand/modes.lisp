@@ -46,7 +46,8 @@ until set."
                            :prev-depth (list-state-prev-depth outer)
                            :space-factor (list-state-space-factor outer)
                            :clang (list-state-clang outer)
-                           :span span)
+                           :span span
+                           :line (current-line-number (expander-input expander)))
           (expander-nest expander))))
 
 (defun pop-nest (expander)

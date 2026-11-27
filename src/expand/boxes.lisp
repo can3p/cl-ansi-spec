@@ -16,7 +16,7 @@
 ;;;; (:SHIFT d), the current list with the box shifted by d sp (down or
 ;;;; right); (:SETBOX n global), a box register; or (:LEADERS kind span),
 ;;;; the leaders of kind :LEADERS, :CLEADERS or :XLEADERS whose command
-;;;; was read at span.
+;;;; was read at span; or (:SHIPOUT span), \shipout read at span.
 ;;;;
 ;;;; Nodes never leave a register for a list shared: what \copy and
 ;;;; \unhcopy place is a COPY-NODE, so that the text a list goes on
@@ -223,6 +223,8 @@ nothing; a box placed in a list is a box node."
                          :global global :globaldefs nil)))
         (:shift (when box
                   (append-box expander box (second context))))
+        (:shipout (when box
+                    (ship-out expander box (second context))))
         (:leaders (when box
                     (destructuring-bind (kind span) (rest context)
                       (append-leaders expander kind span box)))))))
@@ -248,19 +250,38 @@ group of CODE and its left brace."
     (replace-register state :box n nil)
     box))
 
-(defun split-marks (nodes)
-  "The marks' token lists among NODES as \\vsplit sees them (§979): those
-of the list, and those that TeX's line breaking or an adjusted \\hbox
-(§655) would have moved out of a paragraph or box node into it."
+(defun display-math-p (node)
+  "True when NODE is a display's :MATH node."
+  (and (eq (node-kind node) :math) (getf (node-properties node) :display) t))
+
+(defun migrating-node-p (node)
+  "True when TeX moves the marks, inserts and \\vadjust lists at the top
+of NODE's list out into the enclosing vertical list (§§655, 1199): a
+paragraph (line breaking), an adjusted \\hbox, a display."
+  (case (node-kind node)
+    (:paragraph t)
+    (:box (tex-box-adjusted (node-value node)))
+    (:math (display-math-p node))))
+
+(defun adjust-marks (nodes)
+  "The marks TeX moves out of a list of NODES whose adjust material
+migrates: its own, those at the top of its \\vadjust lists, and those of
+the math in it, which becomes part of the list."
   (loop for node in nodes
         append (case (node-kind node)
                  (:tex-mark (list (node-value node)))
-                 ((:paragraph :box)
-                  (when (or (eq (node-kind node) :paragraph)
-                            (tex-box-adjusted (node-value node)))
-                    (loop for child in (node-children node)
-                          when (eq (node-kind child) :tex-mark)
-                            collect (node-value child)))))))
+                 (:vadjust (loop for child in (node-children node)
+                                 when (eq (node-kind child) :tex-mark)
+                                   collect (node-value child)))
+                 (:math (adjust-marks (node-children node))))))
+
+(defun split-marks (nodes)
+  "The marks' token lists among NODES as \\vsplit sees them (§979): those
+of the list, and those that line breaking, an adjusted \\hbox or a
+display would have moved out into it (MIGRATING-NODE-P)."
+  (loop for node in nodes
+        append (cond ((eq (node-kind node) :tex-mark) (list (node-value node)))
+                     ((migrating-node-p node) (adjust-marks (node-children node))))))
 
 (defun vsplit-box (expander)
   "\\vsplit's operands and box (§§1082, 977-979): the whole box of the

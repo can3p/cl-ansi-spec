@@ -35,22 +35,36 @@ that text nodes of one font share it (EQ)."
                 ((< (list-state-space-factor list) 1000) 1000)
                 (t sf)))))
 
+(defun append-language (expander language span)
+  "Append a language whatsit for LANGUAGE, read at SPAN, with the
+hyphenation minimums (§§1376-1377), and make it the list's clang."
+  (let ((state (expander-state expander)))
+    (setf (list-state-clang (current-list expander)) language)
+    (append-node expander
+                 (make-node :language
+                            :properties (list :number language
+                                              :left-hyphen-min
+                                              (norm-min (parameter state :lefthyphenmin))
+                                              :right-hyphen-min
+                                              (norm-min (parameter state :righthyphenmin)))
+                            :span span))))
+
 (defun fix-language (expander span)
   "TeX's fix_language (§1376): a language whatsit when \\language differs
 from the paragraph's language so far."
-  (let ((list (current-list expander))
-        (language (current-language expander))
-        (state (expander-state expander)))
-    (unless (= language (list-state-clang list))
-      (setf (list-state-clang list) language)
-      (append-node expander
-                   (make-node :language
-                              :properties (list :number language
-                                                :left-hyphen-min
-                                                (norm-min (parameter state :lefthyphenmin))
-                                                :right-hyphen-min
-                                                (norm-min (parameter state :righthyphenmin)))
-                              :span span)))))
+  (let ((language (current-language expander)))
+    (unless (= language (list-state-clang (current-list expander)))
+      (append-language expander language span))))
+
+(defun character-node (code span style)
+  "TeX's new_character: a :TEXT node of the character CODE read at SPAN,
+in the font whose style is STYLE (FONT-STYLE-NAME).  Without metrics
+every code 0-255 is taken to exist (docs/tex-fidelity.md)."
+  (make-node :text :properties (list :style style)
+                   :value (make-array 1 :element-type 'character
+                                        :initial-element (code-char code)
+                                        :adjustable t :fill-pointer 1)
+                   :span span))
 
 (defun text-continues-p (node style span)
   "True when a character of STYLE read at SPAN extends the :TEXT NODE:
@@ -85,12 +99,7 @@ which extends the text node that ends the list when it can."
                     (make-span (span-file old) (span-start old) (span-end span)
                                (span-line old) (span-column old)))))
           (signal 'job-output :item last))
-        (append-node expander
-                     (make-node :text :properties (list :style style)
-                                      :value (make-array 1 :element-type 'character
-                                                           :initial-element char
-                                                           :adjustable t :fill-pointer 1)
-                                      :span span)))))
+        (append-node expander (character-node code span style)))))
 
 (define-command "char" (expander token meaning)
   ;; §1038: in math, a math character (step 9d).
@@ -192,7 +201,7 @@ SPAN."
   ;; correction, which is 0 without metrics; in math, always.
   (let ((last (first (list-state-contents (current-list expander)))))
     (when (or (eq (mode-kind (current-mode expander)) :math)
-              (and last (eq (node-kind last) :text)))
+              (and last (eq (car (node-last-item last)) :character)))
       (append-node expander (make-node :kern :properties (list :width (format-dimen 0)
                                                                :italic t)
                                              :value 0 :span (token-span token))))))
@@ -245,7 +254,8 @@ height and depth, each a dimension in sp or :RUNNING."
            (unless (and (eq kind :glue)
                         (null (page-state-last-glue (expander-page expander))))
              (report-illegal-case expander token meaning)))
-          ((and last (eq (car last) kind))
+          ((and last (eq (car last) kind)
+                (not (protected-tail-p (first (list-state-contents list)))))
            (remove-last-node list)))))
 
 ;;; Marks (§1101)

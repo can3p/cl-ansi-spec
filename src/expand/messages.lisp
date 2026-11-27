@@ -3,7 +3,7 @@
 ;;;; Main control's mode-independent commands of TeX: The Program,
 ;;;; §§1279-1298: \message and \errmessage (issue_message), \uppercase and
 ;;;; \lowercase (shift_case), \show and \showthe (show_whatever; \showbox
-;;;; and \showlists show lists, which are events).  What they print goes to
+;;;; and \showlists show lists: show-lists.lisp).  What they print goes to
 ;;;; the job's log (log.lisp) as one string: TeX's line breaking of the
 ;;;; terminal and \newlinechar are not kept.
 

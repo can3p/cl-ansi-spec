@@ -199,3 +199,15 @@ character's code and category, or the meaning of a control sequence."
                                         (:mathchar (scan-fifteen-bit-int expander))
                                         (t (scan-eight-bit-int expander))))
                  :global global)))
+
+(defun do-assignments (expander)
+  "TeX's do_assignments (§1270): carry out the assignments that follow,
+after blanks and \\relax, with \\setbox not allowed (`Improper').
+Returns the first other token and its meaning, which are not read again."
+  (loop
+    (multiple-value-bind (token meaning) (get-x-nonblank-nonrelax expander)
+      (unless (and token (or (prefix-name meaning) (assignment-function meaning)))
+        (return (values token meaning)))
+      (setf (expander-set-box-allowed expander) nil)
+      (prefixed-command expander token meaning)
+      (setf (expander-set-box-allowed expander) t))))

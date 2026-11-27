@@ -350,7 +350,7 @@ value, the expansion of the rest of the input and every error message."
   (check-expansion "\\the\\font" "\\nullfont ")
   (check-expansion "\\the\\textfont1" "\\nullfont ")
   (check-expansion "\\the\\fontdimen6\\nullfont" "0.0pt")
-  (check-expansion "\\the\\hyphenchar\\font" "0")
+  (check-expansion "\\the\\hyphenchar\\font" "45")
   (check-expansion "\\the\\tenrm" "\\tenrm "
                    :setup ((load-test-font expander "tenrm" "cmr10")))
   (check-expansion "\\fontname\\tenrm" "cmr10 at 5.0pt"

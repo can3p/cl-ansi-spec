@@ -131,6 +131,8 @@ groups of events and alignments end in their own steps."
       ((:hbox :adjusted-hbox) (package-box expander :hbox))
       (:vbox (end-graf expander (token-span token)) (package-box expander :vbox))
       (:vtop (end-graf expander (token-span token)) (package-box expander :vtop))
+      (:disc (build-discretionary expander token))
+      (:insert (end-insert expander token))
       ;; A math group's noad is 9d's; until then its nodes go on in the
       ;; enclosing list.
       (:math (unsave expander)
