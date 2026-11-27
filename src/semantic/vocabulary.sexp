@@ -109,8 +109,8 @@
  :why "Code within a formula, in a box with a trailing space, which its begin must precede (setup-document.tex:12).")
 (:entry "ang" :angle
  :why "A name in angle brackets: a character (\\NewlineChar), no arguments (\\noargs) (setup-document.tex:18).")
-(:entry "hat" :caret
- :why "The caret character, drawn from a lowered math wedge whose text would not be `^' (setup-document.tex:268).")
+(:entry "hat" :caret :placement :block
+ :why "The caret character, drawn from a lowered math wedge whose text would not be `^'; its first node is in a box it only measures, so its begin is placed at once (setup-document.tex:268).")
 
 ;;; Evaluation arrows and the notation of examples
 
@@ -317,7 +317,7 @@
  :why "A constant variable (setup-document.tex:184).")
 (:entry "DefunMultiWithValues" :defun-multi :placement :block
  :why "Several functions with one lambda list and values: the lambda list, the values, then their \\entry lines (setup-document.tex:130).")
-(:entry "DefunMultiAccessorWithValues" :defun-multi-accessor :placement :block
+(:entry "DefunMultiAccessorWithValues" :defun-multi-accessor
  :why "Several accessors: lambda list, values, new value, then their \\entry lines, set twice, as readers and as setf forms (setup-document.tex:137).")
 (:entry "DefsetfMulti" :defsetf-multi :placement :block
  :why "Several setf forms: lambda list, new value, then their \\entry lines (setup-document.tex:150).")
@@ -415,7 +415,7 @@
 
 ;;; Figures: the content goes to box 1, which \\endfig unboxes
 
-(:entry "endfig" :figure :placement :block
+(:entry "endfig" :figure
  :why "A figure (setup-aux.tex:734): its \\ifcase stays open while \\finishboxfig unboxes box 1, the content \\boxfig set aside with its events, and sets the caption.")
 (:entry "docaption" :caption :placement :block
  :why "A caption, `Figure N--M. text', as set (setup-aux.tex:744); empty when none was given.")

@@ -87,10 +87,10 @@ observers are set; none may be set already.  Returns the OBSERVER."
                 (note-definition observer entry meaning span))))
           (expander-append-observer expander)
           (lambda (expander node list)
-            (unless (content-neutral-p node)
+            (unless (content-neutral-p node list)
               (drop-held observer)
               (when (observer-pending observer)
-                (place-pending observer expander list)))))
+                (place-pending observer expander list node)))))
     observer))
 
 ;;; Meanings
@@ -203,7 +203,10 @@ wrapper held, if any: report it and drop it."
 to."
   (let ((entry (activation-entry activation))
         (span (activation-end-span activation)))
-    (emit-event observer expander (list :end (activation-key activation)) :span span)
+    ;; An end is no content: a wrapper held since (its tail call yet to
+    ;; come) stays held.
+    (emit-event observer expander (list :end (activation-key activation))
+                :span span :drop-held nil)
     (unless (eq (activation-list activation) (current-list expander))
       (push (make-report :unbalanced (entry-name entry) span
                          :previous-span (activation-span activation))
@@ -221,15 +224,19 @@ or SPAN, the call's, when the body is empty."
 
 ;;; Placing markers
 
-(defun content-neutral-p (node)
-  "True when NODE does not end the wait of a pending begin: a marker, or
-what TeX adds by itself when a paragraph begins (its \\parskip glue,
-its indentation), so that an inline entry used in vertical mode begins
-inside the paragraph it starts."
+(defun content-neutral-p (node list)
+  "True when NODE, appended to LIST, does not end the wait of a pending
+begin: a marker, what TeX adds by itself when a paragraph begins (its
+\\parskip glue, its indentation), so that an inline entry used in
+vertical mode begins inside the paragraph it starts, or a penalty in a
+vertical list (page breaking, never content: `{\\penalty20000}' opens
+\\EV, which begins a code line).  A penalty in a paragraph is content."
   (or (marker-p node)
       (eq (node-kind node) :indent)
       (and (eq (node-kind node) :glue)
-           (equal (getf (node-properties node) :command) "parskip"))))
+           (equal (getf (node-properties node) :command) "parskip"))
+      (and (eq (node-kind node) :penalty)
+           (eq (mode-kind (list-state-mode list)) :vertical))))
 
 (defun begin-list (expander home list)
   "The list a pending begin goes to when a node is appended to LIST, the
@@ -250,23 +257,32 @@ not in it, LIST takes the begin."
         (nth (1+ formula) inner)
         list)))
 
-(defun place-pending (observer expander list)
-  "Append OBSERVER's pending begins, oldest first, to LIST, a node being
-appended to it, or to the list BEGIN-LIST says.  Every pending begin has
-its activation (BEGIN-CALL)."
-  (let ((pending (reverse (observer-pending observer))))
-    (setf (observer-pending observer) '())
-    (loop for (event span activation) in pending
-          for target = (begin-list expander (activation-home activation) list)
-          do (append-marker expander event :span span :list target)
-             (setf (activation-list activation) target))))
+(defun place-pending (observer expander list &optional node)
+  "Append OBSERVER's pending begins, oldest first, to LIST, NODE being
+appended to it, or to the list BEGIN-LIST says.  A begin whose call was
+made in a paragraph that NODE now closes waits on: the paragraph is not
+the call's content (a figure set in a paragraph ends it, `\\Vskip').
+Every pending begin has its activation (BEGIN-CALL)."
+  (let ((nest (expander-nest expander))
+        (waiting '()))
+    (loop for pending in (reverse (observer-pending observer))
+          for (event span activation) = pending
+          for home = (activation-home activation)
+          do (if (and node (eq (node-kind node) :paragraph) (not (member home nest)))
+                 (push pending waiting)
+                 (let ((target (begin-list expander home list)))
+                   (append-marker expander event :span span :list target)
+                   (setf (activation-list activation) target))))
+    (setf (observer-pending observer) waiting)))
 
-(defun emit-event (observer expander event &key span)
+(defun emit-event (observer expander event &key span (drop-held t))
   "Append a marker for EVENT at SPAN to EXPANDER's current list, after
-OBSERVER's pending begins; return that list.  Replace handlers emit
-their events with it."
+OBSERVER's pending begins; return that list.  The wrapper held, if any,
+is dropped, unless DROP-HELD is false.  Replace handlers emit their
+events with it."
   (let ((list (current-list expander)))
-    (drop-held observer)
+    (when drop-held
+      (drop-held observer))
     (place-pending observer expander list)
     (append-marker expander event :span span :list list)
     list))

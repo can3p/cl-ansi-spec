@@ -44,7 +44,9 @@ classifies every other macro (see "Choosing entries").
   alone, every reference would be a `\clref`. Of a chain of wrappers,
   the outermost keeps the call. The tail call is the call of the first
   token of the wrapper's body; a held wrapper that meets another call, a
-  node or a marker first is reported `:unbalanced` and dropped. Environments are pairs: an `:open` entry's call is a
+  node or a marker first is reported `:unbalanced` and dropped; the end
+  of another call is no content and does not drop it (TeX expands a
+  cell's first macro, `\formatOp`, before the `\misc{` template). Environments are pairs: an `:open` entry's call is a
   `:begin`, a `:close` entry's call the `:end` of the `:open` entry it
   names, both with their arguments. `\code`…`\endcode` (through
   `\screen!`), `\begincom`…`\endcom`, `\issue`…`\endissue` are
@@ -68,14 +70,16 @@ classifies every other macro (see "Choosing entries").
   the first node of its content: it is placed just before the next node
   appended, or the next character added to a text node, in whatever
   list, except for what TeX adds by itself when a paragraph begins
-  (`\parskip` glue, the indentation); so an inline entry used in vertical
-  mode begins inside the paragraph it starts, and one whose first content
+  (`\parskip` glue, the indentation) and penalties in a vertical list
+  (page breaking, never content: `\EV` opens with one); so an inline
+  entry used in vertical mode begins inside the paragraph it starts, and one whose first content
   is in an alignment cell (TeX expands the first cell's macros before it
   opens the cell) begins in the cell. A formula begun since the call is
   the exception: a body that opens with one (`{$\langle$}`, `\EV`'s arrow)
   begins in the list that will hold the formula, before it, so that it
   ends in the same list (`begin-list`). A body that opens with a box
-  (`\ff`) is `:block`. With no such node it is placed with its end. A `:block` entry's `:begin`, and every other
+  (`\ff`, `\hat`) is `:block`. A call made in a paragraph that its body
+  ends (`\endfig`'s `\Vskip`) waits past that paragraph for its content. With no such node it is placed with its end. A `:block` entry's `:begin`, and every other
   marker, is placed at once in the current list, after the begins still
   waiting. A body whose last token is the character that starts a
   paragraph ends before the paragraph begins (TeX reads that character

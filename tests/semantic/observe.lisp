@@ -146,6 +146,42 @@ text only) and the kinds and names of its REPORTS."
                    (:begin :term :arguments ("a")) (:text "a")
                    (:kern :width "0.0pt" :italic t) (:end :term)
                    (:end :cell) (:end :row) (:end :alignment)))
+  ;; A penalty in a vertical list does not end the wait (\\EV opens with
+  ;; one at the start of a code line); one in a paragraph does.
+  (check-semantic "\\def\\ev{{\\penalty20000}{$<$}}\\ev y\\par\\def\\pe{\\penalty5 z}a\\pe\\par"
+                  (("ev" :ev) ("pe" :pe))
+                  ((:penalty :value 20000)
+                   (:begin :paragraph)
+                   (:begin :ev :arguments ())
+                   (:begin :math) (:begin :noad :class :rel) (:begin :nucleus)
+                   (:math-char :fam 1 :code 60) (:end :nucleus) (:end :noad) (:end :math)
+                   (:end :ev)
+                   (:text "y") (:end :paragraph)
+                   (:begin :paragraph) (:text "a")
+                   (:begin :pe :arguments ()) (:penalty :value 5) (:text "z") (:end :pe)
+                   (:end :paragraph)))
+  ;; A call made in a paragraph its body ends waits for content after
+  ;; it (a figure set in a paragraph).
+  (check-semantic "\\def\\fg{\\par\\vfil\\relax}x\\fg"
+                  (("fg" :fg))
+                  ((:begin :paragraph) (:text "x") (:end :paragraph)
+                   (:begin :fg :arguments ())
+                   (:glue :glue "0.0pt plus 1.0fil" :command "vfil")
+                   (:end :fg)))
+  ;; With no content after the paragraph, it is placed with its end.
+  (check-semantic "\\def\\fg{\\par}x\\fg\\relax"
+                  (("fg" :fg))
+                  ((:begin :paragraph) (:text "x") (:end :paragraph)
+                   (:begin :fg :arguments ()) (:end :fg)))
+  ;; The end of a call whose body is read as the argument of a wrapper's
+  ;; tail call does not drop the wrapper (TeX expands a cell's first
+  ;; macro before the template that wraps it).
+  (check-semantic "\\def\\cl#1{(#1)}\\def\\w{\\cl}\\def\\e#1{#1}x\\expandafter\\w\\e{z}\\par"
+                  (("cl" :cl) ("w" :w :kind :wrapper) ("e" :e))
+                  ((:begin :paragraph) (:text "x")
+                   (:begin :e :arguments ("z")) (:end :e)
+                   (:begin :w :arguments ("z") :through :cl) (:text "(z") (:text ")") (:end :w)
+                   (:end :paragraph)))
   ;; The end's span is the body's last token, here an argument's.
   (multiple-value-bind (expander) (semantic-job "\\def\\tm#1{(#1}\\tm{ab}\\par" '(("tm" :t)))
     (run-job expander)

@@ -76,3 +76,24 @@ them (M4).")
                           (equal error-file "plain.tex"))
                       "chap-2: ~A at ~A:~A" message error-file line))))
           (is equal '() (spec-run-errors run) "errors of ~A" (spec-run-job run))))))
+
+(defparameter *expected-reports*
+  '(("chap-6" :unbalanced "curly"
+     "dict-iteration.tex:621-622: a \\CR, a new row of the BNF rule, inside
+\\curly's argument, so the group runs over two cells"))
+  "The reports of the whole spec besides *SETUP-REDEFINITIONS*: (job kind
+name why).")
+
+(define-test spec-jobs-reports
+  :parent spec-jobs
+  ;; Every job reports the setup files' redefinitions, and only the
+  ;; reports listed besides.
+  (dolist (run (spec-runs))
+    (is equal (append *setup-redefinitions*
+                      (loop for (job kind name) in *expected-reports*
+                            when (string= job (spec-run-job run))
+                              collect (list kind name)))
+        (mapcar (lambda (report)
+                  (list (semantic:report-kind report) (semantic:report-name report)))
+                (spec-run-reports run))
+        "reports of ~A" (spec-run-job run))))
