@@ -287,7 +287,19 @@ Categories: `:block`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `rows` | list of node of kind or category `:row` | yes | The table's rows, in order. |
+| `rows` | list of node of kind or category `:row` | yes | The table's rows, in order: the rows TeX set, but not the spacing rows between its rules, whose cells are all empty. |
+
+Example:
+
+```lisp
+(:table :rows
+ ((:row :header common-lisp:t :cells
+   ((:cell :content ((:strong :content ("Abbreviation"))))
+    (:cell :content ((:strong :content ("Meaning"))))))
+  (:row :cells
+   ((:cell :content ((:emphasis :content ("adj."))))
+    (:cell :content ("adjective"))))))
+```
 
 ### Node kind `:row`
 
@@ -295,8 +307,16 @@ A row of a table.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `header` | boolean | no | True for a row of column headings (the heading arguments of \tablefigtwo and its relatives). |
-| `cells` | list of node of kind or category `:cell` | yes | The row's cells, in order. |
+| `header` | boolean | no | True for the first row of a table when every cell that has content holds nothing but bold text: the row of column headings (\tablefigtwo, \tabletwo). |
+| `cells` | list of node of kind or category `:cell` | yes | The row's cells, in order; the columns that only draw a rule (\vrule in their template) have none. |
+
+Example:
+
+```lisp
+(:row :header common-lisp:t :cells
+ ((:cell :content ((:strong :content ("Context"))))
+  (:cell :content ((:strong :content ("Kind of Lambda List"))))))
+```
 
 ### Node kind `:cell`
 
@@ -304,8 +324,15 @@ A cell of a row.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `content` | inline list | no | The cell's text and inlines; absent for an empty cell. |
+| `content` | inline list | no | The cell's text and inlines, without the spaces around them; absent for an empty cell. |
 | `columns` | integer | no | The number of columns the cell spans when \span joined more than one; absent for one. |
+
+Example:
+
+```lisp
+(:cell :content
+ ((:strong :content ("defun")) " " (:emphasis :content ("form"))))
+```
 
 ### Node kind `:figure`
 
@@ -316,10 +343,21 @@ Categories: `:block`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `id` | string | yes | The label of the \DefineFigure that names the figure, or <chapter-id>/fig-<n> for a figure that none names. |
+| `id` | string | yes | The label of the \DefineFigure that names the figure, or <chapter-id>/fig-<n> for a figure that none names (n the second part of its number). |
 | `number` | string | yes | The figure's number, its chapter's and its own joined by a hyphen ("14-1"), from the caption, checked against the :write of its \DefineFigure when there is one. |
 | `caption` | inline list | no | The caption's text after the number; absent when the figure has none. |
 | `content` | list of node of kind or category `:block` | yes | What the figure shows: a table, or other blocks. |
+
+Example:
+
+```lisp
+(:figure :id "ObjectSystemClasses" :number "4-7" :caption
+ ("Object System Classes") :content
+ ((:table :rows
+   ((:row :cells
+     ((:cell :content ("class"))
+      (:cell :content ("standard-class"))))))))
+```
 
 ### Target kind `:figure`
 

@@ -2994,7 +2994,25 @@
             "$ref": "#/$defs/row"
           },
           "title": "rows",
-          "description": "The table's rows, in order."
+          "description": "The table's rows, in order: the rows TeX set, but not the\nspacing rows between its rules, whose cells are all empty.",
+          "examples": [
+            [
+              {
+                "kind": "row",
+                "cells": [
+                  {
+                    "kind": "cell",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "adverb"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -3002,7 +3020,76 @@
         "span",
         "rows"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "table",
+          "rows": [
+            {
+              "kind": "row",
+              "header": true,
+              "cells": [
+                {
+                  "kind": "cell",
+                  "content": [
+                    {
+                      "kind": "strong",
+                      "content": [
+                        {
+                          "kind": "text",
+                          "text": "Abbreviation"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "cell",
+                  "content": [
+                    {
+                      "kind": "strong",
+                      "content": [
+                        {
+                          "kind": "text",
+                          "text": "Meaning"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "row",
+              "cells": [
+                {
+                  "kind": "cell",
+                  "content": [
+                    {
+                      "kind": "emphasis",
+                      "content": [
+                        {
+                          "kind": "text",
+                          "text": "adj."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "cell",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "adjective"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "row": {
       "type": "object",
@@ -3019,7 +3106,10 @@
         "header": {
           "type": "boolean",
           "title": "header",
-          "description": "True for a row of column headings (the heading arguments of\n\\tablefigtwo and its relatives)."
+          "description": "True for the first row of a table when every cell that has\ncontent holds nothing but bold text: the row of column headings\n(\\tablefigtwo, \\tabletwo).",
+          "examples": [
+            true
+          ]
         },
         "cells": {
           "type": "array",
@@ -3027,7 +3117,20 @@
             "$ref": "#/$defs/cell"
           },
           "title": "cells",
-          "description": "The row's cells, in order."
+          "description": "The row's cells, in order; the columns that only draw a rule\n(\\vrule in their template) have none.",
+          "examples": [
+            [
+              {
+                "kind": "cell",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "adjective"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -3035,7 +3138,43 @@
         "span",
         "cells"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "row",
+          "header": true,
+          "cells": [
+            {
+              "kind": "cell",
+              "content": [
+                {
+                  "kind": "strong",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "Context"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "cell",
+              "content": [
+                {
+                  "kind": "strong",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "Kind of Lambda List"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "cell": {
       "type": "object",
@@ -3176,19 +3315,59 @@
             ]
           },
           "title": "content",
-          "description": "The cell's text and inlines; absent for an empty cell."
+          "description": "The cell's text and inlines, without the spaces around them;\nabsent for an empty cell.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "compatible with one or more ANSI standards"
+              }
+            ]
+          ]
         },
         "columns": {
           "type": "integer",
           "title": "columns",
-          "description": "The number of columns the cell spans when \\span joined more\nthan one; absent for one."
+          "description": "The number of columns the cell spans when \\span joined more\nthan one; absent for one.",
+          "examples": [
+            2
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "cell",
+          "content": [
+            {
+              "kind": "strong",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "defun"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "emphasis",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "form"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "figure": {
       "type": "object",
@@ -3205,12 +3384,18 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The label of the \\DefineFigure that names the figure, or\n<chapter-id>/fig-<n> for a figure that none names."
+          "description": "The label of the \\DefineFigure that names the figure, or\n<chapter-id>/fig-<n> for a figure that none names (n the second part of\nits number).",
+          "examples": [
+            "ObjectSystemClasses"
+          ]
         },
         "number": {
           "type": "string",
           "title": "number",
-          "description": "The figure's number, its chapter's and its own joined by a\nhyphen (\"14-1\"), from the caption, checked against the :write of its\n\\DefineFigure when there is one."
+          "description": "The figure's number, its chapter's and its own joined by a\nhyphen (\"14-1\"), from the caption, checked against the :write of its\n\\DefineFigure when there is one.",
+          "examples": [
+            "4-7"
+          ]
         },
         "caption": {
           "type": "array",
@@ -3339,7 +3524,15 @@
             ]
           },
           "title": "caption",
-          "description": "The caption's text after the number; absent when the figure has\nnone."
+          "description": "The caption's text after the number; absent when the figure has\nnone.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Object System Classes"
+              }
+            ]
+          ]
         },
         "content": {
           "type": "array",
@@ -3396,7 +3589,30 @@
             ]
           },
           "title": "content",
-          "description": "What the figure shows: a table, or other blocks."
+          "description": "What the figure shows: a table, or other blocks.",
+          "examples": [
+            [
+              {
+                "kind": "table",
+                "rows": [
+                  {
+                    "kind": "row",
+                    "cells": [
+                      {
+                        "kind": "cell",
+                        "content": [
+                          {
+                            "kind": "text",
+                            "text": "class"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -3406,7 +3622,50 @@
         "number",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "figure",
+          "id": "ObjectSystemClasses",
+          "number": "4-7",
+          "caption": [
+            {
+              "kind": "text",
+              "text": "Object System Classes"
+            }
+          ],
+          "content": [
+            {
+              "kind": "table",
+              "rows": [
+                {
+                  "kind": "row",
+                  "cells": [
+                    {
+                      "kind": "cell",
+                      "content": [
+                        {
+                          "kind": "text",
+                          "text": "class"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "cell",
+                      "content": [
+                        {
+                          "kind": "text",
+                          "text": "standard-class"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "term-ref": {
       "type": "object",

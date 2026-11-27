@@ -62,5 +62,7 @@
    #:*fonts* #:font-entry #:register-handler #:*layout-codes* #:*ligatures* #:font-file #:font-class
    #:convert-text #:install-text-handlers #:*plain-text-containers*
    #:plain-text-container-p
+   ;; Tables and figures (build-tables.lisp)
+   #:install-table-handlers
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))
