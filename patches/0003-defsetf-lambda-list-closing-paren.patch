@@ -1,0 +1,15 @@
+Close the defsetf lambda list's parenthesis (concept-bvl.tex).
+The syntax rule at concept-bvl.tex:1181-1187 opens a parenthesis with
+\lparen and never closes it: its last line, the &environment option, lacks
+the \rparen the rules at :97, :482, :550 and :598 end with.  Add it.
+--- concept-bvl.tex
++++ concept-bvl.tex
+@@ -1184,7 +1184,7 @@
+ 		     \xparen\f{[}\Vtop{\hbox{{\key} \star{\KeyVarValueSuppliedP}}
+ 				  \vskip 4pt
+ 				  \hbox{\brac{\allowotherkeys}\f{]}}}\CR
+-		     \xparen\ttbrac{{\environment} \param{var}}}
++		     \xparen\ttbrac{{\environment} \param{var}}\rparen}
+ 
+ A \term{defsetf lambda list} can contain the \term{lambda list keywords} shown
+ in \thenextfigure.

@@ -1,0 +1,22 @@
+Keep the numeric-accumulation rule's braces in one row (dict-iteration.tex).
+The rule of Syntax for the loop keyword `numeric-accumulation' sets a
+\curly group over dict-iteration.tex:622-625, but a row break, \CR, at 623
+ends the first table row inside the group, so the group opens in one cell
+and closes in another, and \xcurly (a spacer as wide as the opening brace)
+indents the continuation.  Drop the \CR and the spacer: the group is one
+braced alternation, as the first group of the list-accumulation rule above it is.  The
+printed rule loses its line break and its row may be wider; the line count
+is unchanged.
+--- dict-iteration.tex
++++ dict-iteration.tex
+@@ -620,8 +620,8 @@
+  \brac{\loopref{into} \param{simple-var}}}
+ \auxbnf{numeric-accumulation}%
+ {\curly{\loopref{count}    | \loopref{counting}   |
+-	\loopref{sum}      | \loopref{summing}    | \CR
+- \xcurly\loopref{maximize} | \loopref{maximizing} |
++	\loopref{sum}      | \loopref{summing}    |
++ \loopref{maximize} | \loopref{maximizing} |
+         \loopref{minimize} | \loopref{minimizing}} \curly{\param{form} | \loopref{it}} \CR
+  \brac{\loopref{into} \param{simple-var}} \brac{\param{type-spec}}}
+ \auxbnf{conditional}%
