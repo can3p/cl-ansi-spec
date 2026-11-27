@@ -10,6 +10,8 @@
   (:use #:cl)
   (:local-nicknames (#:model #:cl-ansi-spec/model)
                     (#:json #:cl-ansi-spec/json))
+  (:import-from #:cl-ansi-spec/json
+                #:json-object-p #:json-object-members #:json-get)
   (:export
    ;; Generated files (generate.lisp)
    #:define-generator #:generators #:generator-name #:generator-path
@@ -17,4 +19,11 @@
    #:stale-generated-files
    ;; JSON Schema generator (schema.lisp)
    #:model-schema #:model-schema-text #:schema-undescribed
-   #:schema-outside-subset))
+   #:schema-outside-subset
+   ;; Schema validator (validate.lisp)
+   #:validate-json #:json-valid-p #:schema-subset-violations
+   #:validation-error #:validation-error-pointer #:validation-error-message
+   #:unsupported-schema-keyword #:unsupported-schema-keyword-pointer
+   #:unsupported-schema-keyword-keyword
+   #:unresolved-schema-reference #:unresolved-schema-reference-reference
+   #:circular-schema-reference #:circular-schema-reference-reference))
