@@ -102,6 +102,25 @@ text CONTENT."
       (inline-events :figref '("FigConses") "14-1"))
   (is equal '((:this-section)) (inline-events :this-section '())))
 
+(define-test inlines-reference-texts
+  :parent inlines
+  ;; The `\\fi's a cell's active first character leaves, with the spaces TeX
+  ;; skips after them, are not part of the name.
+  (is equal "*package*" (model::reference-text "*\\fi \\fi package*"))
+  (is equal "-" (model::reference-text "-\\fi"))
+  (is equal "*" (model::reference-text "*\\fi \\fi"))
+  (is equal "\\fiasco" (model::reference-text " \\fiasco ")
+      "a control word that only begins with fi is kept")
+  (is equal ">=" (model::reference-text "{$\\spGT $}\\fi \\fi ="))
+  (is equal "<" (model::reference-text "{$\\spLT $}\\fi \\fi"))
+  (is equal '((:operator-ref :text "*print-base*" :via :misc))
+      (inline-events :misc '("*\\fi \\fi print-base*") "*print-base*"))
+  ;; A reference with no name (an empty table cell) is no node.
+  (is equal '() (inline-events :misc '("")))
+  ;; \\f marks code: a type specifier is no name of an entry.
+  (is equal '((:code :content ("(eql't)")))
+      (inline-events :typeref '("\\f {(eql 't)}") "(eql't)")))
+
 (define-test inlines-notation
   :parent inlines
   (is equal '((:evaluates-to)) (inline-events :evaluates-to '()))

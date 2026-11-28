@@ -59,7 +59,8 @@ number (docs/model.md, \"Glossary\")"))
        "The sense \"1a\" is a sub-sense of 1, kept as 1." ,sub-sense)
       ("chap-12" :node "concept-numbers.tex" 580 nil
        "the quadrant diagram of the branch cuts, drawn as an \\halign inside a
-cell of another: a cell holds inlines, not a table")
+cell of another: a cell holds inlines, not a table; the builder does not
+hold it, a patch of the source (step 3.19p) must")
       ("chap-26" :diagnostic "concept-glossary.tex" 131 "The sense \"n\" is not a number."
        "the glossary's own explanation of the notation, \\term{something}\\meaning{n}")
       ("chap-26" :diagnostic "concept-glossary.tex" 270

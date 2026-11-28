@@ -35,6 +35,7 @@ one of the front matter begun by \beginSimpleChapter or
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | string | yes | The chapter's id: the reference name of \beginchapter (its third argument, e.g. ChapOne), or a simple chapter's title. |
+| `aliases` | list of string | no | The other labels that name the chapter, which a reference may use: the short name, the second argument of \DefineChapter (\DefineChapter{ChapTwo}{Syntax}). |
 | `number` | string | no | The chapter's number as \beginchapter's first argument gives it ("1" … "26", "A"); absent for a simple chapter. |
 | `title` | inline list | yes | The chapter's title, \beginchapter's second argument or the simple chapter's one. |
 | `children` | list of node of kind or category `:section`, `:dictionary-entry`, `:block` | no | What the chapter holds, in order: the blocks before its first section, then its sections. |
@@ -56,7 +57,8 @@ to the next section of its level or above, or the chapter's end.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `id` | string | yes | The label of the \DefineSection that names the section, or <parent-id>/<n> for a section that none names (its n-th among its parent's sections). |
+| `id` | string | yes | The label of the \DefineSection that names the section, or <parent-id>/<n> for a section that none names (its n-th among its parent's sections). When the sources name a section twice, the last label. |
+| `aliases` | list of string | no | The other labels that name the section, which a reference may use: those of its earlier \DefineSection when the sources name the section twice (2.1 is CharacterSyntax in chap-2.tex and TheStandardSyntax in concept-syntax.tex). |
 | `number` | string | yes | The section's number, its chapter's and the count of each level joined by dots ("14.1.2"), as the :write of its \DefineSection confirms. |
 | `level` | integer | yes | The level, 1 for a section of the chapter, 2 for a subsection, and so on to 5. |
 | `dictionary` | boolean | no | True for a dictionary section, begun by \includeDictionary: its children are dictionary entries. |

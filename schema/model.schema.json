@@ -939,6 +939,19 @@
             "ChapFifteen"
           ]
         },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "aliases",
+          "description": "The other labels that name the chapter, which a reference may\nuse: the short name, the second argument of \\DefineChapter\n(\\DefineChapter{ChapTwo}{Syntax}).",
+          "examples": [
+            [
+              "Syntax"
+            ]
+          ]
+        },
         "number": {
           "type": "string",
           "title": "number",
@@ -1217,9 +1230,22 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The label of the \\DefineSection that names the section, or\n<parent-id>/<n> for a section that none names (its n-th among its\nparent's sections).",
+          "description": "The label of the \\DefineSection that names the section, or\n<parent-id>/<n> for a section that none names (its n-th among its\nparent's sections).  When the sources name a section twice, the last label.",
           "examples": [
             "ArrayElements"
+          ]
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "aliases",
+          "description": "The other labels that name the section, which a reference may\nuse: those of its earlier \\DefineSection when the sources name the\nsection twice (2.1 is CharacterSyntax in chap-2.tex and\nTheStandardSyntax in concept-syntax.tex).",
+          "examples": [
+            [
+              "CharacterSyntax"
+            ]
           ]
         },
         "number": {

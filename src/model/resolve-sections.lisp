@@ -20,14 +20,23 @@ backslash and surrounding white space, or NIL when nothing is left."
       (setf id (string-trim '(#\Space #\Tab #\Newline) (subseq id 1))))
     (and (plusp (length id)) id)))
 
+(defun secref-labels (node registry)
+  "Every label that names NODE: its id and, for a chapter or section, its
+aliases."
+  (let ((id (node-field-value node :id registry)))
+    (remove-duplicates
+     (remove nil (cons id (and (member (node-kind node) '(:chapter :section))
+                               (node-field-value node :aliases registry))))
+     :test #'equal)))
+
 (defun secref-index (items kind registry)
-  "A hash table from id to the list of nodes of kind KIND in ITEMS, in
-document order."
+  "A hash table from label to the list of nodes of kind KIND in ITEMS that
+it names, in document order."
   (let ((table (make-hash-table :test 'equal)))
     (walk-nodes (lambda (node)
                   (when (eq (node-kind node) kind)
-                    (let ((id (node-field-value node :id registry)))
-                      (when id (push node (gethash id table))))))
+                    (dolist (label (secref-labels node registry))
+                      (push node (gethash label table)))))
                 items registry)
     (maphash (lambda (id nodes) (setf (gethash id table) (nreverse nodes))) table)
     table))
@@ -56,7 +65,8 @@ unresolved too."
             ((rest found) (problem "The label ~S is ambiguous: ~{~(~A~) at ~A~^, ~}."
                                    id (loop for (kind . n) in found
                                             collect kind collect (secref-span-text n))))
-            (t (setf (node-field-value node :target registry) (make-target (caar found) id))
+            (t (setf (node-field-value node :target registry)
+                     (make-target (caar found) (node-field-value (cdar found) :id registry)))
                nil)))))
 
 (defun resolve-section-references (items &key (registry *registry*))
