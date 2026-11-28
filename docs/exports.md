@@ -282,9 +282,32 @@ This is the one place the rule is stated; the process docs and skills link
 here. Compatibility rules are decided only when a stable release is
 planned.
 
+### The sample export
+
+`make sample` (`tools/sample.lisp`; `OUT=dir` for another place) writes a
+small export to `build/sample/`, for code that reads the exports to be
+built and tested without running the parser (it still takes about 25 s: it
+builds the whole model and keeps a few entries of it). `write-sample-export`
+(`src/export/sample.lisp`) writes, for each id of `*sample-entry-ids*`
+(`endp`, `boolean`, `type-error`, `when`, `car`, `*print-base*`: a
+function, a system class, a condition type, a macro, an accessor, a
+variable), the dictionary entry as `entries/<id>.json` and `.sexp` (the id
+named as a file as chapters are, "The writers"), then `manifest.json`,
+built as the whole export's, which lists the files with their digests. An
+entry file is a file as any other: `{"schemaVersion": "…", "entry": {…}}`,
+and `(:schema-version "…" :entry (:dictionary-entry …))`. It is a slice of
+the whole export, so its references point to chapters, sections and glossary
+entries the sample does not hold; they are resolved in the whole export.
+There is no `report.json`.
+
+`tests/export/sample.lisp` writes the sample from the real model and checks
+the manifest, every digest, every entry against the schema and the
+S-expression files. The entries are chosen from those the schema accepts:
+the pinned violations of "The whole export" are not in them.
+
 ## For consumers
 
-`docs/consuming.md` (planned) is the short guide for code that reads the
+`docs/consuming.md` is the short guide for code that reads the
 exports:
 
 - how the files fit together, starting from `manifest.json`;
@@ -292,7 +315,7 @@ exports:
 - getting from a node back to its TeX source;
 - a worked example on `endp`.
 
-A small sample export, a few entries with the manifest, is published next
+The sample export of "The sample export" is published next
 to the full exports (under `sample/` at the same base URL), so a library can be built and tested without running
 the parser. Bindings for other languages are not provided; they can be
 generated from the JSON Schema with standard tools.

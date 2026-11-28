@@ -46,4 +46,6 @@
    #:write-export-file #:write-export-files
    ;; The whole export (manifest.lisp; step 3.20)
    #:export-report-object #:export-manifest-object #:export-collect
-   #:write-whole-export))
+   #:write-whole-export
+   ;; The sample export (sample.lisp; step 3.22)
+   #:*sample-entry-ids* #:sample-entry #:sample-file-name #:write-sample-export))
