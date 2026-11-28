@@ -202,6 +202,49 @@ single form `(:schema-version "<digest>" . content)`, read back with `read`
 with `*read-eval*` false under standard syntax (keywords, strings, integers
 and lists only).
 
+### The whole export
+
+`make export` (`tools/export.lisp`) builds the document of every chapter
+job (`build-document`) and writes it under `build/export/` (`OUT=dir` for
+another place): `write-whole-export` (`src/export/manifest.lisp`) writes
+the chapter files, `glossary` (every `glossary-group` of the document) and
+`index` (every `index-entry`, in document order), each as JSON and as an
+S-expression, then `report.json` and `manifest.json`. The two are JSON
+only: they describe the export, not the model.
+
+- **`manifest.json`** (`export-manifest-object`): `schemaVersion`;
+  `generator` (`name`, `version`, `commit`, the git commit of the
+  working tree, `"unknown"` outside a checkout); `source`: `specSha256`
+  (the SHA-256 of `spec/SHA256SUMS`, which names every source by its
+  digest) and `patches`, `{"name", "sha256"}` of each applied patch in
+  order (`applied-patches`, M4); `files`: `{"path", "sha256"}` of every
+  other file written, in the order written.
+- **`report.json`** (`export-report-object`): `schemaVersion`, then
+  three arrays of groups `{"kind", "description", "count", "items"}`,
+  each item `{"job", "span", "message"}` (job and span left out when
+  the problem has none): `unresolvedReferences` (the kinds
+  `unresolved-term`, `ambiguous-term`, `missing-sense`,
+  `unresolved-reference`, `ambiguous-reference`; the message is the
+  reason), `texErrors` (`tex-error`, `fatal-error`: errors the job
+  recovered from, or stopped on), and `other` (every other kind of
+  problem, e.g. `diagnostic`). A kind with no problem has no group. The
+  kinds and their meaning are `*problem-kinds*`
+  (`src/model/build.lisp`).
+
+`tests/export/whole-spec.lisp` writes the export of the whole spec to a
+temporary directory and checks every digest of the manifest, every node
+of the JSON files against the schema (3.6), the S-expression files, and
+the counts of the report by kind (pinned there). The real export still
+breaks the schema in 63 places (`*export-schema-violations*`: 54
+`math-char` nodes without a span; 8 `figure` and 1 `glossary-example` nodes
+where the declaration of their parent does not allow them); the test pins
+them as a ratchet, so a new violation fails it and a fixed one must be
+removed from the list.
+
+The validator's cost matters here: a `oneOf` over node kinds validates only
+the branches whose constant `kind` matches the instance's, and a schema is
+checked against the subset once, not at every call.
+
 ### The writers
 
 `src/export/write-json.lisp` (`node-json`), `write-sexp.lisp` (`file-sexp`,

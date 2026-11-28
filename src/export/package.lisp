@@ -10,7 +10,8 @@
   (:use #:cl)
   (:local-nicknames (#:model #:cl-ansi-spec/model)
                     (#:json #:cl-ansi-spec/json)
-                    (#:sha256 #:cl-ansi-spec/sha256))
+                    (#:sha256 #:cl-ansi-spec/sha256)
+                    (#:patch #:cl-ansi-spec/patch))
   (:import-from #:cl-ansi-spec/json
                 #:json-object-p #:json-object-members #:json-get)
   ;; The declarations the reference doc reads (reference.lisp)
@@ -42,4 +43,7 @@
    ;; Writers (write-json.lisp, write-sexp.lisp, files.lisp; step 3.7)
    #:node-json #:file-sexp #:sexp-text #:read-sexp-text #:file-object
    #:schema-pathname #:schema-version #:export-file-name
-   #:write-export-file #:write-export-files))
+   #:write-export-file #:write-export-files
+   ;; The whole export (manifest.lisp; step 3.20)
+   #:export-report-object #:export-manifest-object #:export-collect
+   #:write-whole-export))
