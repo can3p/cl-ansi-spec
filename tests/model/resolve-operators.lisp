@@ -110,7 +110,7 @@ against the test model."
 ;;; The whole spec
 
 (defparameter *whole-spec-operator-findings*
-  '(:resolved 12427 :ambiguous 273 :unresolved 89)
+  '(:resolved 12434 :ambiguous 273 :unresolved 89)
   "What resolving the whole spec's operator references finds; change it
 deliberately, with the reason.  The unresolved ones are names the
 dictionary has no entry for (`safety', `speed': declaration identifiers;
