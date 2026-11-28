@@ -1,0 +1,12 @@
+\term{type-specifier} in dict-types.tex and dict-printer.tex: the glossary
+term is "type specifier".
+--- dict-types.tex
++++ dict-types.tex
+@@ -127,1 +127,1 @@
+-The list form of the \typeref{function} \term{type-specifier}
++The list form of the \typeref{function} \term{type specifier}
+--- dict-printer.tex
++++ dict-printer.tex
+@@ -1317,1 +1317,1 @@
+-can assume that object satisfies the \term{type} given by \term{type-specifier}.
++can assume that object satisfies the \term{type} given by \term{type specifier}.

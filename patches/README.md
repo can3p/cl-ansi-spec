@@ -52,3 +52,16 @@ texts that spelled an entry kind otherwise: `function`, `Special Form`,
 into a paragraph), `0008-empty-code-in-type-of-examples` (an empty `\code`
 block) and `0009-open-and-closed-streams-label-twice` (two sections with one
 `\DefineSection` label).
+
+Term patches (step 3.19p), from the term references the model could not
+resolve: `0010-seeterm-nested-term` (`\seeterm\term{close}`),
+`0011-implementation-dependent-spelling`, `0012-satisfies-the-test-spelling`,
+`0013-compound-type-specifier-spelling`, `0014-generalized-boolean`,
+`0015-hash-table-term-loop`, `0016-hash-tables-term-equalp`,
+`0017-type-specifier-term`, `0018-function-names-term`,
+`0019-lambda-list-term-glossary`, `0020-method-defining-form-term` and
+`0021-object-term-period` fix the 12 misspelt terms; `0022-term-for-argument-names`
+and `0023-term-for-operator-and-type-names` set argument, operator and type
+names as `\param`, `\funref`, `\macref`, `\typeref` or `\f` where they were
+`\term`.  The `:not-a-term` rows whose intended markup is not plain stay
+pinned in `tests/model/unresolved-terms.sexp`.

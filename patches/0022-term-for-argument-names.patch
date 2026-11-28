@@ -1,0 +1,55 @@
+The prose names an argument of the operator being described with \term where
+\param is meant (the spec's own idiom, e.g. \param{start} and \param{end} in
+the line before): start, end, from-end (dict-sequences.tex), errorp
+(dict-objects.tex), table and, on the next line, the glossary term pprint dispatch table
+(hyphenated in the source; dict-printer.tex), protected-form (dict-flow.tex), just-loaded
+(dict-pathnames.tex), typespec (dict-numbers.tex), pathspec (dict-files.tex)
+and start1, start2 (dict-strings.tex).  Left pinned: the other :not-a-term
+rows, where the intended markup is not plain.
+--- dict-sequences.tex
++++ dict-sequences.tex
+@@ -1213,1 +1213,1 @@
+-\term{bounded} by \param{start} and \term{end}
++\term{bounded} by \param{start} and \param{end}
+@@ -1334,1 +1334,1 @@
+-regardless of the value of \term{start}, \term{end}, or \term{from-end}.
++regardless of the value of \param{start}, \param{end}, or \param{from-end}.
+--- dict-objects.tex
++++ dict-objects.tex
+@@ -3570,1 +3570,1 @@
+-When using \SETFof{find-class}, any \term{errorp} argument is \term{evaluated}
++When using \SETFof{find-class}, any \param{errorp} argument is \term{evaluated}
+--- dict-printer.tex
++++ dict-printer.tex
+@@ -221,2 +221,2 @@
+-Should signal an error \oftype{type-error} if \term{table} is neither a
+-\term{pprint-dispatch-table} nor \nil.
++Should signal an error \oftype{type-error} if \param{table} is neither a
++\term{pprint dispatch table} nor \nil.
+--- dict-flow.tex
++++ dict-flow.tex
+@@ -3148,1 +3148,1 @@
+-\param{results}---the \term{values} of the \term{protected-form}.
++\param{results}---the \term{values} of the \param{protected-form}.
+--- dict-pathnames.tex
++++ dict-pathnames.tex
+@@ -576,1 +576,1 @@
+-\term{just-loaded}---a \term{generalized boolean}.
++\param{just-loaded}---a \term{generalized boolean}.
+--- dict-numbers.tex
++++ dict-numbers.tex
+@@ -3633,1 +3633,1 @@
+-hold parts of \term{type} \term{typespec}.
++hold parts of \term{type} \param{typespec}.
+--- dict-files.tex
++++ dict-files.tex
+@@ -187,1 +187,1 @@
+-The \term{primary value} is the given \term{pathspec} so that this operation can
++The \term{primary value} is the given \param{pathspec} so that this operation can
+--- dict-strings.tex
++++ dict-strings.tex
+@@ -766,2 +766,2 @@
+-     to the subsequence of \param{string1} \term{bounded} by \term{start1} and \param{end1}
+- and to the subsequence of \param{string2} \term{bounded} by \term{start2} and \param{end2}.
++     to the subsequence of \param{string1} \term{bounded} by \param{start1} and \param{end1}
++ and to the subsequence of \param{string2} \term{bounded} by \param{start2} and \param{end2}.

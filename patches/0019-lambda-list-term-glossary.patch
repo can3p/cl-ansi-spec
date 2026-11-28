@@ -1,0 +1,7 @@
+\term{lambda-list} in the glossary entry of aux variable: the term is
+"lambda list" (the entry's first line has it right).
+--- concept-glossary.tex
++++ concept-glossary.tex
+@@ -425,1 +425,1 @@
+-  introduced by a \term{lambda-list}, \term{aux variables} are not 
++  introduced by a \term{lambda list}, \term{aux variables} are not 

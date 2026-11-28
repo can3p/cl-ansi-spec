@@ -1,0 +1,7 @@
+\term{function-names} in dict-environment.tex: the glossary term is
+"function name", here in the plural.
+--- dict-environment.tex
++++ dict-environment.tex
+@@ -543,1 +543,1 @@
+-  unless no \term{function-names} are supplied, 
++  unless no \term{function names} are supplied, 

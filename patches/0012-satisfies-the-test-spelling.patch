@@ -1,0 +1,7 @@
+"satifies the test" (sic) in dict-conses.tex; the glossary entry is
+"satisfy the test" (inflected: satisfies the test).
+--- dict-conses.tex
++++ dict-conses.tex
+@@ -3953,1 +3953,1 @@
+-For every pair that \term{satifies the test},
++For every pair that \term{satisfies the test},

@@ -1,0 +1,8 @@
+\term{generic boolean} in concept-objects.tex names no glossary entry; the
+term the sentence means, a value returned by slot-boundp, is generalized
+boolean.
+--- concept-objects.tex
++++ concept-objects.tex
+@@ -517,1 +517,1 @@
+-returns a \term{generic boolean} value that indicates whether a specified \term{slot} has a
++returns a \term{generalized boolean} value that indicates whether a specified \term{slot} has a
