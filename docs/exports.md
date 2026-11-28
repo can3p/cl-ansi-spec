@@ -93,8 +93,8 @@ Every exported file of the whole spec is validated against the schema in
 the test suite. The validator is Lisp and implements exactly the subset of
 JSON Schema the generator emits: `type`, `const`, `enum`, `required`,
 `properties`, `additionalProperties`, `items`, `$ref`, and `oneOf` (over
-kind-constant objects, over `const` values, and over a target and `null`). The generator never emits anything outside that subset; a test
-checks this.
+kind-constant objects, over `const` values, and over a target and `null`).
+The generator never emits anything outside that subset; a test checks this.
 
 CI also checks the export with one widely used external validator, ajv-cli
 (pinned in `.github/workflows/ci.yml`, step "Validate the export against the
@@ -103,8 +103,9 @@ schema"). It runs in CI only and is not part of the code base. The step runs
 in `build/export/` against `schema/model.schema.json`. Each file wraps its
 node (`chapter`, `glossary` or `index`), so the nodes are taken out first.
 `manifest.json` and `report.json` have no schema and are not checked. Any
-violation fails the job. The Python validator check-jsonschema took over two
-minutes on the largest chapter alone, too slow for CI, so the step uses ajv.
+violation fails the job; an export with no nodes fails it too. The Python
+validator check-jsonschema did not finish within 110 seconds on the largest
+chapter alone (it was stopped there), too slow for CI, so the step uses ajv.
 
 The validator is `src/export/validate.lisp`. `(validate-json schema
 instance)` takes both as parsed JSON (`cl-ansi-spec/json`) and returns the

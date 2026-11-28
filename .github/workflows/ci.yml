@@ -64,5 +64,6 @@ jobs:
               for i, node in enumerate(data[key]):
                   write(f"{key}-{i:05d}.json", node)
           PY
+          test -n "$(ls -A "$nodes")" || { echo "no nodes exported" >&2; exit 1; }
           npx --yes ajv-cli@5.0.0 validate --spec=draft2020 \
             -s schema/model.schema.json -d "$nodes/*.json"
