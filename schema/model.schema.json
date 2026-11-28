@@ -6003,7 +6003,10 @@
         "letter": {
           "type": "string",
           "title": "letter",
-          "description": "The heading's letter, or the heading for the entries that do not\nbegin with a letter."
+          "description": "The heading's letter, or the heading for the entries that do not\nbegin with a letter.",
+          "examples": [
+            "A"
+          ]
         },
         "entries": {
           "type": "array",
@@ -6011,7 +6014,27 @@
             "$ref": "#/$defs/glossary-entry"
           },
           "title": "entries",
-          "description": "The group's entries, in order."
+          "description": "The group's entries, in order.",
+          "examples": [
+            [
+              {
+                "kind": "glossary-entry",
+                "id": "abort",
+                "term": "abort",
+                "senses": [
+                  {
+                    "kind": "glossary-sense",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "to stop a computation."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6019,7 +6042,69 @@
         "span",
         "letter"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "glossary-group",
+          "letter": "A",
+          "entries": [
+            {
+              "kind": "glossary-entry",
+              "id": "absolute",
+              "term": "absolute",
+              "parts-of-speech": [
+                "adjective"
+              ],
+              "senses": [
+                {
+                  "kind": "glossary-sense",
+                  "number": 1,
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "(of a "
+                    },
+                    {
+                      "kind": "term-ref",
+                      "text": "time",
+                      "target": {
+                        "kind": "glossary",
+                        "id": "time"
+                      }
+                    },
+                    {
+                      "kind": "text",
+                      "text": ") representing a specific point in time."
+                    }
+                  ]
+                },
+                {
+                  "kind": "glossary-sense",
+                  "number": 2,
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "(of a "
+                    },
+                    {
+                      "kind": "term-ref",
+                      "text": "pathname",
+                      "target": {
+                        "kind": "glossary",
+                        "id": "pathname"
+                      }
+                    },
+                    {
+                      "kind": "text",
+                      "text": ") representing a specific position in a\ndirectory hierarchy."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "glossary-entry": {
       "type": "object",
@@ -6036,12 +6121,18 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The entry's id: its term."
+          "description": "The entry's id: its term.",
+          "examples": [
+            "access"
+          ]
         },
         "term": {
           "type": "string",
           "title": "term",
-          "description": "The term defined, \\gentry's argument."
+          "description": "The term defined, \\gentry's argument.",
+          "examples": [
+            "access"
+          ]
         },
         "pronunciation": {
           "type": "array",
@@ -6170,7 +6261,20 @@
             ]
           },
           "title": "pronunciation",
-          "description": "How the term is pronounced, \\pronounced's argument, with its\nstress marks; absent when not given."
+          "description": "How the term is pronounced, \\pronounced's argument, with its\nstress marks; absent when not given.",
+          "examples": [
+            [
+              {
+                "kind": "strong",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "nil"
+                  }
+                ]
+              }
+            ]
+          ]
         },
         "parts-of-speech": {
           "type": "array",
@@ -6178,7 +6282,13 @@
             "$ref": "#/$defs/enum-part-of-speech"
           },
           "title": "parts-of-speech",
-          "description": "The parts of speech given after the term, before the senses, in\norder."
+          "description": "The parts of speech given after the term, before the senses, in\norder.",
+          "examples": [
+            [
+              "noun",
+              "transitive-verb"
+            ]
+          ]
         },
         "usages": {
           "type": "array",
@@ -6186,7 +6296,12 @@
             "$ref": "#/$defs/enum-usage"
           },
           "title": "usages",
-          "description": "The usages given after the term, before the senses, that hold\nfor every sense."
+          "description": "The usages given after the term, before the senses, that hold\nfor every sense.",
+          "examples": [
+            [
+              "idiomatic"
+            ]
+          ]
         },
         "senses": {
           "type": "array",
@@ -6194,7 +6309,31 @@
             "$ref": "#/$defs/glossary-sense"
           },
           "title": "senses",
-          "description": "The senses, in order; one, without a number, when the entry is\nnot numbered."
+          "description": "The senses, in order; one, without a number, when the entry is\nnot numbered; text before `1.' (an optional context, `(of an array)')\nis a sense of its own, first, without a number.",
+          "examples": [
+            [
+              {
+                "kind": "glossary-sense",
+                "number": 1,
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "expressed adjustability."
+                  }
+                ]
+              },
+              {
+                "kind": "glossary-sense",
+                "number": 2,
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "actual adjustability."
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6204,7 +6343,83 @@
         "term",
         "senses"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "glossary-entry",
+          "id": "access",
+          "term": "access",
+          "parts-of-speech": [
+            "noun",
+            "transitive-verb"
+          ],
+          "senses": [
+            {
+              "kind": "glossary-sense",
+              "number": 1,
+              "parts-of-speech": [
+                "transitive-verb"
+              ],
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "(a "
+                },
+                {
+                  "kind": "term-ref",
+                  "text": "place",
+                  "target": {
+                    "kind": "glossary",
+                    "id": "place"
+                  }
+                },
+                {
+                  "kind": "text",
+                  "text": ") to "
+                },
+                {
+                  "kind": "term-ref",
+                  "text": "read",
+                  "sense": 1,
+                  "target": {
+                    "kind": "glossary",
+                    "id": "read"
+                  }
+                },
+                {
+                  "kind": "text",
+                  "text": " the value of the place."
+                }
+              ]
+            },
+            {
+              "kind": "glossary-sense",
+              "number": 2,
+              "parts-of-speech": [
+                "noun"
+              ],
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "(of a "
+                },
+                {
+                  "kind": "term-ref",
+                  "text": "place",
+                  "target": {
+                    "kind": "glossary",
+                    "id": "place"
+                  }
+                },
+                {
+                  "kind": "text",
+                  "text": ") an attempt to read it."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "glossary-sense": {
       "type": "object",
@@ -6221,7 +6436,10 @@
         "number": {
           "type": "integer",
           "title": "number",
-          "description": "The sense's number; absent when the entry has one sense."
+          "description": "The sense's number; absent when the entry has one sense.",
+          "examples": [
+            1
+          ]
         },
         "parts-of-speech": {
           "type": "array",
@@ -6229,7 +6447,12 @@
             "$ref": "#/$defs/enum-part-of-speech"
           },
           "title": "parts-of-speech",
-          "description": "The parts of speech given for this sense alone."
+          "description": "The parts of speech given for this sense alone.",
+          "examples": [
+            [
+              "transitive-verb"
+            ]
+          ]
         },
         "usages": {
           "type": "array",
@@ -6237,7 +6460,12 @@
             "$ref": "#/$defs/enum-usage"
           },
           "title": "usages",
-          "description": "The usages given for this sense alone."
+          "description": "The usages given for this sense alone.",
+          "examples": [
+            [
+              "mathematics"
+            ]
+          ]
         },
         "content": {
           "type": "array",
@@ -6366,7 +6594,27 @@
             ]
           },
           "title": "content",
-          "description": "The definition's text, its \\term references and its `See'\npointers."
+          "description": "The definition's text, its \\term references and its `See'\npointers.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "(of a "
+              },
+              {
+                "kind": "term-ref",
+                "text": "time",
+                "target": {
+                  "kind": "glossary",
+                  "id": "time"
+                }
+              },
+              {
+                "kind": "text",
+                "text": ") representing a specific point in time."
+              }
+            ]
+          ]
         },
         "examples": {
           "type": "array",
@@ -6374,7 +6622,20 @@
             "$ref": "#/$defs/glossary-example"
           },
           "title": "examples",
-          "description": "The sense's examples, \\gexample, in order."
+          "description": "The sense's examples, \\gexample, in order.",
+          "examples": [
+            [
+              {
+                "kind": "glossary-example",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "This is an example of an example."
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6382,7 +6643,45 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "glossary-sense",
+          "number": 1,
+          "parts-of-speech": [
+            "transitive-verb"
+          ],
+          "content": [
+            {
+              "kind": "text",
+              "text": "(a "
+            },
+            {
+              "kind": "term-ref",
+              "text": "place",
+              "target": {
+                "kind": "glossary",
+                "id": "place"
+              }
+            },
+            {
+              "kind": "text",
+              "text": ") to read the value of the place."
+            }
+          ],
+          "examples": [
+            {
+              "kind": "glossary-example",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "Look it up."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "glossary-example": {
       "type": "object",
@@ -6523,7 +6822,15 @@
             ]
           },
           "title": "content",
-          "description": "The example's text."
+          "description": "The example's text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "This is an example of an example."
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6531,7 +6838,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "glossary-example",
+          "content": [
+            {
+              "kind": "text",
+              "text": "This is an example of an example."
+            }
+          ]
+        }
+      ]
     },
     "bnf-rule": {
       "type": "object",

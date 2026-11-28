@@ -62,6 +62,8 @@
    #:*fonts* #:font-entry #:register-handler #:*layout-codes* #:*ligatures* #:font-file #:font-class
    #:convert-text #:install-text-handlers #:*plain-text-containers*
    #:plain-text-container-p
+   ;; The glossary (build-glossary.lisp, step 3.14)
+   #:install-glossary-handlers #:*part-of-speech-texts* #:*usage-texts*
    ;; Math (build-math.lisp)
    #:*math-families* #:*math-tables* #:math-family-text
    #:install-math-handlers
