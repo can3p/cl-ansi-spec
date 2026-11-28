@@ -74,9 +74,9 @@ whole-milestone critic checks them.
    - Tick the step in `docs/plan/<id>.md` (only your own step; `PLAN.md`
      names only the milestones).
    - Make one commit containing code, tests, docs and the plan tick.
-     A change of the events of the whole spec is meant: say in the
-     message why they changed, and regenerate `tests/snapshots.sexp`
-     (`make snapshots`) in that commit.
+     A change of the events or the model of the whole spec is meant: say
+     in the message why they changed, and regenerate `tests/snapshots.sexp`
+     and `tests/model-snapshots.sexp` (`make snapshots`) in that commit.
 
 `main` stays usable after every step.
 
@@ -101,8 +101,9 @@ be merged before the next wave starts; a step may start as soon as its
   leaves one closing paren too many (or a component twice) and the
   system no longer loads.  Merge one pull request at a time and run
   `make test` on each merge before the next.  Generated files (`tests/snapshots.sexp`,
-  the JSON Schema, the reference doc): take either side, then run
-  `make snapshots` or `make generate` (planned) and commit the result.
+  `tests/model-snapshots.sexp`, the JSON Schema, the reference doc): take
+  either side, then run `make snapshots` or `make generate` and commit the
+  result.
   `docs/plan/<id>.md`: each step ticks only its own item, so ticks merge.
 - **Names in shared packages.**  Steps of one wave fill files of the
   same package, so a helper (function, macro, variable; tests included)

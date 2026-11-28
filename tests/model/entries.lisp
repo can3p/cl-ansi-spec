@@ -139,14 +139,17 @@ without spans, and the build report."
     (true (some (lambda (message) (search "outside any entry" message))
                 (entries-problem-messages report)))
     (true (member :underflow (mapcar #'model:problem-kind (model:build-report-problems report)))))
-  ;; Content between the entry's start and its first label has no node to hold it.
+  ;; What stands between the entry's start and its first label is its
+  ;; content; text there is no block, which the entry's check reports.
   (multiple-value-bind (nodes report)
       (entry-sexps (begin-event :com "x" "Function")
                    (ev :begin :paragraph) (ev :text "x Function") (ev :end :paragraph)
-                   (ev :begin :paragraph) (ev :text "stray") (ev :end :paragraph)
+                   (ev :text "stray")
                    (ev :end :com))
-    (declare (ignore nodes))
-    (true (some (lambda (message) (search "outside any part" message))
+    (is equal '((:dictionary-entry :id "x" :names ("x") :entry-kind :function
+                 :content ("stray")))
+        nodes)
+    (true (some (lambda (message) (search "content" message))
                 (entries-problem-messages report)))))
 
 (define-test entries-end-inside-a-paragraph
@@ -314,7 +317,7 @@ and TAIL, and the report."
              (member file (cl-ansi-spec/inventory:survey-files
                            (cl-ansi-spec/inventory:survey-job job))
                      :test #'string=))
-           (cl-ansi-spec/inventory:chapter-jobs)))
+           (cl-ansi-spec:chapter-jobs)))
 
 (defun spec-nodes (file first last)
   "The nodes the entry handlers build from FILE's lines FIRST to LAST, as

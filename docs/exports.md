@@ -151,12 +151,20 @@ branch only. `$ref` resolves to `#` or a JSON Pointer in the same schema.
   - dictionary entries: the first name, e.g. `endp`;
   - glossary entries: the term.
 
+  - figures: their `\DefineFigure` label, else `<chapter-id>/fig-<m>`
+    for figure `N-M`;
+  - a section without a `\DefineSection`: `<parent-id>/<n>`, its *n*-th
+    among its parent's sections (stable because its parent's id is; no
+    source links to it).
+
   An id is unique among the nodes of one target kind, so a link is the pair
   `{"kind", "id"}`. Two dictionary entries can share a first name (an
   operator documented once as a function and once as a type). In that case
-  the id becomes `<name>/<ftype>`, e.g. `function/special-operator`, with
+  both ids become `<name>/<ftype>`, e.g. `function/special-operator`, with
   the `\ftype` text in kebab-case. Any collision that rule does not settle
-  stops the build.
+  is an `:id-collision` of the build report (a source error that a patch
+  fixes); the whole-spec test pins the report, so none goes unnoticed
+  ([model.md](model.md), "Ids").
 - **Spans:**
   `{"file": "dict-conses.tex", "start": 61234, "end": 61262, "line": 1702, "column": 0}`.
   `start` and `end` are character offsets, with `end` exclusive. `line`

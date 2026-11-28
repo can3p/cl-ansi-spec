@@ -10,13 +10,24 @@
 
 (in-package #:cl-ansi-spec/tex)
 
-(defstruct (token-level (:constructor make-token-level (tokens kind &optional tag)))
+(defstruct (token-level (:constructor make-token-level
+                           (tokens kind &optional tag call body context)))
   "A token list being read.  KIND says where it comes from, e.g.
 :BACKED-UP, :INSERTED or :MACRO; TAG, if not NIL, is given to the stack's
-LEVEL-END-HOOK when the level is removed."
+LEVEL-END-HOOK when the level is removed.  A :MACRO body pushed with
+PUSH-MACRO-BODY also has the CALL token, the BODY as defined (its tokens
+are the ones read from it, the arguments' are not) and the CONTEXT, the
+stack's levels when the call was read; ORIGIN caches the span
+TOKEN-ORIGIN-SPAN gives CALL.  When the level is removed its origin is
+settled and its context dropped, so that a loop of tail calls does not
+keep every level it went through."
   (tokens '() :type list)
   (kind nil :read-only t)
-  (tag nil :read-only t))
+  (tag nil :read-only t)
+  (call nil :read-only t)
+  (body '() :type list :read-only t)
+  (context '() :type list)
+  (origin nil))
 
 (defstruct (input-stack (:constructor %make-input-stack
                             (state resolver skip-hook)))
@@ -89,6 +100,9 @@ with a tag its LEVEL-END-HOOK."
   (let ((level (pop (input-stack-levels stack)))
         (hook (input-stack-u-template-end-hook stack))
         (end-hook (input-stack-level-end-hook stack)))
+    (when (token-level-call level)
+      (level-origin level)
+      (setf (token-level-context level) '()))
     (when (and end-hook (token-level-tag level))
       (funcall end-hook stack (token-level-tag level)))
     (when (and hook (eq (token-level-kind level) :u-template))
@@ -116,6 +130,39 @@ LEVEL-END-HOOK when the level is removed.  Returns no values."
     (pop-exhausted-token-lists stack))
   (push (make-token-level (copy-list tokens) kind tag) (input-stack-levels stack))
   (values))
+
+(defun call-context (stack)
+  "The levels of STACK, as PUSH-MACRO-BODY wants them for a call whose
+token was just read: taken before the call's arguments are, which may
+remove the level the token came from."
+  (input-stack-levels stack))
+
+(defun push-macro-body (stack tokens tag call body context)
+  "PUSH-TOKENS of TOKENS, the expansion of a macro whose BODY (as
+defined, parameter numbers included) CALL called, as a :MACRO level
+remembering them and CONTEXT, the CALL-CONTEXT of CALL, for
+TOKEN-ORIGIN-SPAN.  Returns no values."
+  (pop-exhausted-token-lists stack)
+  (push (make-token-level (copy-list tokens) :macro tag call body context)
+        (input-stack-levels stack))
+  (values))
+
+(defun token-origin-span (token context)
+  "Where TOKEN, read with the levels CONTEXT on the stack (a CALL-CONTEXT),
+stands in the text: its own span, unless it is a token of the body of a
+macro call in CONTEXT, which stands where that call does, recursively;
+so the token of a call a setup macro makes stands at the outermost call
+in the text (a file, or an argument read from one)."
+  (dolist (level context (and token (token-span token)))
+    (when (and (token-level-p level) (token-level-call level)
+               (member token (token-level-body level) :test #'eq))
+      (return (level-origin level)))))
+
+(defun level-origin (level)
+  "Where the call of the macro body LEVEL stands in the text, cached."
+  (or (token-level-origin level)
+      (setf (token-level-origin level)
+            (token-origin-span (token-level-call level) (token-level-context level)))))
 
 (defun resolve-input (stack name)
   "The line source the resolver of STACK finds for the file NAME, or NIL;

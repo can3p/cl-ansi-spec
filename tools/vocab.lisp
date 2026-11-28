@@ -23,6 +23,7 @@
 
 (defpackage #:cl-ansi-spec.tools.vocab
   (:use #:cl #:cl-ansi-spec/inventory)
+  (:import-from #:cl-ansi-spec #:chapter-jobs)
   (:import-from #:cl-ansi-spec.tools #:with-exit-status))
 
 (in-package #:cl-ansi-spec.tools.vocab)

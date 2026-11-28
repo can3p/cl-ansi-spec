@@ -48,8 +48,10 @@ example notation); absent for a blank line."
                                     :content ((:paragraph :content ("bindings of functions.")))))))
   "A list, from \\beginlist to \\endlist, or the items of a level below
 \\item (\\itemitem, \\itemitemitem) that follow one another."
-  (items (:node :item) :repeated t :required t
-   :doc "The list's items, in order."
+  (items (:node :item :issue-start :issue-end :index-entry :editor-note :reviewer-note)
+   :repeated t :required t
+   :doc "The list's items, in order, and the anchors (issues, index
+entries) and notes that stand before or between them, outside any item."
    :example ((:item :label ("•") :content ((:paragraph :content ("bindings of functions.")))))))
 
 (define-node item (:area :blocks

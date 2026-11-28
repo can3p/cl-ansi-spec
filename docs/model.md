@@ -22,12 +22,12 @@ field.
 
 | Node | Fields | Children |
 |------|--------|----------|
-| `:document` | `:version` (`\rev` of `setup-version.tex`) | `:front-matter`, `:chapters` |
+| `:document` | `:version` (`\rev` of `setup-version.tex`) | `:cover` (blocks), `:front-matter`, `:chapters` |
 | `:chapter` | `:id`, `:number` (`"1"` … `"26"`, `"A"`; none for a simple chapter), `:title` | `:children`: blocks, sections, dictionary entries |
 | `:section` | `:id` (the `\DefineSection` label), `:number` (e.g. `"14.1.2"`), `:level` (1–5), `:dictionary`, `:title` | `:children`: blocks, sections, dictionary entries, glossary groups |
-| `:dictionary-entry` | `:id`, `:names`, `:entry-kind` (the `\ftype`, an enum) | `:parts` |
+| `:dictionary-entry` | `:id`, `:names`, `:entry-kind` (the `\ftype`, an enum) | `:content` (anchors, notes before the first part), `:parts` |
 | `:part` | `:title` (the `\label` text), `:none` (true for "None.") | `:content`: blocks |
-| `:glossary-group` | `:letter` | `:entries` |
+| `:glossary-group` | `:letter` | `:entries` (and the anchors between them) |
 | `:glossary-entry` | `:id`, `:term`, `:pronunciation`, `:parts-of-speech`, `:usages` | `:senses` (`:glossary-sense`: `:number`, `:parts-of-speech`, `:usages`, `:content`, `:examples`) |
 | `:figure` | `:id`, `:number` (`"14-1"`), `:caption` | `:content`: a `:table` or blocks |
 
@@ -94,6 +94,24 @@ dictionary entry defines is its field `:entry-kind`.
 Every addressable node has a stable `:id`, derived from the sources (the
 entry name, the `\DefineSection` label, the glossary term), never from
 numbering. Exports and consumers link by id.
+
+### Ids
+
+*Step 3.16* (`src/model/ids.lisp`).  Each builder gives its nodes the id
+the sources name them by ([exports.md](exports.md), "JSON shape"):
+chapters their `\beginchapter` reference name, sections their
+`\DefineSection` label (`<parent-id>/<n>` for the sections none names:
+stable because the parent's id is, and never a link target), dictionary
+entries their first name, glossary entries their term, figures their
+`\DefineFigure` label (`<chapter-id>/fig-<m>` without one).
+`assign-ids`, run by `build-model` over all the jobs built, settles the
+rest: the dictionary entries that share a first name all get
+`<name>/<entry-kind>` (`function/special-operator`; 30 names in the
+sources, `tests/model/whole-spec.lisp` lists them).  An id still shared
+by two nodes of one target kind is an `:id-collision` of the report,
+each node after the first at its span: a source error, fixed by a patch
+(a label `\DefineSection` gives twice).  `walk-nodes` visits every node
+of a model in document order.
 
 ## Full example
 
@@ -228,7 +246,8 @@ that owns the area (its ratchet file lists what is missing).
   (`\issue` alone between paragraphs, dict-types.tex:72).
 - **Glossary.** Parts of speech and usages are lists, on the entry (given
   before the senses, `\Noun, \TransitiveVerb`) and on each sense; the
-  pronunciation keeps its stress marks, so it is inlines.  `\meaning`
+  pronunciation keeps its stress marks (`:stress`, before each stressed
+  syllable), so it is inlines.  `\meaning`
   after a `\term` is the `:sense` of that term reference.
 - **Math** keeps `\mathchoice`'s four lists (`:math-choice`): which one
   TeX sets depends on the style at typesetting time.
@@ -251,8 +270,8 @@ handlers of an area live in its own file and build the nodes.
   an argument's token list as TeX shows it (`token-list-text`, so the
   builder keeps the job's expander), `event-argument-texts` all of them.
 - **Cursor.** The events of a build are a cursor; `next-event` and
-  `peek-event` give the next event and its span, so a handler may take the
-  events that follow its own.
+  `peek-event` give the next event and its span, and `events-ahead` the
+  next few, so a handler may take the events that follow its own.
 - **Handlers** are keyed on the pair (event type, key), since `:begin`,
   `:end` and `:mark` share keys: `(define-handler (:begin :com) (builder
   event span) …)`, key `nil` for a type without keys (`(:text nil)`).  A
@@ -268,10 +287,19 @@ handlers of an area live in its own file and build the nodes.
   field, its node's span **joins** the span of its beginning and that of
   its end (`join-spans`: from the start of one to the end of the other
   when both lie in one file, else the beginning's; spans are
-  `cl-ansi-spec/tex` spans, which the package imports with
-  `make-span` and their readers), its node is checked with
-  `node-problems`, and the node is added to the container below.  Nodes
-  are made from the build's registry (`make-builder-node`).
+  `cl-ansi-spec/tex` spans, whose readers the package re-exports, so a
+  consumer of the model needs no other phase), its on-close function
+  runs, `container-end-span` holding the span it closes at (`nil` at the
+  end of the input; `container-closing-span` falls back on the beginning's), its node is checked with `node-problems`, and the
+  node is added to the container below.  Nodes are made from the build's
+  registry (`make-builder-node`).
+- **Implicit ends.** A container opened `:ends-with-input` (a chapter or
+  a section, which only the next one ends) is closed quietly by the end
+  of the input.  One opened `:groups-only` (a box in a line, which has no
+  node, field or on-close) does not stop an `:end` that closes a
+  container below it (`\hbox{… \rparen}` closes a `\lparen` begun outside
+  the box): its items so far go to that container, and it stays open
+  above its parent for the rest.
 - **Build report.** Nothing is dropped silently: every problem goes into
   the report with its span (`*problem-kinds*`): an event no handler takes
   (`:unhandled`); an `:end` whose key has no open container (`:underflow`
@@ -279,19 +307,25 @@ handlers of an area live in its own file and build the nodes.
   when one below it closes, or at the end of the build, which is closed
   there (`:unclosed`); a node that does not match its declaration
   (`:node`); a `:diagnostic` event or log entry; a TeX error the job
-  recovered from (`:tex-error`) or that stopped it (`:fatal-error`).
+  recovered from (`:tex-error`) or that stopped it (`:fatal-error`); an
+  id that two nodes of one target kind keep (`:id-collision`, "Ids"
+  below).
 - **Builds.** `build-events` builds a list of events; `build-job` runs a
   chapter job from plain TeX's format, observing the spec's vocabulary,
-  and builds its events; `build-model` builds the chapter jobs it is given
-  (the model does not list them: `cl-ansi-spec/inventory` does).
+  and builds its events (a third value: the draft's revision,
+  `job-version`); `build-model` builds the chapter jobs it is given,
+  every one by default (`chapter-jobs`, `src/source.lisp`, in the order
+  of the standard), and settles their ids (`assign-ids`);
+  `build-document` makes the `:document` of them ("Structure").
   `build-fixture` builds the nodes a job appended while the reader was at
   some lines of a file (`dict-conses.tex` 1702–1759 is `endp`): a
   composite node appended then whole, and of one appended later the
   nodes inside it appended then.  It places nodes by the reader's line,
-  not by their spans as `make events` does, because a vocabulary entry
-  called from a setup macro (`\begincom` calls `\dobegincom`) has the
-  span of that call, in `setup-aux.tex`.  Each job runs once per session
-  for fixtures (`forget-job-runs`), so the builders' tests stay fast.
+  as a node TeX appends while it reads a line belongs to it (the span of
+  a vocabulary event is that of the call in the text, [events.md](events.md),
+  but a paragraph's is where TeX began it, which may be a setup
+  macro).  Each job runs once per session for fixtures
+  (`forget-job-runs`), so the builders' tests stay fast.
 - **Printing.** `node-sexp` writes a node as `(kind :field value … :span
   span)`, its fields in declaration order, empty ones left out;
   `print-node` prints it.  `make model FILE=… LINES=… [JOB=…]` prints the
@@ -364,11 +398,10 @@ sections and the standard. Its handlers are the functions of
   closes the open sections of level *L* or more (a chapter closes them
   all) and opens its node in the nearest open one of a lower level. These
   closings are not problems; any other container still open then is
-  reported `:unclosed`. At the end of a job the last chapter and its open
-  sections are closed by the core, which reports each `:unclosed` (the
-  job has no event for `\endchapter`): a build of a whole job has exactly
-  those, no others, until step 3.16 closes them or filters them from
-  its pinned report.
+  reported `:unclosed`. The containers of chapters and sections end
+  with the input (`:ends-with-input`): the job has no event for
+  `\endchapter`, so the end of a job closes its last chapter and its
+  open sections quietly.
 - **Headings.** After a section's mark the handler takes the events up
   to the end of the heading paragraph (`\HeadII`…): what comes before is
   handled as usual, the empty math of the hang is skipped, the first box
@@ -405,9 +438,14 @@ sections and the standard. Its handlers are the functions of
   events.
 - **The standard.** `build-standard` makes the `:document` of the chapter
   nodes of the jobs in order: those with no number (`\beginSimpleChapter`,
-  chap-0.tex) are the front matter. `job-version` reads `\rev`, the draft's
-  revision, from a job's expander. Calling both for the whole spec is
-  step 3.16's.
+  chap-0.tex) are the front matter, and the blocks before the first
+  chapter (the cover chap-0.tex sets, `\Head`, `\HeadI`) its `cover`.
+  `job-version` reads `\rev`, the draft's revision, from a job's
+  expander. `build-document` builds the jobs (`build-model`) and makes
+  their document; a top-level item it cannot place is reported.  In a
+  heading, an inline entry whose end follows its begin at once, before
+  the heading paragraph, is dropped: the heading macro's use of the title
+  outside the heading (`\keyref` in concept-bvl.tex:338) sets nothing.
 - **Not yet.** Paragraphs, entries and the other blocks of a section's
   children come from their own steps; until they land they are reported
   as unhandled events.
@@ -421,25 +459,29 @@ for tests).
 
 - **Entry.** `(:begin :com)` has two arguments: the names, a
   comma-separated list (catcode-active commas, lines wrapped: split on
-  commas, trimmed), and the `\ftype` text.  The kind is that text in
-  kebab-case and must be a value of `entry-kind` (an unknown one is
-  reported and the entry has none).  The id is the first name: the
-  collision rule (`<name>/<kind>`) needs every entry and is 3.16's
-  (`ids.lisp`).  Three entries spelled the kind otherwise
+  commas, trimmed), and the `\ftype` text.  A name is the text without
+  the math shifts and grouping braces TeX reads in it (`$-$` is `-`,
+  `{char$=$}` is `char=`), for the names of signatures too.  The kind is
+  that text in kebab-case and must be a value of `entry-kind` (an unknown
+  one is reported and the entry has none).  The id is the first name,
+  until the collision rule ("Ids") settles a name two entries share.
+  Three entries spelled the kind otherwise
   (`function`, `macro`, `Special Form`): patches 0004–0006.
 - **Heading.** `\dobegincom` typesets the names and the kind in a
   paragraph of its own, and each `\label` its title in a box.  The part
   and the entry carry that meaning, so the paragraph and the box are
   skipped; one holding an event with a vocabulary key is reported, not
-  dropped silently.  Everything before the first part is built as usual,
-  and what no part can hold (the entry's `:parts` hold parts only) is
-  reported.
+  dropped silently.  Everything before the first part is built as usual
+  and is the entry's `content`: index entries, the anchor of an issue
+  that covers the whole entry, notes.
 - **Parts.** `(:mark :label)` closes the part before and opens one:
   its title is argument 1; `:none` is true when argument 2 is not `:`
   (`\label Side Effects:\None.`, which the `(:mark :label-confidence)`
   that follows completes: its `.`, `!` or `?`, how sure the authors are
   that the part is empty, is the part's `:confidence`).  A part runs to
-  the next label or to the entry's end.
+  the next label or to the entry's end.  A label on the line after a
+  paragraph's last comes before that paragraph's end, which closes it
+  first (dict-flow.tex:2447).
 - **The end.** `\endcom` ends the entry's last part.  It may sit inside
   the last paragraph (dict-conses.tex:201, :4021), so that its `(:end
   :com)` comes before the paragraph's: the handler first takes the
@@ -457,7 +499,8 @@ for tests).
   does not matter, so the `Newline` forms need no rule of their own; a
   box (the stacked keyword parameters of `make-array`) starts a word.
   The name is removed from the front of the first words (reported when it
-  is not there).
+  is not there); a formula there counts as the characters it sets, a
+  minus sign as `-` (`\DefunWithValues <` sets `$<$`).
   - `:operator-signature`: `:defun`, `:defmac`, `:defspec`, `:defgen`,
     `:defmeth` and their `-no-return` forms; no values and `:no-return t`
     for the latter.
@@ -470,7 +513,11 @@ for tests).
   - `:type-signature`: `(:mark :deftype)`, whose alignment follows: one
     row per line of syntax, each `(NAME …)` without its parentheses and
     name, joined by `bnf-break`; the macro's empty last paragraph is
-    dropped.
+    dropped.  The `(NAME` is the template's, which TeX reads after it has
+    expanded the first macro of the line (looking for `\omit`), so it may
+    begin the content of a notation node (`\ttbrac`, `\starparam`'s
+    group, at any depth): it is taken out of it there, with the
+    notation's opening glyph it then precedes.
   - The `-multi` forms set a table with one `\entry` row per name (events
     outside the captured rows, the layout of the rest of the table, are
     skipped): the
@@ -515,15 +562,20 @@ and notes, and drops the presentational events.
   paragraph is still open, and `\beginlist` (when no blank line precedes
   it, concept-args.tex:14) and `\endlist` (`\par\endgroup`) come before the
   paragraph they end.  So an item mark is remembered and applied when the
-  next paragraph begins, and a list's begin and end wait for the open
-  paragraph to end.  A paragraph ends with `close-block`, which gives
-  the container's on-close function the end span through a weak table
-  (the core's on-close does not get it).
+  next paragraph begins, and a list's begin and end, and a code block's
+  begin, wait for the open paragraph to end.  (`\code` on the line after a
+  paragraph's text is a source error: TeX skips the end of the `\code`
+  line, so the code's first line runs into the paragraph, and the block
+  after it is empty and reported.)  Anchors and notes that stand in a
+  list outside any item are among its `items`.
 - **Notes.** `\editornote` and `\reviewer` are marks carrying `:hidden`;
   the spec sets `\editornotesfalse` (setup-options.tex:23), so their body
   typesets nothing and the note's text is the argument as TeX shows it,
-  `\term{x}` and `` `` `` as written, not inlines.  A note shown by the
-  options is reported (its typeset copy would also be in the text).
+  `\term{x}` and `` `` `` as written, not inlines.  This is the rule, not a
+  gap: a note is the editors' text about the draft, not text of the
+  standard, and its inlines would need a second typesetting with the
+  options changed.  A note shown by the options is reported (its typeset
+  copy would also be in the text).
 
 ### Tables and figures
 
@@ -553,8 +605,13 @@ registered in `*handlers*` at load).
   reported (the caption's stands); without a caption the written number
   is used.  The id is the label, else `<chapter-id>/fig-<m>` for the
   number `N-M`, the chapter's id being that of the enclosing chapter node
-  when it has one, else `N` (3.16 gives final ids).  Text directly in a
-  figure is reported and dropped; the content is its blocks.
+  when it has one, else `N`; `assign-ids` checks they are unique ("Ids").
+  Text directly in a figure is reported and dropped; the content is its
+  blocks.
+- **`\simplecaption`** captions the block before it, with no figure
+  around (a display, a code block: concept-numbers.tex:591): that block
+  becomes the content of a figure, numbered and titled by the caption,
+  labelled by a `\DefineFigure` waiting for it.
 - **`\thenextfigure`** (`:next-figure`) is a `:next-figure` node with no
   words: its text is the number of the figure that follows, which 3.17
   resolves.
@@ -573,7 +630,14 @@ decides:
   inflected as `dotted lists` is `:text "dotted list"`). Only
   `:emphasis`, `:strong`, `:code`, `:citation` and `:input` keep their
   content, read as plain text (their keys are plain-text containers, so
-  the font does not make a second `:code` inside a `:code`).
+  the font does not make a second `:code` inside a `:code`).  In a
+  formula their content is text too: an ordinary noad of characters
+  (`\i{e}`) or of a box (`\ff{log}`'s `\hbox`) is the text it sets, a
+  `:code` in a `:code` its content, the space around trimmed; a font
+  command left empty there is dropped (`$0^\i{x}$`: its letter went to
+  the script, a field TeX scans itself), and one whose letters carry
+  scripts is no node, its math staying in the formula (math italic is the
+  font of letters anyway).
 - **References are unresolved.** `:operator-ref` takes its `:via` from
   the macro's key (`*reference-vias*`) and its `:text` from the *last*
   argument, as the reference sets it: `\kwd{test}` is `":test"`, `\keyref{key}`
@@ -609,13 +673,21 @@ step has to close them.
 
 - **Entry.**  `id` and `term` are `\gentry`'s argument.  The heading
   `\gentry` sets again (the term in bold, its `:index-entry`, the term's
-  text) is dropped from the items: it only repeats the term.
+  text) is dropped from the items: it only repeats the term.  An anchor
+  outside any entry (an issue begun before a `\gentry`, which covers it)
+  is among its group's `entries`; anything else there but space and the
+  letter the group's heading repeats is reported.
 - **Notation.**  `\Noun` … `\Adverb` and `\ANSI` … `\Computers` are
   `:part-of-speech` and `:usage` containers told by their argument text
   (`*part-of-speech-texts*`, `*usage-texts*`); `\pronounced` is a
   `:pronunciation` container; its square brackets are notation, set in a
-  formula, so the formula is unwrapped to its content (the stress marks
-  `\Stress` sets are formulas that hold nothing and are dropped).  In an entry each leaves a tag, and the entry
+  formula, so the formula is unwrapped to its content.  `\Stress`,
+  `\stress` and `\maybeStress` are vocabulary entries
+  (`:primary-stress` …): each is a `:stress` node of its `level`, the
+  mark the macro draws with rules in a formula, followed by the syllable
+  it stresses, up to the next mark, as IPA writes them (the call's end
+  is no boundary: `\Stress{\harda}` ends before the tail call sets its
+  syllable).  In an entry each leaves a tag, and the entry
   reads the tags when it closes; outside an entry (the glossary's
   introduction explains the notation) the text stays, in italics, and a
   pronunciation keeps its items.  A text that is not in the table is a
@@ -650,6 +722,12 @@ its opening and closing forms (`\lbrac` … `\rbrac`) report the same
 
 - `:bnf-rule` (`\auxbnf`): `name` is the first argument; `definition` is
   what the rule typeset after it, without the leading `name::`.
+  `\auxbnf` sets the rule in an alignment of three columns (an indent;
+  the name and `::=`; the right side), its lines ended by `\CR`: the
+  alignment is layout, so its rows, cells and `\noalign`s are dropped,
+  with the cells of the first two columns, and the right side's content
+  is the definition, one notation running across lines (`\lparen` …
+  `\rparen`) included.
 - `:bnf-optional`, `:bnf-zero-or-more`, `:bnf-group`,
   `:bnf-parenthesized`, `:bnf-bracketed`, `:bnf-required` and
   `:bnf-one-or-more` hold their `content`.  The glyphs a macro typesets
@@ -662,10 +740,10 @@ its opening and closing forms (`\lbrac` … `\rbrac`) report the same
 - `:bnf-break` (`\CR`) and `:bnf-repeat-previous` (`\prevplus`) are leaf
   nodes, as are `:bnf-caret` (`\hat`; what it draws is dropped),
   `:angle-name` (`\ang`, `name`) and `:bnf-indirection` (`\down`, `name`).
-- Not done here: the `\param` that follows a `\down` is a separate inline
-  (inlines), so the parameter's name appears twice until the two are
-  merged; the rule's alignment cells belong to tables and figures, and an
-  unhandled alignment event is reported, not dropped silently.
+  `\down` sets its arrow, then its name with `\param`: that parameter,
+  which the node already names, is dropped, and text in the arrow's
+  extent (a template's, which its begin waited for) goes before the
+  node.
 
 ### Math
 

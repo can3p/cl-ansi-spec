@@ -77,6 +77,11 @@ entries share a first name (docs/exports.md, \"Ids\")."
   (entry-kind (:enum entry-kind) :required t
    :doc "What the names are, from the entry's \\ftype."
    :example :function)
+  (content (:node :block) :repeated t
+   :doc "What stands in the entry before its first part, between its
+heading and its first \\label: index entries, issue anchors (an issue
+the whole entry belongs to) and notes."
+   :example ((:index-entry :index-kind :ref :text "endp")))
   (parts (:node :part) :repeated t
    :doc "The entry's parts, one per \\label, in order."
    :example ((:part :title "Syntax" :content ((:operator-signature

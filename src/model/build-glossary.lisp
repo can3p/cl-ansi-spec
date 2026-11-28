@@ -87,6 +87,22 @@ the mark of a stress, is dropped."
                      (t (list item)))
                    (list item))))
 
+(defun glossary-finish-stress (level)
+  "The on-close function of a stress mark of LEVEL: what it holds is the
+mark, drawn (formulas and rules), which a :STRESS node of LEVEL says,
+and what it set of the syllable after it, inlines that follow the node.
+The syllable's end is no boundary: \\Stress{\\harda} ends before its
+syllable, a tail call, is set."
+  (lambda (builder container)
+    (let ((node (make-builder-node builder :stress :level level
+                                                   :span (container-span container))))
+      (dolist (problem (node-problems node (builder-registry builder)))
+        (report-problem builder :node (node-span node) :message problem))
+      (setf (container-items container)
+            (reverse (cons node (remove-if-not (lambda (item) (inline-item-p builder item))
+                                               (pronunciation-inlines
+                                                (container-contents container)))))))))
+
 (defun finish-pronunciation (builder container)
   "The end of a \\pronounced: in an entry, its inlines are the pronunciation,
 left as a tag in the container below; elsewhere they stay where they are."
@@ -105,9 +121,12 @@ left as a tag in the container below; elsewhere they stay where they are."
 
 (defun finish-sense-mark (builder container text)
   "The end of a \\meaning whose argument is TEXT: its number is the :SENSE of
-the term reference that comes before it, which it follows directly.  What
-the \\meaning set (a subscript) is dropped."
-  (let ((previous (first (container-items (current-container builder))))
+the term reference that comes before it, which it follows directly but
+for the index entry of a \\newterm (concept-classes.tex:62).  What the
+\\meaning set (a subscript) is dropped."
+  (let ((previous (find-if-not (lambda (item)
+                                 (and (typep item 'node) (eq (node-kind item) :index-entry)))
+                               (container-items (current-container builder))))
         (span (container-span container)))
     (setf (container-items container) '())
     (multiple-value-bind (number sub) (sense-number text)
@@ -265,14 +284,25 @@ of speech and usages (those before the first sense number) and its senses."
     (setf (container-items container) '())))
 
 (defun finish-group (builder container)
-  "The end of a letter's group: the entries it held are its entries; the
-letter set in bold before the first is dropped, it repeats the letter."
-  (declare (ignore builder))
-  (let ((node (container-node container)))
-    (setf (node-field-value node :entries)
-          (remove-if-not (lambda (item)
-                           (and (typep item 'node) (eq (node-kind item) :glossary-entry)))
-                         (container-contents container))
+  "The end of a letter's group: the entries it held, and the anchors
+before or between them, are its entries; the letter set in bold before
+the first entry, and space, are dropped: they repeat the letter.
+Anything else is reported, as no field holds it."
+  (let ((node (container-node container)) (entries '()) (seen-entry nil))
+    (dolist (item (container-contents container))
+      (cond ((and (typep item 'node)
+                  (member (node-kind item) '(:glossary-entry :issue-start :issue-end :index-entry)))
+             (when (eq (node-kind item) :glossary-entry) (setf seen-entry t))
+             (push item entries))
+            ((glossary-blank-string-p item))
+            ((and (not seen-entry) (typep item 'node) (eq (node-kind item) :strong)
+                  (equal (node-field-value item :content)
+                         (list (node-field-value node :letter)))))
+            (t (report-problem builder :node (container-span container)
+                               :message (format nil "~S stands in the glossary group ~A outside any entry, dropped."
+                                                (if (stringp item) item (node-kind item))
+                                                (node-field-value node :letter))))))
+    (setf (node-field-value node :entries) (nreverse entries)
           (container-items container) '())))
 
 ;;; Entries and groups run until the next one
@@ -384,6 +414,15 @@ dropped, and counted as open so that its end is."
                       (open-container builder :pronunciation span
                                       :on-close #'finish-pronunciation))
                     table)
+  (loop for (key . level) in '((:primary-stress . :primary) (:secondary-stress . :secondary)
+                                (:optional-stress . :optional))
+        do (let ((key key) (level level))
+             (register-handler :begin key
+                               (lambda (builder event span)
+                                 (declare (ignore event))
+                                 (open-container builder key span
+                                                 :on-close (glossary-finish-stress level)))
+                               table)))
   (register-handler :begin :glossary-example
                     (lambda (builder event span)
                       (declare (ignore event))

@@ -33,7 +33,8 @@ classifies every other macro (see "Choosing entries").
   such an entry must be `:block` or observed at another macro.
 - **Kinds.** A `:call` entry (the default) is a `:begin` with the call's
   arguments when it is called and an `:end` when its body ends (see
-  "Observers"), its span the body's last token. A `:mark` entry is one
+  "Observers"), its span where the call ends in the text, the last token
+  of its last argument (the call's own without arguments). A `:mark` entry is one
   `:mark` event. A `:wrapper` entry hands its content to another
   entry's macro, a tail call (`\def\funref{\clref}`, `\def\kwd#1{\ttref{:#1}}`,
   setup-document.tex:62-79): its call is held, and the next entry
@@ -112,7 +113,15 @@ markers, nodes that carry an event (`src/expand/nodes.lisp`):
   `macro-call` once a call's arguments are matched, before its body is
   read. It returns an action, NIL (the body is read) or `:replace` (it is
   not, and no tag may be given), and a tag. A non-NIL tag goes on the
-  body's token-list level.
+  body's token-list level.  While it runs, `call-origin-span` gives where
+  a token of the call stands in the text: a token of a macro's body
+  stands where that macro's call does, recursively, so the call a setup
+  macro makes (`\begincom` calls `\dobegincom` in setup-aux.tex) stands at
+  the outermost call in the text, a file or an argument read from one
+  (`token-origin-span`, `src/tex/input-stack.lisp`: each macro body's
+  level remembers its call, its body as defined and the levels below,
+  taken before the arguments are read).  Every vocabulary event has that
+  span.
 - **`level-end-observer`** `(expander tag)` is called when that level is
   removed, which is TeX's own end of the body (§§324-325, 390): lazily,
   when a token is next wanted from below it, or when back_input or a later
@@ -155,8 +164,10 @@ self-references (`\thissection`), the glossary (`\gentry` marks an
 entry, which runs to the next one or to its group's end; `\Noun` and
 the other parts of speech and usages are wrappers of the `\i` they
 call), figures (`\endfig`, whose extent holds the content `\boxfig`
-set aside in box 1 and the caption `\docaption` sets with its number)
-and the structure; font changes written
+set aside in box 1 and the caption `\docaption` sets with its number),
+the stress marks of pronunciations (`\Stress`, `\stress`,
+`\maybeStress`, which draw them with rules in a formula) and the
+structure; font changes written
 directly (`{\tt …}`) stay presentational and phase 4 reads them outside
 entries only.  A macro of plain TeX the setup files redefine as an entry
 (`\b`, `\i`, `\j`, `\hat`, `\star`, `\item`, `\itemitem`, and the

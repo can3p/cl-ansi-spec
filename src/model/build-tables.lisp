@@ -270,6 +270,36 @@ bold is no emphasis there."
                       (caption-items (node-field-value item :content)))
                      (t (list item)))))
 
+(defun tables-caption-block (builder parent container items)
+  "\\simplecaption, a caption outside a figure, captions the block before
+it (a display, a code block: concept-numbers.tex:591): that block, the
+last node among PARENT's items, becomes the content of a figure, with the
+number and the text of the caption CONTAINER's ITEMS and the label of a
+\\DefineFigure waiting for it.  NIL, nothing changed, when there is no
+such block."
+  (let ((block (find-if (lambda (item) (typep item 'node)) (container-items parent))))
+    (when (and block (member (node-kind block) (expand-kinds '(:block))))
+      (multiple-value-bind (number text) (parse-caption items)
+        (destructuring-bind (&optional label written)
+            (shiftf (gethash builder *pending-figures*) nil)
+          (when (and number written (string/= number written))
+            (report-problem builder :node (container-span container)
+                            :message (format nil "Figure ~A by its caption, ~A by \\DefineFigure ~A."
+                                             number written label)))
+          (let* ((number (or number written))
+                 (figure (make-builder-node
+                          builder :figure
+                          :span (join-spans (node-span block) (container-closing-span container))
+                          :content (list block)
+                          :number number
+                          :caption (if number text items)
+                          :id (or label (and number (make-figure-id builder label number))))))
+            (dolist (problem (node-problems figure (builder-registry builder)))
+              (report-problem builder :node (node-span figure) :message problem))
+            (setf (container-items parent)
+                  (substitute figure block (container-items parent) :count 1))
+            t))))))
+
 (defun finish-caption (builder container)
   "Hand the number and the text of the caption CONTAINER to the figure
 it is in, and take them out of the figure's items."
@@ -278,8 +308,9 @@ it is in, and take them out of the figure's items."
                      (gethash figure *figure-states*)))
          (items (trim-inlines (caption-items (container-contents container)))))
     (cond ((null state)
-           (report-problem builder :node (container-span container)
-                           :message "A caption outside a figure."))
+           (unless (and items (tables-caption-block builder figure container items))
+             (report-problem builder :node (container-span container)
+                             :message "A caption outside a figure.")))
           ((null items))
           (t (multiple-value-bind (number text) (parse-caption items)
                (unless number

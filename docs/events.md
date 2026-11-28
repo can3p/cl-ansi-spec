@@ -46,7 +46,11 @@ nodes (`make-marker`, `append-marker`): a marker's event is its own, with
 its span.  TeX never sees a marker (`docs/vocabulary.md`, "Observers").
 
 Every event has a `:span`: where the command, character or list began
-(`:end` events: what ended it, when known).  The expander builds the
+(`:end` events: what ended it, when known).  A vocabulary event has the
+span of its call in the text: the call a setup macro makes stands at the
+outermost call in the text (`\begincom`'s, not `\dobegincom`'s in
+setup-aux.tex), and its `:end` where that call's last argument ends
+(`docs/vocabulary.md`, "Observers").  The expander builds the
 events as nodes of TeX's lists (`src/expand/nodes.lisp`, `docs/tex-fidelity.md`,
 "Lists and nodes"); `job-events` flattens the outer vertical list.
 Properties hold strings, numbers, keywords, tokens, spans and lists of
@@ -62,7 +66,8 @@ All in `tests/semantic/spec-jobs.lisp`, which runs every chapter job once:
 - The stream for a job is deterministic. Each job's event count and the
   FNV-1a hash of its events printed canonically (token lists as text,
   spans as file:line:col) are kept in `tests/snapshots.sexp`;
-  `make snapshots` rewrites it, printing the jobs whose events changed.
+  `make snapshots` rewrites it, printing the jobs whose events changed
+  (and `tests/model-snapshots.sexp`, the jobs' models).
 - Per job, each key has as many `:end` events as `:begin` events (a
   `:close` entry's call ends the key it closes), but where the sources
   leave something open (listed with the reason).

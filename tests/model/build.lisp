@@ -337,7 +337,7 @@ handlers."
   :parent build
   ;; One job built whole: one entry per \begincom of dict-conses.tex (49).
   (multiple-value-bind (nodes report)
-      (model:build-model '("chap-14") :registry *build-registry*
+      (model:build-model :jobs '("chap-14") :registry *build-registry*
                          :handlers *build-handlers*)
     (is = 49 (count-if (lambda (node) (typep node 'build-test-entry)) nodes))
     ;; Two entries end inside their last paragraph (\endcom on the line

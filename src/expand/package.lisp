@@ -37,6 +37,7 @@
                 #:open-level-tags
                 #:v-template-ended-p
                 #:next-token #:back-input #:push-tokens #:push-file
+                #:call-context #:push-macro-body #:token-origin-span
                 #:end-current-file #:input-file-missing #:current-line-number
                 #:resolve-input #:push-read-line #:reading-line-p #:end-read-line
                 #:read-line-tokens)
@@ -97,7 +98,7 @@
    #:expander #:make-expander #:expander-state #:expander-input
    #:expander-job-name #:expander-scanner-status #:expander-align-state
    #:expander-marks #:scanner-status
-   #:expander-call-observer #:expander-level-end-observer
+   #:expander-call-observer #:expander-level-end-observer #:call-origin-span
    #:expander-definition-observer #:expander-append-observer
    #:get-next #:get-token #:get-x-token #:back-token #:insert-tokens
    #:expand #:expandable-p #:frozen-control-sequence #:dont-expand-meaning

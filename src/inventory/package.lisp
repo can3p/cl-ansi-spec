@@ -7,7 +7,7 @@
 
 (defpackage #:cl-ansi-spec/inventory
   (:use #:cl)
-  (:import-from #:cl-ansi-spec #:spec-files #:source-search-path)
+  (:import-from #:cl-ansi-spec #:spec-files #:source-search-path #:chapter-jobs)
   (:import-from #:cl-ansi-spec/tex
                 #:+begin-group+ #:+end-group+ #:+escape+ #:+letter+ #:+comment+
                 #:+space+ #:+other+ #:+active+ #:+parameter+
@@ -38,4 +38,4 @@
    #:survey #:survey-job #:survey-job-name #:survey-files #:survey-definitions
    #:survey-occurrences #:survey-inputs #:survey-catcode-notes
    #:survey-uncertain-lines
-   #:chapter-jobs #:merge-surveys #:count-table #:name-counts #:name-class))
+   #:merge-surveys #:count-table #:name-counts #:name-class))

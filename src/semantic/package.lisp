@@ -16,7 +16,7 @@
                 #:node-kind #:node-properties #:marker-p #:append-marker
                 #:expander-call-observer #:expander-level-end-observer
                 #:expander-definition-observer #:expander-append-observer
-                #:insert-tokens)
+                #:insert-tokens #:call-origin-span)
   (:export
    ;; Entries and vocabularies (vocabulary.lisp)
    #:entry #:make-entry #:entry-name #:entry-key #:entry-kind

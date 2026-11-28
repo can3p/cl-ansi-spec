@@ -3,7 +3,9 @@
 ;;;; Rewrite tests/snapshots.sexp: run every chapter job, observing the
 ;;;; spec's vocabulary, and keep each one's event count and hash
 ;;;; (tests/semantic/spec-jobs.lisp), printing the jobs whose events
-;;;; changed.  Run it in the commit that changes the events.
+;;;; changed; then tests/model-snapshots.sexp, each job's node count and
+;;;; the hash of its model (tests/model/whole-spec.lisp).  Run it in the
+;;;; commit that changes the events or the model.
 ;;;;
 ;;;; Usage: make snapshots
 
@@ -24,4 +26,5 @@
       (asdf:load-system "cl-ansi-spec/tests"
                         :force '("cl-ansi-spec" "cl-ansi-spec/tests"))))
   (uiop:symbol-call '#:cl-ansi-spec/tests '#:write-snapshots)
+  (uiop:symbol-call '#:cl-ansi-spec/tests '#:write-model-snapshots)
   t)

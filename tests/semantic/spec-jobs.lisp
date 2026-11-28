@@ -109,7 +109,7 @@ vocabulary; return its SPEC-RUN."
 (defun spec-runs ()
   "The SPEC-RUNs of every chapter job."
   (or *spec-runs*
-      (setf *spec-runs* (mapcar #'run-spec-job (cl-ansi-spec/inventory:chapter-jobs)))))
+      (setf *spec-runs* (mapcar #'run-spec-job (cl-ansi-spec:chapter-jobs)))))
 
 (define-test spec-jobs-run
   :parent spec-jobs

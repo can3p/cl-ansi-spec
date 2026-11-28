@@ -74,7 +74,8 @@ is a reference wrapper and :input (\\IN) example notation, beside
 
 (:owner "3.14" :file "build-glossary.lisp"
  :vocabulary (:glossary-letter :glossary-entry :glossary-example :sense
-              :part-of-speech :pronunciation :usage)
+              :part-of-speech :pronunciation :usage :primary-stress
+              :secondary-stress :optional-stress)
  :why "Glossary entries from one \\gentry to the next, with their senses.")
 
 (:owner "3.15" :file "build-bnf.lisp"

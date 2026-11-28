@@ -595,16 +595,6 @@ source search path), and return a SURVEY.  Each file is read at most once."
 
 ;;; Queries
 
-(defun chapter-jobs ()
-  "Return the names of the chapter jobs: the chap-N.tex files, N a
-number or a letter (chap-0-edit-history.tex is not one: chap-0 inputs
-it)."
-  (loop for pathname in (spec-files)
-        for name = (pathname-name pathname)
-        when (and (> (length name) 5) (string= "chap-" name :end2 5)
-                  (not (find #\- name :start 5)))
-          collect name))
-
 (defun count-table (occurrences)
   "Return a hash table mapping each name used in OCCURRENCES to its uses
 per file, in file order, as lists (file text body uncertain): uses outside
