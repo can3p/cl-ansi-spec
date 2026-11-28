@@ -1,12 +1,11 @@
 ;;;; tests/model/nodes.lisp
 ;;;;
-;;;; The node shapes (src/model/nodes-*.lisp; docs/plan/m3.md, step 3.2):
+;;;; The node shapes (src/model/nodes-*.lisp):
 ;;;; every vocabulary key and event kind the ownership table
 ;;;; (src/model/owners.sexp) gives a builder step is accounted for here,
 ;;;; either by the node kinds its handler builds, all declared, or by the
 ;;;; reason it builds none of its own.  The builder steps build against
 ;;;; this table; one that changes what a key builds changes it here.
-;;;; Owner: step 3.2.
 
 (in-package #:cl-ansi-spec/tests)
 

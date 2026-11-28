@@ -5,7 +5,6 @@
 ;;;; them by; ASSIGN-IDS, run over the whole model, settles the dictionary
 ;;;; entries that share a first name and reports the ids that are still
 ;;;; not unique among the nodes of their target kind.
-;;;; Owner: step 3.16 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/model)
 

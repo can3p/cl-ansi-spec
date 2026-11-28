@@ -3,7 +3,6 @@
 ;;;; The handlers that build math lists from their events, and the
 ;;;; character tables that map a math family's code to Unicode
 ;;;; (docs/model.md, "Math").
-;;;; Owner: step 3.15m of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/model)
 

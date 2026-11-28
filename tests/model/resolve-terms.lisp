@@ -4,7 +4,6 @@
 ;;;; from the sources for each tier and rule, resolved against the
 ;;;; glossary of concept-glossary.tex; the whole spec's references, the
 ;;;; ones left unresolved pinned in tests/model/unresolved-terms.sexp.
-;;;; Owner: step 3.19 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

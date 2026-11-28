@@ -4,7 +4,6 @@
 ;;;; (src/model/print.lisp), with node kinds and handlers declared here,
 ;;;; in a registry and a handler table of their own: on events made here,
 ;;;; and on the real lines of dict-conses.tex (BUILD-FIXTURE).
-;;;; Owner: step 3.3.
 
 (in-package #:cl-ansi-spec/tests)
 

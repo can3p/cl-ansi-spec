@@ -9,7 +9,6 @@
 ;;;; `reference' (`make generate'); the suite fails while the file is
 ;;;; stale (tests/export/generate.lisp) and checks the layout on fixture
 ;;;; declarations (tests/export/reference.lisp).
-;;;; Owner: step 3.5 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/export)
 

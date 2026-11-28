@@ -1,10 +1,9 @@
 ;;;; src/model/owners.lisp
 ;;;;
 ;;;; The ownership table of the builder (src/model/owners.sexp): which
-;;;; step of docs/plan/m3.md, in which handler file, builds each
+;;;; builder step, in which handler file, builds each
 ;;;; vocabulary key and each event kind.  Read by the tests that check
 ;;;; every key and kind has exactly one owner (tests/model/owners.lisp).
-;;;; Owner: step 3.0.
 
 (in-package #:cl-ansi-spec/model)
 

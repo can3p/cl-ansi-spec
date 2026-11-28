@@ -6,7 +6,7 @@
 ;;;; A generator step registers its own with DEFINE-GENERATOR in its own
 ;;;; file, so steps never edit a shared list.  `make generate' writes
 ;;;; them all (tools/generate.lisp); the suite fails on a stale one
-;;;; (tests/export/generate.lisp).  Owner: step 3.0.
+;;;; (tests/export/generate.lisp).
 
 (in-package #:cl-ansi-spec/export)
 

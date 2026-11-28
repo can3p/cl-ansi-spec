@@ -6,7 +6,6 @@
 ;;;; without a value, and an empty array, are omitted, except that a
 ;;;; reference's "target" is always there (null when unresolved).  A file is
 ;;;; an object with "schemaVersion" and its content (see files.lisp).
-;;;; Owner: step 3.7 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/export)
 

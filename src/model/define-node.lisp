@@ -8,7 +8,6 @@
 ;;;; registry, which the builder, the writers, the schema and the
 ;;;; reference doc read through the introspection functions below, and
 ;;;; which UNDOCUMENTED-ITEMS checks for missing documentation.
-;;;; Owner: step 3.1.
 
 (in-package #:cl-ansi-spec/model)
 

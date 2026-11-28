@@ -39,7 +39,10 @@ description: Pre-commit quality gate for this repository — run the build/test 
   gives a real example; a docstring that restates the name is a
   should-fix. If the change alters what the model holds, the declarations
   and the generated schema and reference doc reflect it. Wrong
-  definitions are fixed (`docs/exports.md`, "Versioning").
+  definitions are fixed (`docs/exports.md`, "Versioning"). A test that
+  builds nodes also validates them against the schema: a node missing a
+  required field, or placed where its parent's declaration does not
+  allow it, otherwise shows only in the whole export.
 - **Docs in step**: the docs the step names, `docs/architecture.md` and
   `AGENTS.md` describe the code as it now is, as current rules with no
   history.

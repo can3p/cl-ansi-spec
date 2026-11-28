@@ -3,8 +3,7 @@
 ;;;; The node kinds of the glossary (docs/model.md, "Glossary"): its
 ;;;; letter groups, entries, senses and examples, the enums of parts of
 ;;;; speech and usages, and the target kind that points to entries.
-;;;; Owner: step 3.2 (shapes), then 3.14 of docs/plan/m3.md (documentation
-;;;; and examples, through tests/model/undocumented-glossary.sexp).
+;;;; Its documentation ratchet: tests/model/undocumented-glossary.sexp.
 
 (in-package #:cl-ansi-spec/model)
 

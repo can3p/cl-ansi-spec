@@ -2,7 +2,6 @@
 ;;;;
 ;;;; Tests of the sample export: the files, the manifest and the digests
 ;;;; on the real model, every entry valid against the schema.
-;;;; Owner: step 3.22 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

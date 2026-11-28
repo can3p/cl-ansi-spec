@@ -5,7 +5,6 @@
 ;;;; of the spec.  The handlers are the entry handlers and the text
 ;;;; handlers in a table of their own, with a paragraph and a parameter
 ;;;; made here, so that the tests do not depend on the other builder steps.
-;;;; Owner: step 3.9 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

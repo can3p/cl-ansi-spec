@@ -10,8 +10,7 @@
 ;;;;                (execution: execute; macro char: macro character);
 ;;;;   :not-a-term  a name, argument or number set as a term (with-slots,
 ;;;;                start1, 9); a source error, \term for \code or \param;
-;;;;   :typo        a misspelt glossary term, for a patch (docs/plan/m3.md, 3.19).
-;;;; Owner: step 3.19 of docs/plan/m3.md (tests/model/resolve-terms.lisp).
+;;;;   :typo        a misspelt glossary term, for a patch.
 
 (
  ("-3" 1 :not-a-term)

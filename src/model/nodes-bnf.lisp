@@ -3,8 +3,7 @@
 ;;;; The node kinds of syntax descriptions (docs/model.md, "Syntax"): BNF
 ;;;; rules and the inlines of the notation (concept-definitions.tex,
 ;;;; "Notational Conventions"), in lambda lists and syntax as in rules.
-;;;; Owner: step 3.2 (shapes), then 3.15 of docs/plan/m3.md (documentation
-;;;; and examples, through tests/model/undocumented-bnf.sexp).
+;;;; Its documentation ratchet: tests/model/undocumented-bnf.sexp.
 
 (in-package #:cl-ansi-spec/model)
 

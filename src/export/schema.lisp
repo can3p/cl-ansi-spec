@@ -8,7 +8,7 @@
 ;;;; description and examples.  One $defs entry per node kind, named as
 ;;;; the kind, picked out by a constant "kind".  Besides them: "span",
 ;;;; "text" (unless a kind :text is declared), "enum-<name>" and
-;;;; "target-<name>".  Owner: step 3.4 of docs/plan/m3.md.
+;;;; "target-<name>".
 
 (in-package #:cl-ansi-spec/export)
 

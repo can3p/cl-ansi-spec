@@ -2,7 +2,6 @@
 ;;;;
 ;;;; Tests of semantic inlines (src/model/build-inlines.lisp): each
 ;;;; macro's node from events made here, then real lines of the spec.
-;;;; Owner: step 3.13 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

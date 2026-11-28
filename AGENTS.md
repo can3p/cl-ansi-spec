@@ -33,8 +33,9 @@
 * `patches/` — independent, numbered patches applied on top of `spec/tex/`.
 * `src/` — the `cl-ansi-spec` system. `tests/` — `cl-ansi-spec/tests` (Parachute).
   One directory per phase package (`src/tex/`, `src/expand/`,
-  `src/semantic/`, `src/model/`, `src/export/`); `tests/` mirrors it.  In
-  M3 every file a wave step fills exists as a stub naming its owner step.
+  `src/semantic/`, `src/model/`, `src/export/`); `tests/` mirrors it.  While
+  a milestone runs in waves, every file a wave step fills exists as a stub
+  naming its owner step.
 * `tools/` — command-line tools, written in Lisp; `make` is only a thin wrapper.
 * `docs/` — `architecture.md` (start here), `process.md`, topic docs (`reader`, `events`,
   `vocabulary`, `tex-fidelity`, `model`, `exports`), `plan/<id>.md`

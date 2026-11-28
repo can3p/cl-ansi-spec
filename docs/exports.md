@@ -233,7 +233,7 @@ only: they describe the export, not the model.
 
 `tests/export/whole-spec.lisp` writes the export of the whole spec to a
 temporary directory and checks every digest of the manifest, every node
-of the JSON files against the schema (3.6), the S-expression files, and
+of the JSON files against the schema ("Validation"), the S-expression files, and
 the counts of the report by kind (pinned there). Every node of the
 export is valid against the schema.
 

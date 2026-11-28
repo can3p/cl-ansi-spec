@@ -1,7 +1,6 @@
 ;;;; src/model/resolve-operators.lisp
 ;;;;
 ;;;; Operator references (\clref and its wrappers) resolved to dictionary entries.
-;;;; Owner: step 3.18 of docs/plan/m3.md.
 ;;;;
 ;;;; The model has one node, :OPERATOR-REF, for \clref and every wrapper;
 ;;;; its :VIA says which wrapper wrote it.  Resolution runs on the built

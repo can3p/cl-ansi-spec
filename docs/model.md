@@ -1,8 +1,7 @@
 # Document model
 
-The product of the parser (phase 4, milestone M3). This page is the
-**draft schema**. M3 refines it, and this page is updated in the same commit
-as the code.
+The product of the parser (phase 4). This page describes the model; it is
+updated in the same commit as the code.
 
 ## Shape
 
@@ -15,7 +14,7 @@ objects there.
 
 The kinds are declared in `src/model/nodes-<area>.lisp`, one file per
 area ("Node shapes" below); the tables here summarise them, and the
-generated reference (`docs/model-reference.md` (planned)) has every
+generated reference ([`docs/model-reference.md`](model-reference.md)) has every
 field.
 
 ### Document level
@@ -97,7 +96,7 @@ numbering. Exports and consumers link by id.
 
 ### Ids
 
-*Step 3.16* (`src/model/ids.lisp`).  Each builder gives its nodes the id
+`src/model/ids.lisp`.  Each builder gives its nodes the id
 the sources name them by ([exports.md](exports.md), "JSON shape"):
 chapters their `\beginchapter` reference name, sections their
 `\DefineSection` label (`<parent-id>/<n>` for the sections none names:
@@ -156,12 +155,11 @@ text.
 
 ## Building the model, by area
 
-One section per step of the milestone that builds it (`docs/plan/m3.md`),
-each written by its step.
+One section per area of the builder.
 
 ### Declarations
 
-*Step 3.1.* Every node kind is declared once
+Every node kind is declared once
 (`src/model/define-node.lisp`):
 
 ```lisp
@@ -216,18 +214,18 @@ each written by its step.
 
 ### Node shapes
 
-*Step 3.2.* Every kind, enum, category and target kind is declared in
+Every kind, enum, category and target kind is declared in
 `src/model/nodes-<area>.lisp` with its type and a one-line meaning; the
-examples, and fuller docstrings where needed, come with the builder step
+examples, and fuller docstrings where needed, come with the builder
 that owns the area (its ratchet file lists what is missing).
 
 - **What each key builds.** `tests/model/nodes.lisp` (`*node-products*`)
-  gives every vocabulary key and event kind a builder step owns the node
+  gives every vocabulary key and event kind a builder owns the node
   kinds its handler builds, or `:none` and why it builds none of its own
   (a closing key, a mark that only feeds its container, a presentational
   event).  The test checks that each kind named is declared, that every
   owned key is listed, and that every kind is built from a key or held
-  by another kind's field (`:document`, the root, aside).  A builder step
+  by another kind's field (`:document`, the root, aside).  A builder
   that builds something else changes the table in the same commit.
 - **Names.** A kind's name cannot be a symbol of `common-lisp`, hence
   `:document` (the standard) and `:item-list`; the block of code is
@@ -254,10 +252,10 @@ that owns the area (its ratchet file lists what is missing).
 
 ### Building
 
-*Step 3.3.* The builder core, `make model` and the build report.  Which step
+The builder core, `make model` and the build report.  Which builder
 builds what: the ownership table `src/model/owners.sexp` gives every
 vocabulary key and every event kind of [events.md](events.md) exactly one
-owner, a step of the milestone and its handler file in `src/model/`
+owner, a builder and its handler file in `src/model/`
 (`tests/model/owners.lisp` checks it).
 
 The builder core (`src/model/build.lisp`) reads a job's events
@@ -337,7 +335,7 @@ handlers of an area live in its own file and build the nodes.
 
 ### Text
 
-`src/model/build-text.lisp` (step 3.12) turns `:text` and `:space`
+`src/model/build-text.lisp` turns `:text` and `:space`
 events into strings, and font runs into inlines.
 
 - **Fonts.** `*fonts*` lists the font families the jobs set text in
@@ -377,9 +375,9 @@ events into strings, and font runs into inlines.
   `plain-text-container-p` names stays plain, because the container
   gives it its meaning: the vocabulary keys of structure, entries,
   tables and figures, inlines, glossary and syntax, and `:code`
-  (`*plain-text-containers*`; a step with another such container pushes
+  (`*plain-text-containers*`; a builder with another such container pushes
   its key). So `{\tt …}` in a paragraph is `code`, `\f{…}` is whatever
-  3.13 builds for it, and a heading stays text.
+  the inlines builder (`src/model/build-inlines.lisp`) builds for it, and a heading stays text.
 - **Mechanism.** The handlers are the functions of
   `install-text-handlers`, registered in `*handlers*` at load; tests
   register them in a table of their own. A container's current run of
@@ -389,7 +387,7 @@ events into strings, and font runs into inlines.
 
 ### Structure
 
-`src/model/build-structure.lisp` (step 3.8) builds the chapters, the
+`src/model/build-structure.lisp` builds the chapters, the
 sections and the standard. Its handlers are the functions of
 `install-structure-handlers`, registered in `*handlers*` at load.
 
@@ -438,7 +436,7 @@ sections and the standard. Its handlers are the functions of
   second argument of `\DefineChapter`) and, for a section the sources
   name twice (2.1: `CharacterSyntax` in chap-2.tex, `TheStandardSyntax` in
   concept-syntax.tex; the last is the id), its earlier labels.
-- **Other writes.** The `:write` handler is this step's, whose one owner
+- **Other writes.** The `:write` handler belongs to the structure builder, whose one owner
   drops every `\write` the handlers above do not take: the table of
   contents, the index and the issue files are data the model rebuilds from
   events.
@@ -452,13 +450,12 @@ sections and the standard. Its handlers are the functions of
   heading, an inline entry whose end follows its begin at once, before
   the heading paragraph, is dropped: the heading macro's use of the title
   outside the heading (`\keyref` in concept-bvl.tex:338) sets nothing.
-- **Not yet.** Paragraphs, entries and the other blocks of a section's
-  children come from their own steps; until they land they are reported
-  as unhandled events.
+- **Elsewhere.** Paragraphs, entries and the other blocks of a section's
+  children come from their own builders.
 
 ### Entries
 
-`src/model/build-entries.lisp` (step 3.9) builds a dictionary entry from
+`src/model/build-entries.lisp` builds a dictionary entry from
 the events `\begincom` … `\endcom` make; `install-entry-handlers`
 registers its handlers (in `*handlers*` at load, in a table of their own
 for tests).
@@ -539,7 +536,7 @@ for tests).
 
 ### Blocks
 
-`src/model/build-blocks.lisp` (step 3.10) builds paragraphs, code, lists
+`src/model/build-blocks.lisp` builds paragraphs, code, lists
 and notes, and drops the presentational events.
 
 - **Paragraphs.** `(:begin :paragraph)` … `(:end :paragraph)` is a
@@ -550,7 +547,7 @@ and notes, and drops the presentational events.
   `:tex-mark`, `:special`, `:openout`, `:closeout`.  `*discarded-containers*`
   lists the containers whose whole content goes (`:leaders`, `:insert`,
   `:vadjust`, `:shipout`).  A `:box` is kept transparent: its content
-  is built in its place.  `:write` is 3.8's.  Nothing else is dropped.
+  is built in its place.  `:write` belongs to the structure builder ("Structure", above).  Nothing else is dropped.
 - **Code.** `\code` … `\endcode` is a `:code-block`; each line is a
   paragraph there (`\par` is `\endgraf`) and becomes a `:code-line`, its
   spaces as written (one per `:space`), an empty line a line without
@@ -561,7 +558,7 @@ and notes, and drops the presentational events.
   `:item-list` in its content, and an `\itemitem` straight in the list
   (concept-args.tex:15) is an item of it.  The label is the content of the
   box `\listlabel` sets at the start of the item's first paragraph, so a
-  bullet, which is math, arrives with 3.15m's handlers (the argument of
+  bullet, which is math, arrives with the math builder's handlers ("Math", below) (the argument of
   the macro is not read: a source that puts text in it, concept-conditions.tex:248,
   gets it as the label).
 - **Where TeX is.** The mark of `\item` comes while the *previous* item's
@@ -585,7 +582,7 @@ and notes, and drops the presentational events.
 
 ### Tables and figures
 
-*Step 3.11.* `src/model/build-tables.lisp` (`install-table-handlers`,
+`src/model/build-tables.lisp` (`install-table-handlers`,
 registered in `*handlers*` at load).
 
 - **Tables.** An `:alignment` opens a `:table`, a `:row` a `:row`, a
@@ -606,7 +603,7 @@ registered in `*handlers*` at load).
   consumer reads.  Only a patch of the source can turn it into something
   the model holds; the problem is pinned in `*whole-spec-problems*`.
 - **Figures.** `\DefineFigure` (a mark) gives the label, and the `:write`
-  after it (left to 3.8, which drops it) the number TeX wrote; both wait
+  after it (left to the structure builder, which drops it) the number TeX wrote; both wait
   for the `:figure` that follows (a `\DefineFigure` always precedes its
   figure in the sources; one that does not would name the next).  The `:caption` inside the figure is
   `Figure N--M. text`: its paragraph and its bold runs (a caption is set
@@ -624,12 +621,12 @@ registered in `*handlers*` at load).
   becomes the content of a figure, numbered and titled by the caption,
   labelled by a `\DefineFigure` waiting for it.
 - **`\thenextfigure`** (`:next-figure`) is a `:next-figure` node with no
-  words: its text is the number of the figure that follows, which 3.17
-  resolves.
+  words: its text is the number of the figure that follows, which the resolvers
+  resolve ("References", below).
 
 ### Inlines
 
-*Step 3.13* (`src/model/build-inlines.lisp`; `make model` shows them).
+`src/model/build-inlines.lisp` (`make model` shows them).
 The node shapes are those of "Node shapes" above; what the builder
 decides:
 
@@ -663,7 +660,7 @@ decides:
   (`\typeref{\f{(eql 't)}}`: a type specifier, no entry's name) is a
   `:code` of what it typeset. `:section-ref` and `:figure-ref` hold the label as
   written, trimmed (`"\\OrdinaryLambdaLists"`). No `:target` is set;
-  3.17-3.19 resolve them ("References", below).
+  the resolvers resolve them ("References", below).
 - **`:lambda-list-keyword`** has no argument: its name is the text its
   macro typeset (`"&allow-other-keys"`).
 - **Notation** (`:evaluates-to` …, `:output`, `:this-section`) has no
@@ -673,23 +670,23 @@ decides:
   first argument). `\issue` and `\endissue` are an `:issue-start` and an
   `:issue-end`, each with the name its macro was called with; the text
   between them stays in the surrounding container.
-- `\thenextfigure` (`:next-figure`) is built by the figures' step 3.11.
+- `\thenextfigure` (`:next-figure`) is built by the tables and figures builder ("Tables and figures", above).
 
 ### Glossary
 
-*Step 3.14.* `src/model/build-glossary.lisp` builds the glossary of
+`src/model/build-glossary.lisp` builds the glossary of
 `concept-glossary.tex` (24 groups, 692 entries).  The glossary is flat in
 the events: `\firstindextab` and `\indextab` are `:glossary-letter` marks,
 `\gentry` a `:glossary-entry` mark, and nothing ends them, so a group runs
 to the next letter and an entry to the next entry or letter.  The
 macros' own layout (`\beginlist` around the glossary, a list and an item
 for each letter, a paragraph for each entry) is dropped: the handlers
-skip those events while they run the group, and drop the list 3.10 opened
+skip those events while they run the group, and drop the list the blocks builder opened
 around the glossary when the first letter begins.  Their handlers
 open a container and *run* the events that follow (`dispatch`) until that
 stopping mark, or until the end of a container opened before them (the
-section that holds the glossary), so no `:unclosed` is reported and no
-step has to close them.
+section that holds the glossary), so no `:unclosed` is reported and nothing
+has to close them.
 
 - **Entry.**  `id` and `term` are `\gentry`'s argument.  The heading
   `\gentry` sets again (the term in bold, its `:index-entry`, the term's
@@ -735,12 +732,12 @@ step has to close them.
 - **Meanings.**  `\meaning{n}` (`:sense`) sets the `:sense` of the
   `:term-ref` it follows, from the integer its text starts with; `2a` is
   sense 2 and is reported (`:diagnostic`) because the sub-sense letter is
-  not kept, and `n` is reported and not set.  The `:term-ref` is 3.13's:
+  not kept, and `n` is reported and not set.  The `:term-ref` is the inlines builder's:
   a `\meaning` that does not follow one is reported.
 
 ### Syntax
 
-*Step 3.15* (`src/model/build-bnf.lisp`).  The BNF notation is built
+`src/model/build-bnf.lisp`.  The BNF notation is built
 from the begin/end pairs of the vocabulary: a macro with an argument and
 its opening and closing forms (`\lbrac` … `\rbrac`) report the same
 `:begin`/`:end` of one key, so the model does not tell them apart.
@@ -772,7 +769,7 @@ its opening and closing forms (`\lbrac` … `\rbrac`) report the same
 
 ### Math
 
-*Step 3.15m.* `src/model/build-math.lisp` builds the formulas the expander
+`src/model/build-math.lisp` builds the formulas the expander
 makes of math mode ([events.md](events.md), `:math`, `:noad`, …) into a
 small tree of TeX's own noads; nothing is typeset.
 
@@ -793,7 +790,7 @@ small tree of TeX's own noads; nothing is typeset.
   plain.tex's 0–3 (cmr, cmmi, cmsy, cmex), then `setup-aux.tex:50-59`'s
   4 (cmbx), 5 (cmti), 6 (cmtt) and the math italic and symbol families
   7 and 8 (`*math-families*`).  Roman, bold, italic and typewriter families
-  use the layouts of the text fonts (3.12); cmmi, cmsy and cmex have
+  use the layouts of the text fonts ("Text", above); cmmi, cmsy and cmex have
   tables of their own (`*math-tables*`: code, Unicode, reason), cmmi and
   cmsy for every slot, cmex for the delimiters of plain.tex's `\delcode`
   table, the big operators and the radicals.  Letters and old-style digits
@@ -808,8 +805,7 @@ small tree of TeX's own noads; nothing is typeset.
 - **Fractions.** `:thickness` is `:default` (`\over`, `\atop` writes
   zero) or the dimension as TeX writes it: `:no-rule` is true for zero
   thickness, `:thickness` holds any other dimension (`\above`).
-- **Not here.** Glue, kerns, boxes and rules in a math list belong to 3.10
-  and 3.11; `\mathchoice`'s four choices keep all four.
+- **Not here.** Glue, kerns, boxes and rules in a math list belong to the blocks and tables builders; `\mathchoice`'s four choices keep all four.
 
 ### References
 
@@ -817,7 +813,7 @@ Resolved after the whole spec builds.
 
 #### Sections, chapters and figures
 
-*Step 3.17* (`src/model/resolve-sections.lisp`).
+`src/model/resolve-sections.lisp`.
 `resolve-section-references` takes the built model and sets the `:target`
 of every `:section-ref` (`\secref`, `\chapref`) and `:figure-ref`
 (`\figref`).  The label, without its backslash and white space, is looked
@@ -845,7 +841,7 @@ are not resolved here.
 
 #### Operators
 
-*Step 3.18.* `src/model/resolve-operators.lisp`.  `resolve-operator-refs`
+`src/model/resolve-operators.lisp`.  `resolve-operator-refs`
 runs on the built model after `assign-ids` (an entry's id is final only
 then) and sets the `:target` of every `:operator-ref` to the entry its text
 names.  `:apply nil` only counts.  Rules, in order:
@@ -874,7 +870,7 @@ entry for; `tests/model/resolve-operators.lisp` pins the counts.
 
 #### Terms
 
-*Step 3.19* (`src/model/resolve-terms.lisp`).  `resolve-terms`, run by
+`src/model/resolve-terms.lisp`.  `resolve-terms`, run by
 `build-model` after `assign-ids`, sets the `:target` of every
 `:term-ref` of the model to `(:glossary id)`, or leaves it `nil` and
 reports it.  Running it again gives the same targets.

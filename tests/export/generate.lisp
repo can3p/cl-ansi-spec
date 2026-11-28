@@ -2,7 +2,6 @@
 ;;;;
 ;;;; The exports' suite, and the registry of generated files
 ;;;; (src/export/generate.lisp): no committed generated file is stale.
-;;;; Owner: step 3.0.
 
 (in-package #:cl-ansi-spec/tests)
 
