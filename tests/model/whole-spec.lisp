@@ -34,6 +34,8 @@ not fit in the heap."
                    (nodes (mapcan (lambda (job) (copy-list (cdr job))) jobs)))
               (multiple-value-bind (renamed collisions) (model:assign-ids nodes)
                 (push (model:make-build-report collisions) reports)
+                ;; Their problems are pinned by tests/model/resolve-terms.lisp.
+                (model:resolve-terms nodes)
                 (make-whole-spec jobs (model:merge-build-reports (nreverse reports)) renamed))))))
 
 (defun whole-spec-nodes ()

@@ -626,8 +626,8 @@ decides:
   A vocabulary `:begin` opens a container of its key; its `:end`
   closes it. The text inside a term, parameter, reference or notation
   is dropped, because the node says it (`:term-ref` and `:operator-ref`
-  keep the *argument* text, not the typeset one: `\term{dotted list}`
-  inflected as `dotted lists` is `:text "dotted list"`). Only
+  keep the *argument* text, not the typeset one; the argument carries
+  the inflection: `\term{dotted lists}` is `:text "dotted lists"`). Only
   `:emphasis`, `:strong`, `:code`, `:citation` and `:input` keep their
   content, read as plain text (their keys are plain-text containers, so
   the font does not make a second `:code` inside a `:code`).  In a
@@ -852,7 +852,40 @@ counts.
 
 #### Terms
 
-*Step 3.19.* Not written yet.
+*Step 3.19* (`src/model/resolve-terms.lisp`).  `resolve-terms`, run by
+`build-model` after `assign-ids`, sets the `:target` of every
+`:term-ref` of the model to `(:glossary id)`, or leaves it `nil` and
+reports it.  Running it again gives the same targets.
+
+- **The name looked up** is the reference's text, which carries its
+  inflection (`\term{objects}`); for a defining reference followed by a
+  term index entry, that entry's text: `\newtermidx{strings}{string}`
+  indexes its second argument (setup-document.tex:84).
+- **Tiers**, the first that finds an entry wins (`*term-tiers*`): the
+  name itself (rule `:exact`); its last word inflected; its first word
+  inflected, in a name of more than one word (`satisfies the test`).
+  Lookup ignores case (`Implementations`, `Lisp Reader`); the glossary
+  has no two ids equal but for case, and a pair would be an
+  `:ambiguous-term`.
+- **Inflections** of a word, in order (`*term-rules*`): the irregulars
+  (`*term-irregulars*`, a reason each: `leaves`, `indices`, `written`,
+  `thrown`, and `\symbolnamedesignator` and its kin, macros in the
+  argument whose text is the term, setup-terms.tex:260-263), then
+  `*term-suffix-rules*`: `-ies` → `-y`; `-es` after s, x, z, ch, sh;
+  `-s` not after s; `-ed`; `-d` (`-ed` → `-e`); a doubled consonant and
+  `-ed`; `-ing`; `-ing` → `-e`; a doubled consonant and `-ing`.  Each is
+  used by the sources (the whole-spec test counts the uses) and every
+  non-exact resolution was read once for a wrong lemma.  The whole
+  phrase must still be an entry, so `objects of …` never lands on
+  `object`.
+- **Problems.**  `:unresolved-term` (no entry); `:ambiguous-term` (two
+  entries in one tier, the first kept; none today); `:missing-sense` (a
+  `\meaning` sense the entry does not number: `syntax type`,
+  concept-glossary.tex:1138 and :5045).  The unresolved texts are pinned
+  with a reason each in `tests/model/unresolved-terms.sexp`: no entry,
+  a phrase of entries (`literal objects`), a variant no rule derives
+  (`execution`, `macro char`), a name set as a term (`with-slots`), or a
+  typo, for a patch.
 
 ## Exports
 

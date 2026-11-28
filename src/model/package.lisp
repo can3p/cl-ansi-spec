@@ -97,5 +97,8 @@
    #:*clref-entryless-vias* #:*clref-preferred-kinds*
    #:clref-finding #:clref-finding-node #:clref-finding-outcome
    #:clref-finding-entries #:clref-finding-message
+   ;; Term references (resolve-terms.lisp, step 3.19)
+   #:*term-irregulars* #:*term-suffix-rules* #:*term-rules* #:*term-tiers*
+   #:resolve-terms
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))
