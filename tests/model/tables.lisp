@@ -261,7 +261,7 @@ with a \vrule), and ROWS."
 
 ;;; Real lines
 
-(defun spec-nodes (job file first last)
+(defun tables-spec-nodes (job file first last)
   "The nodes of FILE's lines FIRST to LAST of JOB, as S-expressions."
   (mapcar (lambda (node) (if (stringp node) node (model:node-sexp node :spans nil)))
           (model:build-fixture job :file file :lines (list first last))))
@@ -269,14 +269,14 @@ with a \vrule), and ROWS."
 (define-test tables-spec-lines
   :parent tables
   ;; concept-classes.tex:9-16: \DefineFigure and \displaythree.
-  (let ((figure (find :figure (spec-nodes "chap-4" "concept-classes.tex" 9 16)
+  (let ((figure (find :figure (tables-spec-nodes "chap-4" "concept-classes.tex" 9 16)
                       :key (lambda (node) (and (consp node) (first node))))))
     (is equal "ObjectSystemClasses" (getf (rest figure) :id))
     (is equal "4-7" (getf (rest figure) :number))
     (is equal '("Object System Classes") (getf (rest figure) :caption))
     (is = 4 (length (getf (rest (first (getf (rest figure) :content))) :rows))))
   ;; concept-bvl.tex:13-47: \tablefigtwo, no \DefineFigure.
-  (let* ((figure (find :figure (spec-nodes "chap-3" "concept-bvl.tex" 13 47)
+  (let* ((figure (find :figure (tables-spec-nodes "chap-3" "concept-bvl.tex" 13 47)
                        :key (lambda (node) (and (consp node) (first node)))))
          (rows (getf (rest (first (getf (rest figure) :content))) :rows)))
     (is equal "3-10" (getf (rest figure) :number))
@@ -285,7 +285,7 @@ with a \vrule), and ROWS."
     (false (getf (rest (second rows)) :header))
     (is = 2 (length (getf (rest (second rows)) :cells))))
   ;; concept-glossary.tex:138-151: \tabletwo, rules and spacing around its rows.
-  (let* ((table (find :table (spec-nodes "chap-26" "concept-glossary.tex" 138 151)
+  (let* ((table (find :table (tables-spec-nodes "chap-26" "concept-glossary.tex" 138 151)
                       :key (lambda (node) (and (consp node) (first node)))))
          (rows (getf (rest table) :rows)))
     (is = 13 (length rows) "a heading row and the twelve abbreviations")
