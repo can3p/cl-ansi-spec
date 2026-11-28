@@ -88,6 +88,10 @@
 * `make generate` — rewrite the generated files (JSON Schema, reference
   doc) from the node declarations; `make test` fails while one is stale.
   On a merge conflict in a generated file take either side, then run it.
+* `make export [OUT=dir]` — write the export of the whole spec (chapter,
+  glossary and index files as JSON and S-expressions, `report.json`,
+  `manifest.json`) to `build/export/`; about 25 s. Prints the build's
+  problems by kind. `docs/exports.md`, "The whole export".
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine

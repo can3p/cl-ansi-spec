@@ -321,20 +321,26 @@ bare `$ref` is looked through; SEEN are the references already followed."
              (let* ((kind (and (json-object-p instance)
                                (let ((value (json-get instance "kind")))
                                  (and (stringp value) value))))
-                    (chosen (and kind
-                                 (find kind branches
-                                         :key (lambda (branch)
-                                                (branch-discriminant root branch))
-                                         :test #'equal)))
-                    (results (map 'list (lambda (branch)
-                                          (validate-instance root branch instance pointer))
-                                  branches))
+                    (discriminants (map 'list (lambda (branch) (branch-discriminant root branch))
+                                        branches))
+                    (chosen (let ((index (and kind (position kind discriminants :test #'equal))))
+                              (and index (elt branches index))))
+                    ;; A branch whose constant kind differs from the
+                    ;; instance's cannot match: it is not validated (the
+                    ;; cost of a oneOf of every node kind is otherwise a
+                    ;; validation of the whole instance per kind).
+                    (results (map 'list (lambda (branch discriminant)
+                                          (if (and kind discriminant
+                                                   (not (string= kind discriminant)))
+                                              (list :other-kind)
+                                              (validate-instance root branch instance pointer)))
+                                  branches discriminants))
                     (matching (count nil results)))
                (cond ((= matching 1))
                      ((and chosen (zerop matching))
                       (setf errors (revappend (nth (position chosen branches) results)
                                               errors)))
-                     ((and kind (some (lambda (branch) (branch-discriminant root branch)) branches))
+                     ((and kind (some #'identity discriminants))
                       (fail "unknown kind ~S" kind))
                      ((zerop matching)
                       (fail "~A matches none of the ~D alternatives"
@@ -343,15 +349,22 @@ bare `$ref` is looked through; SEEN are the references already followed."
                               (describe-json instance) matching)))))))
        (nreverse errors)))))
 
+(defvar *checked-schema* nil
+  "The last schema found to be within the subset: validating many
+instances against one schema checks it once.  It assumes a schema is not
+changed after its first use.")
+
 (defun validate-json (schema instance)
   "Validate INSTANCE, parsed JSON, against SCHEMA, a parsed schema of the subset.
 Return the list of `validation-error`s, in document order; NIL means valid.
 Signal `unsupported-schema-keyword` if SCHEMA leaves the subset and
 `unresolved-schema-reference` for a `$ref` that leads nowhere."
-  (let ((violations (schema-subset-violations schema)))
-    (when violations
-      (error 'unsupported-schema-keyword
-             :pointer (car (first violations)) :keyword (cdr (first violations)))))
+  (unless (eq schema *checked-schema*)
+    (let ((violations (schema-subset-violations schema)))
+      (when violations
+        (error 'unsupported-schema-keyword
+               :pointer (car (first violations)) :keyword (cdr (first violations)))))
+    (setf *checked-schema* schema))
   (validate-instance schema schema instance ""))
 
 (defun json-valid-p (schema instance)
