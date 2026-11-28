@@ -110,14 +110,14 @@ against the test model."
 ;;; The whole spec
 
 (defparameter *whole-spec-operator-findings*
-  '(:resolved 12330 :ambiguous 267 :unresolved 309)
+  '(:resolved 12427 :ambiguous 273 :unresolved 89)
   "What resolving the whole spec's operator references finds; change it
-deliberately, with the reason.  The
-unresolved ones are source or builder matters, not resolution: a
-reference with no text (72, the table templates of concept-cl-symbols),
-the `\\fi \\fi' a table cell's argument keeps unexpanded, `\\f {(eql 't)}'
-set as a type, names the dictionary has no entry for (`safety', `speed':
-declaration identifiers; `variable', `structure': documentation types).")
+deliberately, with the reason.  The unresolved ones are names the
+dictionary has no entry for (`safety', `speed': declaration identifiers;
+`variable', `structure': documentation types), and a few cells of
+concept-pprint.tex and concept-arrays.tex whose argument holds markup
+(`string{\\tt >=}').  The ambiguous ones grew by the cells that now
+name `*', `-' or `/' (the function or the variable) once their `\\fi's are gone.")
 
 (define-test clref-whole-spec
   :parent resolve-operators

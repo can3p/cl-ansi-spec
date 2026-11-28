@@ -61,6 +61,39 @@ label and to a label two nodes share."
     (true (search "No figure has the label \"A\"" (model:problem-message (second problems))))
     (true (search "ambiguous" (model:problem-message (third problems))))))
 
+(define-test resolve-sections-aliases
+  :parent resolve-sections
+  ;; A reference by another label of a chapter or section finds the node,
+  ;; and its target names the node's id.
+  (let* ((ref (model:make-node :section-ref :label "\\Short"))
+         (other (model:make-node :section-ref :label "\\Old"))
+         (model (list (model:make-node :chapter :id "ChapOne" :aliases '("Short") :number "1"
+                                                :title '("One")
+                                                :children (list (model:make-node
+                                                                 :section :id "New" :aliases '("Old")
+                                                                 :number "1.1" :level 1 :title '("S")
+                                                                 :children (list ref other)))))))
+    (is equal '() (model:resolve-section-references model))
+    (is equal '(:chapter "ChapOne") (secref-target ref))
+    (is equal '(:section "New") (secref-target other))))
+
+(define-test resolve-sections-alias-ambiguity
+  :parent resolve-sections
+  ;; A node named by its id and an alias is one candidate; two nodes
+  ;; named by one label are ambiguous.
+  (flet ((section (id aliases number)
+           (model:make-node :section :id id :aliases aliases :number number :level 1
+                                     :title '("S"))))
+    (let* ((one (model:make-node :section-ref :label "\\X"))
+           (two (model:make-node :section-ref :label "\\Y"))
+           (model (list (model:make-node :chapter :id "C" :number "1" :title '("C")
+                                                  :children (list one two (section "X" '("X") "1.1")
+                                                                  (section "Y" '() "1.2")
+                                                                  (section "Z" '("Y") "1.3"))))))
+      (is = 1 (length (model:resolve-section-references model)))
+      (is equal '(:section "X") (secref-target one))
+      (false (secref-target two)))))
+
 (define-test resolve-sections-label-forms
   :parent resolve-sections
   (is equal "Abc" (model::secref-label-id "\\Abc"))
@@ -94,21 +127,11 @@ label and to a label two nodes share."
 ;;; The whole spec
 
 (defparameter *secref-unresolved*
-  (let ((chapter "the short name of a chapter, the second label of its \\DefineChapter, which the chapter node does not keep (it holds the first, its id)")
-        (section "the second label \\DefineSection gives a section already labelled: the node keeps the last, so this one finds nothing")
-        (figure "a figure whose \\DefineFigure is commented out in the source (concept-syntax.tex:386)"))
-    `(("Conditions" 7 ,chapter) ("Syntax" 6 ,chapter) ("Reader" 3 ,chapter)
-      ("TypesAndClasses" 2 ,chapter) ("Printer" 2 ,chapter) ("Strings" 1 ,chapter)
-      ("Streams" 1 ,chapter) ("Objects" 1 ,chapter) ("Numbers" 1 ,chapter)
-      ("Iteration" 1 ,chapter) ("Glossary" 1 ,chapter)
-      ("EvaluationAndCompilation" 1 ,chapter) ("DataAndControlFlow" 1 ,chapter)
-      ("CharacterSyntax" 7 ,section) ("MacroLambdaLists" 4 ,section)
-      ("CompilationTerms" 2 ,section)
-      ("ConstituentTraitsOfStdChars" 3 ,figure)))
+  '(("ConstituentTraitsOfStdChars" 3
+     "a figure whose \\DefineFigure is commented out in the source (concept-syntax.tex:386)"))
   "The labels of the whole spec's references that resolve to nothing:
-(label count reason).  The chapter and section rows are a gap of the
-model (docs/model.md, \"References, Sections, chapters and figures\"), not of the
-sources.")
+(label count reason).  The chapters' short names and the sections' other
+labels resolve through the :ALIASES of their nodes.")
 
 (defvar *secref-whole* nil
   "The problems of resolving the whole spec's references, once per run.")
