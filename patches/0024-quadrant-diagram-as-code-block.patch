@@ -1,0 +1,45 @@
+Give the quadrant diagram of concept-numbers.tex something the model holds.
+The diagram of the quadrant numbers (Figure "Quadrant Numbering for Branch
+Cuts") is an \halign inside a cell of another \halign, set in $$ ... $$ for
+the line drawing: a table in a table cell, which the model cannot hold (a
+cell holds inlines), and which is a drawing, not data.  It becomes a \code
+... \endcode block, the spec's own preformatted display, with the same
+labels in the same places, so that the drawing stays readable in any
+rendering; the caption below keeps its line.  Lines 575-590 stay 16 lines:
+\code, the drawing, \endcode and three comment lines.  The dots of the real
+axis are plain periods, the imaginary axis is a column of colons.
+--- concept-numbers.tex
++++ concept-numbers.tex
+@@ -575,16 +575,16 @@
+-{\def\Qfont#1{{\tt #1}}
+-$$\vbox{\halign{\hfil #\hfil\cr
+-Positive\cr
+-Imaginary Axis\cr
+-\noalign{\vskip 5pt}
+-\vbox{\halign{#&#&#\cr
+-\hfil&\hfil$\vdots$\hfil&\hfil\cr
+-\hfil\Qfont{II\quad}&$\vdots$&\Qfont{\quad I}\hfil\cr
+-\hfil Negative Real Axis\quad$\cdots\cdots\cdots$& &$\cdots\cdots\cdots$\quad Positive Real Axis\hfil\cr
+-\hfil\Qfont{III\quad}&$\vdots$&\Qfont{\quad IV}\hfil\cr
+-\hfil&\hfil$\vdots$\hfil&\hfil\cr
+-}}\cr
+-\noalign{\vskip 5pt}
+-Negative\cr
+-Imaginary Axis\cr}}$$
+-}
++\code
++                Positive
++             Imaginary Axis
++                   :
++       II          :          I
++                   :
++ Negative Real Axis ...:... Positive Real Axis
++                   :
++      III          :          IV
++                   :
++                Negative
++             Imaginary Axis
++\endcode
++%
++%
++%

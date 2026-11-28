@@ -65,3 +65,7 @@ and `0023-term-for-operator-and-type-names` set argument, operator and type
 names as `\param`, `\funref`, `\macref`, `\typeref` or `\f` where they were
 `\term`.  The `:not-a-term` rows whose intended markup is not plain stay
 pinned in `tests/model/unresolved-terms.sexp`.
+
+`0024-quadrant-diagram-as-code-block` sets the quadrant diagram of
+concept-numbers.tex (a table inside a table cell, so a drawing and not data)
+as a `\code` ... `\endcode` block, the spec's preformatted display.
