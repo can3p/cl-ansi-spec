@@ -822,7 +822,33 @@ resolved here.
 
 #### Operators
 
-*Step 3.18.* Not written yet.
+*Step 3.18.* `src/model/resolve-operators.lisp`.  `resolve-operator-refs`
+runs on the built model after `assign-ids` (an entry's id is final only
+then) and sets the `:target` of every `:operator-ref` to the entry its text
+names.  `:apply nil` only counts.  Rules, in order:
+
+1. **Normalise.** The text is trimmed and `\&` is `&`.
+2. **Entryless.** No target and no problem for a reference that cannot
+   name an entry: `:keyword`, `:package`, `:lambda-list-keyword` and
+   `:loop-keyword` (`*clref-entryless-vias*`; a loop keyword such as `and`
+   shares a name with an entry that is another thing), and any text that
+   begins with `:` or `&`.
+3. **Candidates.** The entries with the name among their `:names`; none is
+   *unresolved*.
+4. **Kind preferred.** The candidates of the kinds the wrapper prefers
+   (`*clref-preferred-kinds*`: `\typeref{list}` is the system class,
+   `\funref{list}` the function) when there are any, else all of them; a
+   wrapper of another kind still resolves a name with one entry.
+5. **One** candidate is the target; **several** are *ambiguous* (`\clref`
+   and `\ttref` prefer no kind; `\misc{*}` is the function or the
+   variable), no target.
+
+Unresolved and ambiguous references are returned as `clref-finding`s
+(node, outcome, candidate ids, message), in document order; they are not
+build problems.  Unresolved ones that are no resolution matter: `\misc`
+with no text or with `\fi \fi` left in a table cell's argument, `\f
+{(eql 't)}` set as a type; `tests/model/resolve-operators.lisp` pins the
+counts.
 
 #### Terms
 
