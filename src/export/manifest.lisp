@@ -4,7 +4,6 @@
 ;;;; the document's chapter files, the glossary and the index, then
 ;;;; report.json (the problems of the build) and manifest.json (what the
 ;;;; export was made from, and the digest of every file).
-;;;; Owner: step 3.20 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/export)
 

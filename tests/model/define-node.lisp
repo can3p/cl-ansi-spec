@@ -1,7 +1,7 @@
 ;;;; tests/model/define-node.lisp
 ;;;;
 ;;;; DEFINE-NODE and the registry (src/model/define-node.lisp), on node
-;;;; kinds declared here, in a registry of their own.  Owner: step 3.1.
+;;;; kinds declared here, in a registry of their own.
 
 (in-package #:cl-ansi-spec/tests)
 

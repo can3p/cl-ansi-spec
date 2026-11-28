@@ -1,11 +1,10 @@
 ;;;; src/model/nodes-inlines.lisp
 ;;;;
 ;;;; The node kinds of inlines (docs/model.md, "Inlines"): the category
-;;;; :inline, references (unresolved until 3.17-3.19 resolve them),
+;;;; :inline, references (unresolved until the resolve-* files resolve them),
 ;;;; parameters, fonts by meaning, example notation, citations, index
 ;;;; entries and issue anchors.
-;;;; Owner: step 3.2 (shapes), then 3.13 of docs/plan/m3.md (documentation
-;;;; and examples, through tests/model/undocumented-inlines.sexp).
+;;;; Its documentation ratchet: tests/model/undocumented-inlines.sexp.
 
 (in-package #:cl-ansi-spec/model)
 

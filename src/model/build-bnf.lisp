@@ -2,7 +2,6 @@
 ;;;;
 ;;;; The handlers that build BNF rules and their notation from their events
 ;;;; (docs/model.md, "Syntax").
-;;;; Owner: step 3.15 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/model)
 

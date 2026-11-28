@@ -3,8 +3,7 @@
 ;;;; The file layout of an export (docs/exports.md, "Files"): one file per
 ;;;; chapter under chapters/, then glossary and index, each as JSON and as an
 ;;;; S-expression, every one stating the schemaVersion: the SHA-256 of the
-;;;; committed schema.  The manifest and the report are step 3.20's.
-;;;; Owner: step 3.7 of docs/plan/m3.md.
+;;;; committed schema.  The manifest and the report are in manifest.lisp.
 
 (in-package #:cl-ansi-spec/export)
 

@@ -3,7 +3,6 @@
 ;;;; Tests of the schema validator: each keyword of the subset with a valid
 ;;;; and an invalid fixture, the JSON Pointers of the errors, and the
 ;;;; refusal of keywords outside the subset.
-;;;; Owner: step 3.6 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

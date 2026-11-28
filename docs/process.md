@@ -105,6 +105,9 @@ be merged before the next wave starts; a step may start as soon as its
   either side, then run `make snapshots` or `make generate` and commit the
   result.
   `docs/plan/<id>.md`: each step ticks only its own item, so ticks merge.
+  Before testing a merge, look for a top-level name defined twice across
+  the package's files (two steps' helpers); rename the merging branch's
+  copy with its area prefix.
 - **Names in shared packages.**  Steps of one wave fill files of the
   same package, so a helper (function, macro, variable; tests included)
   carries its area's prefix (`glossary-blank-string-p`,

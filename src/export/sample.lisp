@@ -4,7 +4,6 @@
 ;;;; dictionary entries of the model, each as a file of its own in both
 ;;;; formats, with a manifest, so that code reading the exports can be
 ;;;; written and tested without running the parser.
-;;;; Owner: step 3.22 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/export)
 

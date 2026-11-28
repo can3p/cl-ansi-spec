@@ -3,8 +3,7 @@
 ;;;; The node kinds of dictionary entries (docs/model.md, "Entries"): the
 ;;;; entry, its parts and its signatures, the enum of entry kinds and the
 ;;;; target kind that points to entries.
-;;;; Owner: step 3.2 (shapes), then 3.9 of docs/plan/m3.md (documentation
-;;;; and examples, through tests/model/undocumented-entries.sexp).
+;;;; Its documentation ratchet: tests/model/undocumented-entries.sexp.
 
 (in-package #:cl-ansi-spec/model)
 

@@ -4,7 +4,6 @@
 ;;;; S-expression form, the file layout and the schemaVersion, and the round
 ;;;; trip of a fixture model (written, read back, validated against the
 ;;;; committed schema).
-;;;; Owner: step 3.7 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

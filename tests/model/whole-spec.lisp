@@ -4,7 +4,6 @@
 ;;;; its ids settled (ASSIGN-IDS); the build report pinned, the
 ;;;; invariants checked, and each job's model kept as a snapshot
 ;;;; (tests/model-snapshots.sexp, written by `make snapshots').
-;;;; Owner: step 3.16 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

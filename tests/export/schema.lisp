@@ -2,7 +2,6 @@
 ;;;;
 ;;;; Tests of the JSON Schema generator (src/export/schema.lisp), on kinds
 ;;;; declared here in a registry of their own, and on the model's registry.
-;;;; Owner: step 3.4 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

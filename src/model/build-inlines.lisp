@@ -3,9 +3,8 @@
 ;;;; The handlers that build semantic inlines and unresolved references
 ;;;; from their events (docs/model.md, "Inlines"): terms, parameters,
 ;;;; fonts by meaning, references to names, sections and figures with
-;;;; their key text (3.17-3.19 resolve them), example notation,
+;;;; their key text (resolved later, by the resolve-* files), example notation,
 ;;;; citations, index entries and issues as anchors.
-;;;; Owner: step 3.13 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/model)
 

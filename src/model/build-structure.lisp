@@ -2,7 +2,6 @@
 ;;;;
 ;;;; The handlers that build chapters, sections and the standard from their
 ;;;; events (docs/model.md, "Structure").
-;;;; Owner: step 3.8 of docs/plan/m3.md.
 ;;;;
 ;;;; A chapter and a section are marks with no end: a section runs to the
 ;;;; next mark of its level or above, so the handlers keep a container open

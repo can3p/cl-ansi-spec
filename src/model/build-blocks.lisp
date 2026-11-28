@@ -3,7 +3,6 @@
 ;;;; The handlers that build paragraphs, code, lists, notes from their events,
 ;;;; and the rules that drop the presentational events (docs/model.md,
 ;;;; "Blocks").
-;;;; Owner: step 3.10 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/model)
 

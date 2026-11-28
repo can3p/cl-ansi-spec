@@ -2,7 +2,6 @@
 ;;;;
 ;;;; Tests of math (src/model/build-math.lisp): the character tables, the
 ;;;; handlers on events made here, and real formulas of the spec.
-;;;; Owner: step 3.15m of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

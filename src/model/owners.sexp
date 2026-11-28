@@ -1,15 +1,13 @@
 ;;;; src/model/owners.sexp
 ;;;;
-;;;; The ownership table of the model builder (docs/plan/m3.md, step 3.0;
-;;;; docs/model.md, "Building"), read by LOAD-OWNERS
+;;;; The ownership table of the model builder (docs/model.md, "Building"), read by LOAD-OWNERS
 ;;;; (src/model/owners.lisp).  Each form
 ;;;;   (:owner step :file "build-….lisp" :vocabulary (keys…) :events (kinds…)
 ;;;;    :why "…")
-;;;; gives a builder step the vocabulary keys (src/semantic/vocabulary.sexp)
+;;;; gives a builder (named by the step that wrote it) the vocabulary keys (src/semantic/vocabulary.sexp)
 ;;;; and the event kinds (docs/events.md) whose handlers it writes, in that
 ;;;; file of src/model/.  Every key and every kind has exactly one owner
-;;;; (tests/model/owners.lisp), so nothing falls to the whole-spec step
-;;;; (3.16) by default.  A closing key (:endcom …) goes with the key it
+;;;; (tests/model/owners.lisp), so nothing is left without a handler.  A closing key (:endcom …) goes with the key it
 ;;;; closes.
 
 (:owner "3.3" :file "build.lisp"

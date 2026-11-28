@@ -3,7 +3,6 @@
 ;;;; Tests of text and fonts (src/model/build-text.lisp): the layout tables
 ;;;; and ligatures, the font classes, accents, discretionaries and the text
 ;;;; segments, on events made here, and on real lines of the spec.
-;;;; Owner: step 3.12 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

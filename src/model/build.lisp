@@ -6,7 +6,6 @@
 ;;;; close, and the build report, where every event no handler takes and
 ;;;; every inconsistency goes.  BUILD-EVENTS builds a list of events;
 ;;;; BUILD-JOB, BUILD-MODEL and BUILD-FIXTURE run chapter jobs first.
-;;;; Owner: step 3.3 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/model)
 

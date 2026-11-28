@@ -5,7 +5,6 @@
 ;;;; :TARGET of every :TERM-REF of a model and reports what it cannot
 ;;;; resolve, what it resolves two ways, and the \meaning senses the
 ;;;; entry found has not.
-;;;; Owner: step 3.19 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/model)
 

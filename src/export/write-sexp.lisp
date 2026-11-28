@@ -5,7 +5,6 @@
 ;;;; line column)); a file is one form, (:schema-version "<digest>" :key
 ;;;; content ...), read back with READ under standard syntax and
 ;;;; *READ-EVAL* false (docs/exports.md, "Files").
-;;;; Owner: step 3.7 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/export)
 
