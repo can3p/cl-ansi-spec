@@ -643,7 +643,7 @@ decides:
   argument, as the reference sets it: `\kwd{test}` is `":test"`, `\keyref{key}`
   is `"\\&key"`. `:section-ref` and `:figure-ref` hold the label as
   written, trimmed (`"\\OrdinaryLambdaLists"`). No `:target` is set;
-  3.17-3.19 resolve them.
+  3.17-3.19 resolve them ("References", below).
 - **`:lambda-list-keyword`** has no argument: its name is the text its
   macro typeset (`"&allow-other-keys"`).
 - **Notation** (`:evaluates-to` …, `:output`, `:this-section`) has no
@@ -790,7 +790,35 @@ Resolved after the whole spec builds.
 
 #### Sections, chapters and figures
 
-*Step 3.17.* Not written yet.
+*Step 3.17* (`src/model/resolve-sections.lisp`).
+`resolve-section-references` takes the built model and sets the `:target`
+of every `:section-ref` (`\secref`, `\chapref`) and `:figure-ref`
+(`\figref`).  The label, without its backslash and white space, is looked
+up as an id among the chapters and sections (a `:section-ref`) or the
+figures (a `:figure-ref`); the ids are the labels of `\DefineChapter`,
+`\DefineSection` and `\DefineFigure`, which the builders checked against
+TeX's own numbers.  The generated `setup-sections.tex` and
+`setup-figures.tex` are never read.  A label no node has, or two nodes
+share, leaves the target unset and is one `:unresolved-reference`
+problem (message with the label; the kind is for the coordinator to add
+to `*problem-kinds*`, `build-model` does not call the resolver yet).
+
+`table-of-contents` is a list of `secref-toc-entry` (kind, id, number,
+title, children: the entries of the sections, at any depth), one for each
+chapter; `list-of-figures` a list of `secref-figure-entry` (id, number,
+caption, chapter id), both in document order.
+
+*Known gap.*  A node holds one id.  A chapter has two labels
+(`\DefineChapter{ChapTwo}{Syntax}`: the id and a short name) and a
+section may be given a second `\DefineSection` (2.1 is `CharacterSyntax`
+in chap-2.tex and `TheStandardSyntax` in concept-syntax.tex; the last
+wins).  The references through the label the node does not keep (41 of the
+whole spec's 44 unresolved ones, pinned by label in
+`tests/model/resolve-sections.lisp`) stay unresolved until the chapter and
+section nodes keep their other labels, a change of step 3.8's files.  The
+other 3 reference a figure whose `\DefineFigure` is commented out in the
+source (concept-syntax.tex:386).  `:this-section` and `:next-figure` are not
+resolved here.
 
 #### Operators
 
