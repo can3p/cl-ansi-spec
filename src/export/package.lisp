@@ -10,8 +10,6 @@
   (:use #:cl)
   (:local-nicknames (#:model #:cl-ansi-spec/model)
                     (#:json #:cl-ansi-spec/json)
-                    ;; write-json.lisp, files.lisp (step 3.7)
-                    (#:tex #:cl-ansi-spec/tex)
                     (#:sha256 #:cl-ansi-spec/sha256))
   (:import-from #:cl-ansi-spec/json
                 #:json-object-p #:json-object-members #:json-get)

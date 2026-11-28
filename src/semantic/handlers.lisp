@@ -29,5 +29,5 @@ note is not typeset; then the macro's body is read, as TeX reads it."
               (list :mark (entry-key entry) :arguments arguments
                     :hidden (eq (named-meaning expander "ifeditornotes")
                                 (named-meaning expander "iffalse")))
-              :span (token-span token))
+              :span (call-origin-span expander token))
   (insert-tokens expander (macro-expansion expander token arguments)))

@@ -199,7 +199,7 @@ has the export formats, their JSON Schema and versioning.
 | 0 Sources | pristine and vendored trees, search path and resolver done; unified diffs are read and applied strictly (`src/patch/`); the patch set (`src/patch/set.lisp`) is checked and every job reads the patched tree (M4) |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | done (M2): TeX below typesetting (`src/expand/`, `make expand`), plain TeX's format, the vocabulary and its observation (`src/semantic/`, `make events`); every chapter job runs and its events are checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
-| 4–5 Model, exports | M3 under way (`docs/plan/m3.md`): packages `cl-ansi-spec/model` (`src/model/`) and `cl-ansi-spec/export` (`src/export/`) laid out, one stub file per step; the builder's ownership table (`src/model/owners.sexp`); the builder core (`src/model/build.lisp`: handler table, container stack, build report, `make model`); the registry of generated files (`src/export/generate.lisp`, `make generate`) |
+| 4–5 Model, exports | M3 under way (`docs/plan/m3.md`): packages `cl-ansi-spec/model` (`src/model/`) and `cl-ansi-spec/export` (`src/export/`) laid out, one stub file per step; the builder's ownership table (`src/model/owners.sexp`); the builder core (`src/model/build.lisp`: handler table, container stack, build report, `make model`); the builders of every area; the whole spec builds, ids settled (`src/model/ids.lisp`), its report pinned and each job's model kept as a snapshot (`tests/model/whole-spec.lisp`, `tests/model-snapshots.sexp`); the registry of generated files (`src/export/generate.lisp`, `make generate`) |
 
 Related: [process](process.md) explains how work advances.
 [History](history/) records finished milestones.

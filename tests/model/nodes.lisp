@@ -91,6 +91,7 @@
     (:part-of-speech :none "A part of speech of a glossary entry or sense.")
     (:pronunciation :none "The pronunciation of a glossary entry.")
     (:usage :none "A usage of a glossary entry or sense.")
+    (:primary-stress :stress) (:secondary-stress :stress) (:optional-stress :stress)
     ;; 3.15, syntax
     (:bnf-rule :bnf-rule) (:bnf-break :bnf-break) (:optional :bnf-optional)
     (:end-optional :none "Ends the :optional before it.")

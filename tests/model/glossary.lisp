@@ -311,12 +311,15 @@ S-expressions, and the report."
     (is equal '((:transitive-verb) (:noun))
         (mapcar (lambda (sense) (sexp-field sense :parts-of-speech))
                 (sexp-field entry :senses))))
-  ;; :157: the first group, a pronunciation.
-  (let ((entry (first (group-entries (glossary-fixture 155 160)))))
+  ;; :157: the first group, a pronunciation, \Stress{nil}.
+  (let* ((entry (first (group-entries (glossary-fixture 155 160))))
+         (strong (first (sexp-field entry :pronunciation))))
     (is equal "()" (sexp-field entry :id))
-    (is equal '(:strong :content ("nil"))
-        (subseq (first (sexp-field entry :pronunciation)) 0 3)
-        "the pronunciation is set in bold")))
+    (is eq :strong (first strong) "the pronunciation is set in bold")
+    (is equal '((:stress :level :primary) "nil")
+        (mapcar (lambda (item) (if (consp item) (subseq item 0 3) item))
+                (sexp-field strong :content))
+        "the syllable follows its primary stress mark")))
 
 (define-test glossary-whole
   :parent glossary
@@ -324,8 +327,11 @@ S-expressions, and the report."
          (groups (remove-if-not (lambda (node) (and (typep node 'model:node)
                                                     (eq (model:node-kind node) :glossary-group)))
                                 nodes))
+         ;; A group's entries, without the anchors between them.
          (entries (loop for group in groups
-                        append (model:node-field-value group :entries)))
+                        append (remove-if-not (lambda (node)
+                                                (eq (model:node-kind node) :glossary-entry))
+                                              (model:node-field-value group :entries))))
          (senses (loop for entry in entries
                        append (model:node-field-value entry :senses))))
     (is = 24 (length groups) "Non-alphabetic and 23 letters")

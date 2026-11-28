@@ -21,7 +21,7 @@
        (setf *spec-survey*
              (list (cl-ansi-spec/inventory:merge-surveys
                     (mapcar #'cl-ansi-spec/inventory:survey-job
-                            (cl-ansi-spec/inventory:chapter-jobs)))
+                            (cl-ansi-spec:chapter-jobs)))
                    (cl-ansi-spec/inventory:survey-job "plain"))))))
 
 (defun text-used-macros (survey)

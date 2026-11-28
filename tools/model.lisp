@@ -34,7 +34,7 @@
                  (member file (cl-ansi-spec/inventory:survey-files
                                (cl-ansi-spec/inventory:survey-job job))
                          :test #'string=))
-               (cl-ansi-spec/inventory:chapter-jobs))
+               (cl-ansi-spec:chapter-jobs))
       (error "No chapter job reads ~A." file)))
 
 (defun print-report (report)
@@ -68,7 +68,7 @@ problems."
     (multiple-value-bind (nodes report)
         (cl-ansi-spec/model:build-fixture
          (cond ((and job (string/= job "")) job)
-               ((member name (cl-ansi-spec/inventory:chapter-jobs) :test #'string=) name)
+               ((member name (cl-ansi-spec:chapter-jobs) :test #'string=) name)
                (t (job-of-file file)))
          :file file :lines (parse-line-range (uiop:getenv "LINES")))
       (dolist (node nodes)

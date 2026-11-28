@@ -145,6 +145,9 @@
       "$ref": "#/$defs/glossary-example"
     },
     {
+      "$ref": "#/$defs/stress"
+    },
+    {
       "$ref": "#/$defs/bnf-rule"
     },
     {
@@ -524,6 +527,24 @@
         }
       ]
     },
+    "enum-stress": {
+      "title": "stress",
+      "description": "How a syllable of a pronunciation is stressed, by the mark the\nglossary sets before it (its introduction, concept-glossary.tex:79).",
+      "oneOf": [
+        {
+          "const": "primary",
+          "description": "The primary stress, a high mark (\\Stress)."
+        },
+        {
+          "const": "secondary",
+          "description": "The secondary stress, a low mark (\\stress)."
+        },
+        {
+          "const": "optional",
+          "description": "Stressed or not, a high and a low mark (\\maybeStress)."
+        }
+      ]
+    },
     "enum-math-class": {
       "title": "math-class",
       "description": "The class of a noad, as TeX gives it: the spacing and the limits of\nthe noad follow from it.  The class comes from a character's math code\n\\mathcode, a \\mathord-like command or the construct (a \\left … \\right\nis an inner noad).",
@@ -738,6 +759,81 @@
             "15.17"
           ]
         },
+        "cover": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "cover",
+          "description": "The blocks of the cover, before the first chapter of chap-0.tex:\nthe standard's name, its document number, a page left blank.",
+          "examples": [
+            [
+              {
+                "kind": "paragraph",
+                "content": [
+                  {
+                    "kind": "strong",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "X3J13/94-101"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
+        },
         "front-matter": {
           "type": "array",
           "items": {
@@ -932,6 +1028,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -1230,6 +1329,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -1444,6 +1546,72 @@
           "description": "What the names are, from the entry's \\ftype.",
           "examples": [
             "function"
+          ]
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
+              },
+              {
+                "$ref": "#/$defs/math"
+              }
+            ]
+          },
+          "title": "content",
+          "description": "What stands in the entry before its first part, between its\nheading and its first \\label: index entries, issue anchors (an issue\nthe whole entry belongs to) and notes.",
+          "examples": [
+            [
+              {
+                "kind": "index-entry",
+                "index-kind": "ref",
+                "text": "endp"
+              }
+            ]
           ]
         },
         "parts": {
@@ -1790,6 +1958,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -1925,6 +2096,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -2127,6 +2301,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -2262,6 +2439,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -2492,6 +2672,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -2687,6 +2870,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -2965,6 +3151,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -3052,10 +3241,29 @@
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/item"
+            "oneOf": [
+              {
+                "$ref": "#/$defs/item"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              }
+            ]
           },
           "title": "items",
-          "description": "The list's items, in order.",
+          "description": "The list's items, in order, and the anchors (issues, index\nentries) and notes that stand before or between them, outside any item.",
           "examples": [
             [
               {
@@ -3229,6 +3437,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -3479,6 +3690,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -3654,6 +3868,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -4033,6 +4250,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -4240,6 +4460,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -5011,6 +5234,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -5179,6 +5405,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -5345,6 +5574,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -5635,6 +5867,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -5801,6 +6036,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -6011,10 +6249,23 @@
         "entries": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/glossary-entry"
+            "oneOf": [
+              {
+                "$ref": "#/$defs/glossary-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              }
+            ]
           },
           "title": "entries",
-          "description": "The group's entries, in order.",
+          "description": "The group's entries, in order, and the anchors (issues, index\nentries) that stand before or between them, outside any entry: an issue\nbegun before a \\gentry covers that entry.",
           "examples": [
             [
               {
@@ -6217,6 +6468,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -6267,6 +6521,10 @@
               {
                 "kind": "strong",
                 "content": [
+                  {
+                    "kind": "stress",
+                    "level": "primary"
+                  },
                   {
                     "kind": "text",
                     "text": "nil"
@@ -6550,6 +6808,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -6778,6 +7039,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -6848,6 +7112,40 @@
               "text": "This is an example of an example."
             }
           ]
+        }
+      ]
+    },
+    "stress": {
+      "type": "object",
+      "title": "stress",
+      "description": "A stress mark of a pronunciation: \\Stress, \\stress or \\maybeStress,\ndrawn with rules in a formula before the syllable it stresses, which\nfollows it in the pronunciation's inlines up to the next mark (as IPA\nwrites its marks).",
+      "properties": {
+        "kind": {
+          "const": "stress",
+          "description": "The node kind; picks this definition out."
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "level": {
+          "$ref": "#/$defs/enum-stress",
+          "title": "level",
+          "description": "Which stress the mark gives the syllable after it.",
+          "examples": [
+            "primary"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "level"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "stress",
+          "level": "primary"
         }
       ]
     },
@@ -6952,6 +7250,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -7158,6 +7459,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -7324,6 +7628,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -7502,6 +7809,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -7696,6 +8006,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -7862,6 +8175,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -8032,6 +8348,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -8198,6 +8517,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -8397,6 +8719,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -8682,6 +9007,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -8862,6 +9190,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -9120,6 +9451,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -9302,6 +9636,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -9482,6 +9819,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -9741,6 +10081,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -9921,6 +10264,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -10249,6 +10595,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -10429,6 +10778,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"
@@ -10613,6 +10965,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/stress"
+              },
+              {
                 "$ref": "#/$defs/bnf-break"
               },
               {
@@ -10793,6 +11148,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/stress"
               },
               {
                 "$ref": "#/$defs/bnf-break"

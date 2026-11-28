@@ -411,6 +411,12 @@
  :why "The sense of the term before it, a number set as a subscript (setup-document.tex:452); it redefines the primitive \\meaning.")
 (:entry "pronounced" :pronunciation
  :why "How a glossary term is pronounced, in brackets (setup-document.tex:450).")
+(:entry "Stress" :primary-stress
+ :why "A syllable of a pronunciation with the primary stress, the high mark \\hiaccent draws before it (setup-document.tex:430).")
+(:entry "stress" :secondary-stress
+ :why "A syllable of a pronunciation with the secondary stress, the low mark \\loaccent draws before it (setup-document.tex:431).")
+(:entry "maybeStress" :optional-stress
+ :why "A syllable of a pronunciation stressed or not, the high and low marks \\medaccent draws before it (setup-document.tex:429); no pronunciation uses it.")
 
 
 ;;; Figures: the content goes to box 1, which \\endfig unboxes
@@ -516,9 +522,8 @@
          "\\TypographyCaveats")
  :why "Text: the standard's name, its document number and revision (setup-title.tex:11-27, setup-version.tex:5), a note on the pronunciation key (setup-document.tex:447).")
 (:class :presentational
- :names ("\\maybeStress" "\\Stress" "\\stress" "\\harda" "\\harde" "\\hardo"
-         "\\schwa")
- :why "Accents and stress marks of the glossary's pronunciations (setup-document.tex:429-446), inside \\pronounced.")
+ :names ("\\harda" "\\harde" "\\hardo" "\\schwa")
+ :why "Accents of the glossary's pronunciations (setup-document.tex:433-446), inside \\pronounced.")
 (:class :phrase
  :names ("\\SatisfyTest" "\\DocMethods" "\\Meth" "\\realtypespec" "\\writekeys"
          "\\writekeydescriptions" "\\ExplainRecursiveP")

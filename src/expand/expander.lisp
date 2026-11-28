@@ -93,7 +93,10 @@ end-of-file checks."
   (call-observer nil :type (or null function))
   (level-end-observer nil :type (or null function))
   (definition-observer nil :type (or null function))
-  (append-observer nil :type (or null function)))
+  (append-observer nil :type (or null function))
+  ;; The CALL-CONTEXT of the macro call being observed, while
+  ;; CALL-OBSERVER runs (CALL-ORIGIN-SPAN).
+  (call-context '() :type list))
 
 (defstruct (dont-expand-token (:include cs-token)
                               (:constructor make-dont-expand-token

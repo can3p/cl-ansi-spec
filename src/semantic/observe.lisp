@@ -129,8 +129,8 @@ it is a macro."
 (defun observe-call (observer expander token macro arguments)
   "The call observer: when MACRO belongs to an entry, emit or hold its
 events and return the expander's action and tag (see OBSERVE-VOCABULARY)."
-  (let ((entry (gethash macro (observer-meanings observer)))
-        (span (token-span token)))
+  (let* ((entry (gethash macro (observer-meanings observer)))
+         (span (and entry (call-origin-span expander token))))
     (when entry
       (incf (gethash (entry-name entry) (observer-calls observer) 0)))
     (cond ((null entry) nil)
@@ -144,7 +144,7 @@ events and return the expander's action and tag (see OBSERVE-VOCABULARY)."
                 (unless (tail-call-p (observer-held observer) token)
                   (drop-held observer))
                 (begin-call observer expander entry
-                            (body-end-span macro arguments span) arguments span))
+                            (call-end-span expander arguments span) arguments span))
                (:wrapper
                 (let ((tail (first (macro-body macro)))
                       (held (observer-held observer)))
@@ -222,15 +222,15 @@ to."
                          :previous-span (activation-span activation))
             (observer-report-list observer)))))
 
-(defun body-end-span (macro arguments span)
-  "The span of the last token of MACRO's body with ARGUMENTS substituted,
-or SPAN, the call's, when the body is empty."
-  (dolist (element (reverse (macro-body macro)) span)
-    (let ((token (if (integerp element)
-                     (car (last (nth (1- element) arguments)))
-                     element)))
-      (when token
-        (return (token-span token))))))
+(defun call-end-span (expander arguments span)
+  "Where the call at SPAN with ARGUMENTS ends in the text: the last token
+of its last non-empty argument, or SPAN when it has none
+(CALL-ORIGIN-SPAN: a call a setup macro makes ends where the outermost
+call in the text does)."
+  (let ((last (find-if #'identity arguments :from-end t)))
+    (if last
+        (call-origin-span expander (car (last last)))
+        span)))
 
 ;;; Placing markers
 

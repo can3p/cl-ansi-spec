@@ -14,6 +14,7 @@ job.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `version` | string | yes | The revision of the draft, the text of \rev in setup-version.tex. |
+| `cover` | list of node of kind or category `:block` | no | The blocks of the cover, before the first chapter of chap-0.tex: the standard's name, its document number, a page left blank. |
 | `front-matter` | list of node of kind or category `:chapter` | no | The unnumbered chapters of chap-0.tex (\beginSimpleChapter), in order; absent when the model is built from part of the jobs. |
 | `chapters` | list of node of kind or category `:chapter` | yes | The numbered chapters (\beginchapter), 1 to 26, then the appendix A, in that order. |
 
@@ -97,6 +98,7 @@ one or more defined names of one kind.
 | `id` | string | yes | The entry's id: its first name, or <name>/<entry-kind> when two entries share a first name (docs/exports.md, "Ids"). |
 | `names` | list of string | yes | The names the entry describes, the comma-separated list of \begincom's first argument, in order. |
 | `entry-kind` | enumeration `entry-kind` | yes | What the names are, from the entry's \ftype. |
+| `content` | list of node of kind or category `:block` | no | What stands in the entry before its first part, between its heading and its first \label: index entries, issue anchors (an issue the whole entry belongs to) and notes. |
 | `parts` | list of node of kind or category `:part` | no | The entry's parts, one per \label, in order. |
 
 Example:
@@ -326,7 +328,7 @@ Categories: `:block`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `items` | list of node of kind or category `:item` | yes | The list's items, in order. |
+| `items` | list of node of kind or category `:item`, `:issue-start`, `:issue-end`, `:index-entry`, `:editor-note`, `:reviewer-note` | yes | The list's items, in order, and the anchors (issues, index entries) and notes that stand before or between them, outside any item. |
 
 Example:
 
@@ -912,7 +914,7 @@ What an index entry indexes, by its macro.
 What stands in running text beside strings: references, parameters,
 code, emphasis, example notation, math, anchors.
 
-Kinds: `:editor-note`, `:reviewer-note`, `:term-ref`, `:operator-ref`, `:section-ref`, `:figure-ref`, `:this-section`, `:next-figure`, `:param`, `:metavariable`, `:format-directive`, `:lambda-list-keyword`, `:code`, `:emphasis`, `:strong`, `:evaluates-to`, `:may-evaluate-to`, `:does-not-evaluate-to`, `:equivalent`, `:output`, `:input`, `:citation`, `:index-entry`, `:issue-start`, `:issue-end`, `:bnf-break`, `:bnf-optional`, `:bnf-zero-or-more`, `:bnf-one-or-more`, `:bnf-repeat-previous`, `:bnf-group`, `:bnf-parenthesized`, `:bnf-bracketed`, `:bnf-interleave`, `:bnf-required`, `:bnf-indirection`, `:bnf-caret`, `:angle-name`, `:math`.
+Kinds: `:editor-note`, `:reviewer-note`, `:term-ref`, `:operator-ref`, `:section-ref`, `:figure-ref`, `:this-section`, `:next-figure`, `:param`, `:metavariable`, `:format-directive`, `:lambda-list-keyword`, `:code`, `:emphasis`, `:strong`, `:evaluates-to`, `:may-evaluate-to`, `:does-not-evaluate-to`, `:equivalent`, `:output`, `:input`, `:citation`, `:index-entry`, `:issue-start`, `:issue-end`, `:stress`, `:bnf-break`, `:bnf-optional`, `:bnf-zero-or-more`, `:bnf-one-or-more`, `:bnf-repeat-previous`, `:bnf-group`, `:bnf-parenthesized`, `:bnf-bracketed`, `:bnf-interleave`, `:bnf-required`, `:bnf-indirection`, `:bnf-caret`, `:angle-name`, `:math`.
 
 ## Glossary
 
@@ -924,7 +926,7 @@ or \indextab to the next.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `letter` | string | yes | The heading's letter, or the heading for the entries that do not begin with a letter. |
-| `entries` | list of node of kind or category `:glossary-entry` | no | The group's entries, in order. |
+| `entries` | list of node of kind or category `:glossary-entry`, `:issue-start`, `:issue-end`, `:index-entry` | no | The group's entries, in order, and the anchors (issues, index entries) that stand before or between them, outside any entry: an issue begun before a \gentry covers that entry. |
 
 Example:
 
@@ -1007,6 +1009,25 @@ Example:
 (:glossary-example :content ("This is an example of an example."))
 ```
 
+### Node kind `:stress`
+
+A stress mark of a pronunciation: \Stress, \stress or \maybeStress,
+drawn with rules in a formula before the syllable it stresses, which
+follows it in the pronunciation's inlines up to the next mark (as IPA
+writes its marks).
+
+Categories: `:inline`.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `level` | enumeration `stress` | yes | Which stress the mark gives the syllable after it. |
+
+Example:
+
+```lisp
+(:stress :level :primary)
+```
+
 ### Enumeration `part-of-speech`
 
 The part of speech of a glossary term, by its macro.
@@ -1029,6 +1050,15 @@ compatibility with earlier usage.
 - `:mathematics` - \Mathematics: the sense of mathematics.
 - `:idiomatic` - \Idiomatic: an idiomatic sense.
 - `:computers` - \Computers: the sense of computing in general.
+
+### Enumeration `stress`
+
+How a syllable of a pronunciation is stressed, by the mark the
+glossary sets before it (its introduction, concept-glossary.tex:79).
+
+- `:primary` - The primary stress, a high mark (\Stress).
+- `:secondary` - The secondary stress, a low mark (\stress).
+- `:optional` - Stressed or not, a high and a low mark (\maybeStress).
 
 ### Target kind `:glossary`
 

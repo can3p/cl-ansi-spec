@@ -55,8 +55,10 @@ or \\indextab to the next."
    :doc "The heading's letter, or the heading for the entries that do not
 begin with a letter."
    :example "A")
-  (entries (:node :glossary-entry) :repeated t
-   :doc "The group's entries, in order."
+  (entries (:node :glossary-entry :issue-start :issue-end :index-entry) :repeated t
+   :doc "The group's entries, in order, and the anchors (issues, index
+entries) that stand before or between them, outside any entry: an issue
+begun before a \\gentry covers that entry."
    :example ((:glossary-entry :id "abort" :term "abort"
               :senses ((:glossary-sense :content ("to stop a computation.")))))))
 
@@ -86,7 +88,7 @@ the glossary's end."
   (pronunciation :inlines
    :doc "How the term is pronounced, \\pronounced's argument, with its
 stress marks; absent when not given."
-   :example ((:strong :content ("nil"))))
+   :example ((:strong :content ((:stress :level :primary) "nil"))))
   (parts-of-speech (:enum part-of-speech) :repeated t
    :doc "The parts of speech given after the term, before the senses, in
 order."
@@ -136,3 +138,21 @@ pointers."
   (content :inlines :required t
    :doc "The example's text."
    :example ("This is an example of an example.")))
+
+(define-enum stress (:area :glossary)
+  "How a syllable of a pronunciation is stressed, by the mark the
+glossary sets before it (its introduction, concept-glossary.tex:79)."
+  (:primary "The primary stress, a high mark (\\Stress).")
+  (:secondary "The secondary stress, a low mark (\\stress).")
+  (:optional "Stressed or not, a high and a low mark (\\maybeStress)."))
+
+(define-node stress
+    (:area :glossary :categories (:inline)
+     :example (:stress :level :primary))
+  "A stress mark of a pronunciation: \\Stress, \\stress or \\maybeStress,
+drawn with rules in a formula before the syllable it stresses, which
+follows it in the pronunciation's inlines up to the next mark (as IPA
+writes its marks)."
+  (level (:enum stress) :required t
+   :doc "Which stress the mark gives the syllable after it."
+   :example :primary))

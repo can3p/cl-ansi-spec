@@ -54,6 +54,12 @@ report."
 
 ;;; Names and kinds
 
+(defun entries-name-text (text)
+  "TEXT, a name as a signature's argument spells it, without the math
+shifts and grouping braces TeX reads in it: {\\tt $-$} and string$=$
+name - and string=."
+  (remove-if (lambda (char) (member char '(#\$ #\{ #\}))) text))
+
 (defun split-names (text)
   "The names of TEXT, a comma-separated list, trimmed, without empty ones."
   (loop with start = 0
@@ -160,17 +166,21 @@ shape the entry's rules expect."
 ;;; Entries and their parts
 
 (defun close-entry (builder container)
-  "CONTAINER's items: the parts fill the entry's :PARTS; anything else
-the entry holds outside a part is reported, since no node holds it."
-  (let ((node (container-node container)) (parts '()))
+  "CONTAINER's items: the parts fill the entry's :PARTS, what stands
+before the first part its :CONTENT (the node's check reports what that
+cannot hold); a string or node after a part has no place, reported."
+  (let ((node (container-node container)) (parts '()) (content '()))
     (dolist (item (container-contents container))
-      (if (and (typep item 'node) (eq (node-kind item) :part))
-          (push item parts)
-          (report-shape builder (node-span node)
-                        "~S stands in the entry ~A outside any part, dropped."
-                        (if (stringp item) item (node-kind item))
-                        (dictionary-entry-id node))))
-    (setf (node-field-value node 'parts (builder-registry builder)) (nreverse parts))))
+      (cond ((and (typep item 'node) (eq (node-kind item) :part))
+             (push item parts))
+            ((null parts) (push item content))
+            (t (report-shape builder (node-span node)
+                             "~S stands in the entry ~A after a part, dropped."
+                             (if (stringp item) item (node-kind item))
+                             (dictionary-entry-id node)))))
+    (let ((registry (builder-registry builder)))
+      (setf (node-field-value node 'content registry) (nreverse content)
+            (node-field-value node 'parts registry) (nreverse parts)))))
 
 (defun skip-heading (builder)
   "The events of an entry's heading, set by \\dobegincom from its
@@ -219,14 +229,6 @@ new paragraph, entry or part begins, or an :END that closes nothing here."
              (dispatch builder event span))))
 
 ;;; Signatures
-
-(defun events-ahead (builder count)
-  "The next COUNT events of BUILDER, not consumed (fewer at the end)."
-  (let* ((cursor (builder-cursor builder))
-         (events (cursor-events cursor))
-         (start (cursor-position cursor)))
-    (coerce (subseq events (min start (length events)) (min (+ start count) (length events)))
-            'list)))
 
 (defun leave-paragraph (builder span)
   "A signature is set in a paragraph of its own, which the part's blocks
@@ -338,10 +340,54 @@ containers still open inside it; its items go nowhere."
     (:defgen :generic-function)
     (:defmeth :method)))
 
+(defun entries-math-text (node)
+  "The characters of the formula NODE, in order, minus signs as the
+hyphen-minus of a name: the text a name set in math (\\Defun's `<', set
+as $<$ by setup-aux.tex) spells, or NIL when NODE holds anything but
+noads and characters."
+  (labels ((walk (item)
+             (cond ((not (typep item 'node)) (return-from entries-math-text nil))
+                   ((eq (node-kind item) :math-char)
+                    (substitute #\- (code-char #x2212) (math-char-text item)))
+                   ((and (eq (node-kind item) :math-noad)
+                         (null (math-noad-superscript item))
+                         (null (math-noad-subscript item)))
+                    (format nil "~{~A~}" (mapcar #'walk (math-noad-nucleus item))))
+                   (t (return-from entries-math-text nil)))))
+    (format nil "~{~A~}" (mapcar #'walk (math-content node)))))
+
+(defun entries-strip-name (items name)
+  "STRIP-PREFIX of NAME from ITEMS, whose leading formulas count as the
+text they spell (ENTRIES-MATH-TEXT): two values as STRIP-PREFIX's."
+  (multiple-value-bind (rest missing) (strip-prefix items name)
+    (unless missing
+      (return-from entries-strip-name (values rest nil))))
+  (let ((rest (trim-items items)) (text ""))
+    (loop
+      (let ((item (first rest)))
+        (cond ((string= text name)
+               (return (values (trim-items rest) nil)))
+              ((not (and (< (length text) (length name))
+                         (string= text name :end2 (length text))))
+               (return (values items t)))
+              ((stringp item)
+               (let ((remaining (subseq name (length text))))
+                 (if (and (< (length item) (length remaining))
+                          (string= item remaining :end2 (length item)))
+                     (progn (setf text (concatenate 'string text item))
+                            (pop rest))
+                     (multiple-value-bind (after missing) (strip-prefix rest remaining)
+                       (return (if missing (values items t) (values after nil)))))))
+              ((and (typep item 'node) (eq (node-kind item) :math)
+                    (entries-math-text item))
+               (setf text (concatenate 'string text (entries-math-text item)))
+               (pop rest))
+              (t (return (values items t))))))))
+
 (defun after-name (builder span items name)
   "ITEMS without NAME, the name the signature starts with (reported when
 it does not)."
-  (multiple-value-bind (rest missing) (strip-prefix items name)
+  (multiple-value-bind (rest missing) (entries-strip-name items name)
     (when missing
       (report-shape builder span "The signature does not start with ~S." name))
     rest))
@@ -389,7 +435,7 @@ HEAD (the name, then the lambda list) and whose values are TAIL."
 (defun single-signature-handler (builder event span)
   "A signature that sets one name: operators, \\Defsetf, \\Defvar, \\Defcon."
   (let* ((key (event-key event))
-         (name (argument-trimmed builder event 0))
+         (name (entries-name-text (argument-trimmed builder event 0)))
          (paragraph (leave-paragraph builder span)))
     (multiple-value-bind (head tail arrow end-span) (read-signature builder key span)
       (declare (ignore arrow))
@@ -455,7 +501,7 @@ signature's."
                  (setf end-span espan)
                  (return))
                 ((and (eq (event-type e) :mark) (eq (event-key e) :entry))
-                 (let ((name (argument-trimmed builder e 0)))
+                 (let ((name (entries-name-text (argument-trimmed builder e 0))))
                    (cond ((not (member name names :test #'string=))
                           (stop)
                           (push name names)
@@ -492,10 +538,35 @@ signature's."
 
 ;;; Type specifiers
 
+(defun entries-strip-syntax-prefix (builder items prefix)
+  "STRIP-PREFIX of PREFIX, \"(NAME\", from a line of syntax: from ITEMS,
+or from the content of the notation node ITEMS start with, at any depth
+(\\starparam's group in its repetition).  The \\halign of \\Deftype sets
+the prefix in its template, which TeX reads after it has expanded the
+first macro of the line (looking for \\omit), so a notation macro there
+(\\ttbrac) begins before the prefix: the prefix is taken out of it, and
+the notation's opening glyph, which then begins its content, too
+(BNF-STRIP-NODE-GLYPHS)."
+  (multiple-value-bind (rest missing) (strip-prefix items prefix)
+    (if (not missing)
+        (values rest nil)
+        (let ((first (first (trim-items items)))
+              (registry (builder-registry builder)))
+          (if (and (typep first 'node) (find-field (node-kind first) 'content registry))
+              (multiple-value-bind (inner inner-missing)
+                  (entries-strip-syntax-prefix
+                   builder (node-field-value first 'content registry) prefix)
+                (cond (inner-missing (values items t))
+                      (t (setf (node-field-value first 'content registry) inner)
+                         (bnf-strip-opening-glyph builder first)
+                         (values (trim-items items) nil))))
+              (values items t))))))
+
 (defun syntax-row (builder span name items)
   "The words of one line of a type specifier's syntax, \"(NAME …)\"
 without its parentheses and name."
-  (multiple-value-bind (rest missing) (strip-prefix items (concatenate 'string "(" name))
+  (multiple-value-bind (rest missing)
+      (entries-strip-syntax-prefix builder items (concatenate 'string "(" name))
     (when missing
       (report-shape builder span "A syntax line does not start with (~A." name)
       (return-from syntax-row (trim-items items)))
@@ -548,7 +619,7 @@ syntax, set as the rows of the alignment that follows."
   "Register the handlers of step 3.9 in the handler table TABLE."
   (define-handler (:begin :com :table table) (builder event span)
     "An entry: its names, its kind, its parts."
-    (let* ((names (split-names (argument-trimmed builder event 0)))
+    (let* ((names (mapcar #'entries-name-text (split-names (argument-trimmed builder event 0))))
            (text (argument-trimmed builder event 1))
            (kind (and (string/= text "") (entry-kind-keyword text)))
            (enum (find-enum 'entry-kind (builder-registry builder))))
@@ -568,7 +639,10 @@ syntax, set as the rows of the alignment that follows."
     (close-part builder span)
     (close-container builder :com span event))
   (define-handler (:mark :label :table table) (builder event span)
-    "A part: it runs to the next label or the end of the entry."
+    "A part: it runs to the next label or the end of the entry.  A label
+on the line after a paragraph's last (dict-flow.tex:2447) comes before
+that paragraph's end, which closes it first (DRAIN-INNER-CONTAINERS)."
+    (drain-inner-containers builder)
     (close-part builder span)
     (unless (find-container builder :com)
       (report-shape builder span "The label ~S stands outside any entry."

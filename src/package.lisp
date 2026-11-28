@@ -7,6 +7,7 @@
    #:spec-directory
    #:spec-file
    #:spec-files
+   #:chapter-jobs
    #:read-spec-file
    #:*source-overlay*
    #:spec-tree-file-text

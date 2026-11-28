@@ -107,7 +107,10 @@ when its container closes.")
     (:diagnostic "An unknown construct the expander met: a :DIAGNOSTIC
 event or entry of the job's log.")
     (:tex-error "A TeX error the job recovered from.")
-    (:fatal-error "A TeX error that stopped the job."))
+    (:fatal-error "A TeX error that stopped the job.")
+    (:id-collision "Addressable nodes of one target kind that keep one id
+after the collision rule (ASSIGN-IDS): each but the first, at its
+span."))
   "The kinds of PROBLEM a build reports, each with its meaning.")
 
 (defstruct (problem (:constructor make-problem
@@ -180,23 +183,37 @@ a :BEGIN handler and no :END handler closes that key's container
 ;;; Containers and the builder
 
 (defstruct (container (:constructor make-container
-                          (key span &key node field on-close)))
+                          (key span &key node field on-close ends-with-input
+                                         groups-only)))
   "An open container: the KEY of the event that opened it and that
 event's SPAN; the NODE it builds (or NIL: its items then go to the
 container below); the FIELD of NODE that receives its items, in order,
 when it closes (or NIL); ON-CLOSE, a function of the builder and the
-container called then, before NODE is checked (or NIL); and ITEMS, the
+container called then, before NODE is checked (or NIL), when END-SPAN
+holds the span it is closed at (NIL at the end of the input); with
+ENDS-WITH-INPUT true, the end of the input closes it quietly (a chapter
+or section, which nothing but the next one ends); GROUPS-ONLY true for
+a container without node, field or on-close that may stay open when a
+container below it closes (CLOSE-UNDER-PASS-THROUGH); and ITEMS, the
 nodes and strings added to it, newest first."
   (key nil :type symbol :read-only t)
   (span nil :read-only t)
   (node nil :read-only t)
   (field nil :type symbol :read-only t)
   (on-close nil :type (or null function) :read-only t)
+  (ends-with-input nil :type boolean :read-only t)
+  (groups-only nil :type boolean :read-only t)
+  (end-span nil)
   (items '() :type list))
 
 (defun container-contents (container)
   "The items added to CONTAINER, oldest first."
   (reverse (container-items container)))
+
+(defun container-closing-span (container)
+  "The span at which CONTAINER is being closed (its END-SPAN), or that of
+its beginning at the end of the input: for an on-close function."
+  (or (container-end-span container) (container-span container)))
 
 (defstruct (builder (:constructor make-builder
                         (cursor registry handlers expander job)))
@@ -222,6 +239,14 @@ follow its own."
 (defun peek-event (builder)
   "The next event of BUILDER's events and its span, not consumed."
   (cursor-peek (builder-cursor builder)))
+
+(defun events-ahead (builder count)
+  "The next COUNT events of BUILDER, not consumed (fewer at the end)."
+  (let* ((cursor (builder-cursor builder))
+         (events (cursor-events cursor))
+         (start (cursor-position cursor)))
+    (coerce (subseq events (min start (length events)) (min (+ start count) (length events)))
+            'list)))
 
 (defun report-problem (builder kind span &key message event)
   "Add a problem of KIND (one of *PROBLEM-KINDS*) met at SPAN to
@@ -266,11 +291,14 @@ open)."
   "Add ITEM, a node or a string, to BUILDER's innermost container."
   (push item (container-items (current-container builder))))
 
-(defun open-container (builder key span &key node field on-close)
+(defun open-container (builder key span &key node field on-close ends-with-input
+                                             groups-only)
   "Open a container of KEY begun at SPAN (MAKE-CONTAINER says what NODE,
-FIELD and ON-CLOSE are) and return it."
+FIELD, ON-CLOSE, ENDS-WITH-INPUT and GROUPS-ONLY are) and return it."
   (let ((container (make-container key span :node node :field field
-                                            :on-close on-close)))
+                                            :on-close on-close
+                                            :ends-with-input ends-with-input
+                                            :groups-only groups-only)))
     (push container (builder-stack builder))
     container))
 
@@ -280,6 +308,7 @@ node's field, join the node's span with END-SPAN, call ON-CLOSE, check
 the node and add it to the container below; without a node, its items
 go to the container below."
   (pop (builder-stack builder))
+  (setf (container-end-span container) end-span)
   (let ((node (container-node container))
         (registry (builder-registry builder)))
     (when node
@@ -298,12 +327,39 @@ go to the container below."
            (dolist (item (container-contents container))
              (add-item builder item))))))
 
+(defun pass-through-p (container)
+  "True when CONTAINER was opened to group only (OPEN-CONTAINER's
+GROUPS-ONLY): no node, no field, no on-close, so that its items go to
+the container below as they are (a box in a line of text)."
+  (and (container-groups-only container)
+       (not (or (container-node container) (container-field container)
+                (container-on-close container)))))
+
+(defun close-under-pass-through (builder target span)
+  "Close TARGET at SPAN although containers that only group are open
+above it (\\hbox{… \\rparen}, whose \\rparen closes what began outside
+the box): their items so far go to TARGET, and they stay open, now
+above TARGET's parent, for what they still hold."
+  (let ((lifted '()))
+    (loop until (eq (current-container builder) target)
+          do (push (pop (builder-stack builder)) lifted))
+    ;; LIFTED is outermost first: its items came first.
+    (dolist (container lifted)
+      (dolist (item (container-contents container))
+        (push item (container-items target)))
+      (setf (container-items container) '()))
+    (finish-container builder target span)
+    (dolist (container lifted)
+      (push container (builder-stack builder)))))
+
 (defun close-container (builder key span &optional event)
   "Close the innermost container of KEY at SPAN, where EVENT (when given)
-ended it.  The containers opened inside it and still open are closed
-first, each reported :UNCLOSED; with none of KEY open, the end is
-reported (:UNDERFLOW when no container is open, :UNMATCHED-END
-otherwise) and nothing is closed."
+ended it.  When only containers that group (PASS-THROUGH-P) are open
+inside it, they stay open (CLOSE-UNDER-PASS-THROUGH); otherwise the
+containers opened inside it and still open are closed first, each
+reported :UNCLOSED.  With none of KEY open, the end is reported
+(:UNDERFLOW when no container is open, :UNMATCHED-END otherwise) and
+nothing is closed."
   (let ((target (find-container builder key)))
     (cond ((null target)
            (report-problem builder
@@ -311,6 +367,10 @@ otherwise) and nothing is closed."
                            span
                            :message (format nil "No ~S container is open." key)
                            :event event))
+          ((and (not (eq target (current-container builder)))
+                (every #'pass-through-p
+                       (ldiff (builder-stack builder) (member target (builder-stack builder)))))
+           (close-under-pass-through builder target span))
           (t
            (loop for container = (current-container builder)
                  until (eq container target)
@@ -340,16 +400,17 @@ no handler of its own closes its key's container when the key has a
 shows their token lists) with the HANDLERS of the node kinds of
 REGISTRY.  Return the top-level nodes and strings, and the build
 report.  The containers still open at the end are closed, each reported
-:UNCLOSED."
+:UNCLOSED but those opened to end with the input (OPEN-CONTAINER)."
   (let ((builder (make-builder (make-cursor events) registry handlers expander job)))
     (loop (multiple-value-bind (event span) (next-event builder)
             (unless event (return))
             (dispatch builder event span)))
     (loop while (rest (builder-stack builder))
           do (let ((container (current-container builder)))
-               (report-problem builder :unclosed (container-span container)
-                               :message (format nil "~S, still open at the end."
-                                                (container-key container)))
+               (unless (container-ends-with-input container)
+                 (report-problem builder :unclosed (container-span container)
+                                 :message (format nil "~S, still open at the end."
+                                                  (container-key container))))
                (finish-container builder container nil)))
     (values (container-contents (current-container builder))
             (make-build-report (reverse (builder-problems builder))))))
@@ -428,21 +489,29 @@ with PROBLEMS, the job's own."
 
 (defun build-job (job &key (registry *registry*) (handlers *handlers*))
   "Run the chapter job JOB and build its events (BUILD-EVENTS); its TeX
-errors and diagnostics open the report."
+errors and diagnostics open the report.  A third value is the job's
+revision of the draft (JOB-VERSION)."
   (let ((run (run-job job)))
-    (build-run run (job-events (job-run-expander run)) (run-problems run)
-               registry handlers)))
+    (multiple-value-bind (nodes report)
+        (build-run run (job-events (job-run-expander run)) (run-problems run)
+                   registry handlers)
+      (values nodes report (job-version (job-run-expander run))))))
 
-(defun build-model (jobs &key (registry *registry*) (handlers *handlers*))
-  "Build the chapter jobs JOBS (names, \"chap-14\") in turn (BUILD-JOB);
-return the top-level nodes of all of them, in order, and one report."
-  (let ((reports '()))
-    (values (loop for job in jobs
-                  append (multiple-value-bind (nodes report)
-                             (build-job job :registry registry :handlers handlers)
-                           (push report reports)
-                           nodes))
-            (merge-build-reports (nreverse reports)))))
+(defun build-model (&key (jobs (chapter-jobs)) (registry *registry*) (handlers *handlers*))
+  "Build the chapter jobs JOBS (names, \"chap-14\"; every one by default,
+in the order of the standard) in turn (BUILD-JOB) and settle the ids of
+their nodes (ASSIGN-IDS); return the top-level nodes of all of them, in
+order, one report, the id collisions last, and the revision of the
+draft the jobs give (the first one's)."
+  (let* ((reports '()) (version nil)
+         (nodes (loop for job in jobs
+                      append (multiple-value-bind (nodes report job-version)
+                                 (build-job job :registry registry :handlers handlers)
+                               (push report reports)
+                               (unless version (setf version job-version))
+                               nodes))))
+    (push (make-build-report (nth-value 1 (assign-ids nodes :registry registry))) reports)
+    (values nodes (merge-build-reports (nreverse reports)) version)))
 
 ;;; Fixtures: the model of a job's lines
 

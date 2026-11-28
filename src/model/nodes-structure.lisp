@@ -25,6 +25,10 @@ job."
   (version :string :required t
    :example "15.17"
    :doc "The revision of the draft, the text of \\rev in setup-version.tex.")
+  (cover (:node :block) :repeated t
+   :example ((:paragraph :content ((:strong :content ("X3J13/94-101")))))
+   :doc "The blocks of the cover, before the first chapter of chap-0.tex:
+the standard's name, its document number, a page left blank.")
   (front-matter (:node :chapter) :repeated t
    :example ((:chapter :id "Credits" :title ("Credits")))
    :doc "The unnumbered chapters of chap-0.tex (\\beginSimpleChapter), in

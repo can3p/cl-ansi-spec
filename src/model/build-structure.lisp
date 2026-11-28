@@ -138,8 +138,11 @@ Return the title and the typeset number (NIL without one)."
 before and between its PARAGRAPHS heading paragraphs, handled as usual
 (glue, penalties, writes), and the paragraphs, which become the title.
 Return the title of the last and the typeset number of the first box.
-Reaching text, a mark or another container before the paragraph is
-reported and ends the search."
+An inline entry whose end follows its begin at once, before the
+paragraph, is dropped: the heading macro's use of the title outside the
+heading (\\keyref in concept-bvl.tex:338) sets nothing.  Reaching text,
+a mark or another container before the paragraph is reported and ends
+the search."
   (let ((title '()) (number nil) (seen 0))
     (loop while (< seen paragraphs)
           do (multiple-value-bind (event event-span) (peek-event builder)
@@ -152,6 +155,12 @@ reported and ends the search."
                           (setf title text)
                           (unless number (setf number typeset)))
                         (incf seen))
+                       ((and (eq type :begin)
+                             (let ((after (second (events-ahead builder 2))))
+                               (and after (eq (event-type after) :end)
+                                    (eq (event-key after) event-key))))
+                        (next-event builder)
+                        (next-event builder))
                        ((or (member type '(:text :space))
                             (and (eq type :mark) (not (eq event-key :define-chapter)))
                             (and (member type '(:begin :end)) (not (eq event-key :box))))
@@ -236,7 +245,7 @@ its number, check it against the number TeX typeset, and open it."
           (report-problem builder :node span
                           :message (format nil "Section counted ~A, but TeX typeset ~A."
                                            counted typeset)))
-        (open-container builder key span :node node :field :children)))))
+        (open-container builder key span :node node :field :children :ends-with-input t)))))
 
 (defun begin-chapter (builder event span)
   "A chapter mark: close the chapter before it and open this one, its
@@ -254,7 +263,7 @@ title and reference name from the arguments, then drop its heading."
                                   :number (if simple nil (first arguments))
                                   :title (list title))))
     (close-structure-for builder 0 span)
-    (open-container builder key span :node node :field :children)
+    (open-container builder key span :node node :field :children :ends-with-input t)
     (read-headings builder key (if simple 1 2) nil)))
 
 (defun innermost-structure (builder)
@@ -376,14 +385,40 @@ macro body without the braces around it), or NIL when undefined."
       (string-trim "{}" (token-list-text expander
                                          (cl-ansi-spec/expand:macro-body meaning))))))
 
-(defun build-standard (chapters &key version (registry *registry*))
+(defun build-standard (chapters &key version cover (registry *registry*))
   "The :DOCUMENT of the chapter nodes CHAPTERS (in the order of the jobs):
-those with no number are the front matter, the others the chapters."
+those with no number are the front matter, the others the chapters;
+COVER, the blocks before the first chapter, is its cover."
   (let ((*registry* registry))
     (make-node :document
                :span (and chapters (node-span (first chapters)))
                :version version
+               :cover cover
                :front-matter (remove-if (lambda (chapter) (node-field-value chapter :number))
                                         chapters)
                :chapters (remove-if-not (lambda (chapter) (node-field-value chapter :number))
                                         chapters))))
+
+(defun build-document (&key (jobs (chapter-jobs)) (registry *registry*) (handlers *handlers*))
+  "The :DOCUMENT of the standard built from the chapter jobs JOBS (every
+one by default; BUILD-MODEL), with the draft's revision, and the build
+report.  The blocks before the first chapter are the cover; any other
+top-level item of a job that is not a chapter has no place in the
+document: it is reported (:NODE) and dropped."
+  (multiple-value-bind (nodes report version)
+      (build-model :jobs jobs :registry registry :handlers handlers)
+    (let ((chapters '()) (cover '()) (problems '()))
+      (dolist (item nodes)
+        (cond ((and (typep item 'node) (eq (node-kind item) :chapter))
+               (push item chapters))
+              ((and (null chapters) (typep item 'node)
+                    (member (node-kind item) (category-kinds :block registry)))
+               (push item cover))
+              (t
+               (push (make-problem :node (and (typep item 'node) (node-span item))
+                                   :message (format nil "~S stands outside any chapter, dropped."
+                                                    (if (typep item 'node) (node-kind item) item)))
+                     problems))))
+      (values (build-standard (nreverse chapters) :version version :cover (nreverse cover)
+                                                   :registry registry)
+              (merge-build-reports (list report (make-build-report (nreverse problems))))))))

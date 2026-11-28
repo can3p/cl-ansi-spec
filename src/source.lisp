@@ -124,6 +124,26 @@ TYPE may be :WILD to list every file.  Subdirectories are never listed."
                               (make-pathname :name :wild :type type))
         #'string< :key #'file-namestring))
 
+(defun chapter-jobs ()
+  "The names of the chapter jobs, in the order of the standard: the
+chap-N.tex files, N a number (in numeric order) or a letter (after the
+numbers); chap-0-edit-history.tex is not one, chap-0 inputs it."
+  (let ((jobs (loop for pathname in (spec-files)
+                    for name = (pathname-name pathname)
+                    when (and (> (length name) 5) (string= "chap-" name :end2 5)
+                              (not (find #\- name :start 5)))
+                      collect name)))
+    (flet ((order (name)
+             (let ((number (parse-integer name :start 5 :junk-allowed t)))
+               (if number
+                   (list 0 number)
+                   (list 1 (char-code (char name 5)))))))
+      (sort jobs (lambda (a b)
+                   (destructuring-bind (class-a n-a) (order a)
+                     (destructuring-bind (class-b n-b) (order b)
+                       (or (< class-a class-b)
+                           (and (= class-a class-b) (< n-a n-b))))))))))
+
 (defun read-spec-file (pathname)
   "Return the contents of the source file PATHNAME as a string.
 The pristine sources are ASCII; UTF-8 is accepted so that patched sources

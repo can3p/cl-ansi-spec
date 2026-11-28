@@ -46,29 +46,10 @@ actions that wait for the open paragraph to end."
   (make-hash-table :test 'eq #+sbcl :weakness #+sbcl :key #+sbcl :synchronized #+sbcl t)
   "The BLOCK-STATE of each builder.")
 
-(defvar *end-spans*
-  (make-hash-table :test 'eq #+sbcl :weakness #+sbcl :key #+sbcl :synchronized #+sbcl t)
-  "The span of the end of each container being closed, for an on-close
-function (which is not given it): set by CLOSE-BLOCK.")
-
 (defun block-state (builder)
   "The BLOCK-STATE of BUILDER."
   (or (gethash builder *block-states*)
       (setf (gethash builder *block-states*) (make-block-state))))
-
-(defun close-block (builder key span event)
-  "CLOSE-CONTAINER for KEY at SPAN, the end span being known to the
-on-close function of the container (END-SPAN)."
-  (let ((target (find-container builder key)))
-    (when target
-      (setf (gethash target *end-spans*) span)))
-  (close-container builder key span event))
-
-(defun end-span (container)
-  "The span at which CONTAINER is being closed (its beginning's if
-unknown)."
-  (prog1 (gethash container *end-spans* (container-span container))
-    (remhash container *end-spans*)))
 
 (defun open-paragraph-p (builder)
   "True when the innermost container is a paragraph or a line of code."
@@ -100,7 +81,7 @@ line)."
           (unless (blank-content-p items)
             (list (make-builder-node builder :paragraph :content items
                                      :span (join-spans (container-span container)
-                                                       (end-span container))))))))
+                                                       (container-closing-span container))))))))
 
 (define-handler (:begin :paragraph) (builder event span)
   (declare (ignore event))
@@ -125,7 +106,7 @@ line)."
         finally (return :paragraph)))
 
 (define-handler (:end :paragraph) (builder event span)
-  (close-block builder (innermost-paragraph-key builder) span event)
+  (close-container builder (innermost-paragraph-key builder) span event)
   (unless (open-paragraph-p builder)
     (let* ((state (block-state builder))
            (actions (block-state-after-paragraph state)))
@@ -161,7 +142,7 @@ deeper than LEVEL that are open at the top of the stack."
   (loop for key = (container-key (current-container builder))
         while (or (and (item-container-key-p key) (>= (key-level key) level))
                   (and (sublist-container-key-p key) (> (key-level key) level)))
-        do (close-block builder key span nil)))
+        do (close-container builder key span nil)))
 
 (defun start-item (builder level span)
   "Begin an item of LEVEL (the paragraph that holds its label begins now),
@@ -211,12 +192,12 @@ item, with nothing in it yet: its first box holds the item's label."
   (declare (ignore event))
   (if (item-label-container-p builder)
       (open-container builder :box span :on-close #'finish-label)
-      (open-container builder :box span)))
+      (open-container builder :box span :groups-only t)))
 
 (defun close-list (builder span event)
   "Close the items of an open list, then the list."
   (close-items-from builder 1 span)
-  (close-block builder :list span event))
+  (close-container builder :list span event))
 
 (define-handler (:begin :list) (builder event span)
   (declare (ignore event))
@@ -232,9 +213,15 @@ item, with nothing in it yet: its first box holds the item's label."
 ;;; Code
 
 (define-handler (:begin :code) (builder event span)
+  "A code block.  \\code on the line after a paragraph's last (as in:
+dict-flow.tex:414) begins before that paragraph's end: the block opens
+after it (AFTER-PARAGRAPH)."
   (declare (ignore event))
-  (open-container builder :code span :node (make-builder-node builder :code-block)
-                                     :field 'lines))
+  (after-paragraph builder
+                   (lambda ()
+                     (open-container builder :code span
+                                     :node (make-builder-node builder :code-block)
+                                     :field 'lines))))
 
 ;;; Notes
 

@@ -244,7 +244,7 @@ comments (from an unescaped % to the end of the line)."
   :parent inventory
   :description "Every chapter job is surveyed; uses agree with a textual count."
   (let* ((surveys (mapcar #'cl-ansi-spec/inventory:survey-job
-                          (cl-ansi-spec/inventory:chapter-jobs)))
+                          (cl-ansi-spec:chapter-jobs)))
          (merged (cl-ansi-spec/inventory:merge-surveys surveys))
          (files (cl-ansi-spec/inventory:survey-files merged)))
     ;; Commented out (chap-a.tex:10,14, setup-aux.tex:23) or never input.

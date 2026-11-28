@@ -19,7 +19,11 @@
                 #:log-entry-span #:node-composite #:node-children #:expander-input
                 #:list-nodes #:outer-list #:flatten-nodes #:token-list-text)
   (:import-from #:cl-ansi-spec/semantic #:observe-vocabulary #:spec-vocabulary)
+  (:import-from #:cl-ansi-spec #:chapter-jobs)
   (:export
+   ;; Spans, as cl-ansi-spec/tex makes them (re-exported, so that
+   ;; consumers of the model need not import the reader)
+   #:span #:span-file #:span-start #:span-end #:span-line #:span-column
    ;; The ownership table (owners.lisp)
    #:load-owners #:owners #:owner #:owner-step #:owner-file
    #:owner-vocabulary #:owner-events #:owner-why
@@ -53,8 +57,9 @@
    #:find-handler #:handled-events
    #:container #:container-key #:container-span #:container-node
    #:container-field #:container-items #:container-contents
+   #:container-end-span #:container-closing-span #:container-ends-with-input #:container-groups-only
    #:builder #:builder-registry #:builder-expander #:builder-job
-   #:next-event #:peek-event #:report-problem #:argument-text
+   #:next-event #:peek-event #:events-ahead #:report-problem #:argument-text
    #:event-argument-texts #:make-builder-node #:current-container
    #:find-container #:add-item #:open-container #:close-container
    #:build-events #:build-job #:build-model #:build-fixture #:forget-job-runs
@@ -73,11 +78,13 @@
    #:install-bnf-handlers #:*bnf-containers* #:*bnf-leaves* #:*bnf-marks*
    #:*bnf-glyphs* #:bnf-rule-name #:bnf-rule-definition
    ;; Structure (build-structure.lisp)
-   #:install-structure-handlers #:job-version #:build-standard
+   #:install-structure-handlers #:job-version #:build-standard #:build-document
    #:parse-reference-write #:counted-number
    ;; Dictionary entries (build-entries.lisp, step 3.9)
    #:install-entry-handlers
    ;; Tables and figures (build-tables.lisp)
    #:install-table-handlers
+   ;; Ids (ids.lisp)
+   #:walk-nodes #:assign-ids
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))

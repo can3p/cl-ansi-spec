@@ -33,36 +33,51 @@ undelimited one)."
 its body with the arguments substituted.  A failed match drops the call
 as TeX does."
   (let ((saved-status (expander-scanner-status expander))
-        (saved-warning (expander-warning-index expander)))
+        (saved-warning (expander-warning-index expander))
+        ;; Before the arguments are read, which may remove the level
+        ;; TOKEN came from.
+        (context (call-context (expander-input expander))))
     (setf (expander-warning-index expander) (cs-token-control-sequence token))
     (unwind-protect
          (multiple-value-bind (arguments ok) (match-parameters expander macro)
            (when ok
              ;; A tail call ends its caller's body before it begins (§390).
              (pop-exhausted-token-lists (expander-input expander))
-             (multiple-value-bind (action tag) (observe-call expander token macro arguments)
+             (multiple-value-bind (action tag)
+                 (observe-call expander token macro arguments context)
                (unless (eq action :replace)
                  (let ((body (substitute-arguments (macro-body macro) arguments)))
                    (cond (body
-                          (push-tokens (expander-input expander) body :macro tag))
+                          (push-macro-body (expander-input expander) body tag
+                                           token (macro-body macro) context))
                          (tag
                           ;; An empty body ends at once.
                           (end-observed-body expander tag))))))))
       (setf (expander-scanner-status expander) saved-status
             (expander-warning-index expander) saved-warning))))
 
-(defun observe-call (expander token macro arguments)
+(defun observe-call (expander token macro arguments context)
   "Call EXPANDER's call observer, if any, on a matched call of MACRO by
-TOKEN with ARGUMENTS; return its action (NIL or :REPLACE) and tag."
+TOKEN with ARGUMENTS, read in CONTEXT (CALL-CONTEXT); return its action
+(NIL or :REPLACE) and tag."
   (let ((observer (expander-call-observer expander)))
     (if observer
         (multiple-value-bind (action tag)
-            (funcall observer expander token macro arguments)
+            (let ((saved (expander-call-context expander)))
+              (setf (expander-call-context expander) context)
+              (unwind-protect (funcall observer expander token macro arguments)
+                (setf (expander-call-context expander) saved)))
           (check-type action (member nil :replace))
           (when (and (eq action :replace) tag)
             (error "A replaced call has no body to tag."))
           (values action tag))
         (values nil nil))))
+
+(defun call-origin-span (expander token)
+  "Where TOKEN, the observed call's or one of its arguments', stands in
+the text (TOKEN-ORIGIN-SPAN): a call a setup macro makes stands at the
+outermost call in the text.  Only while EXPANDER's call observer runs."
+  (token-origin-span token (expander-call-context expander)))
 
 (defun end-observed-body (expander tag)
   "Tell EXPANDER's level-end observer, if any, that the body of the call

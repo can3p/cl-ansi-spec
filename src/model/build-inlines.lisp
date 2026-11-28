@@ -50,12 +50,80 @@ it."
   (open-container builder key span
                   :node (apply #'make-builder-node builder kind :span span initargs)))
 
+(defun inlines-math-piece (item kind)
+  "The inlines ITEM, in the content of a KIND node in a formula, stands
+for: a character its text; an ordinary noad without scripts whose
+nucleus is characters and inlines (the letters of \\i{e}, the box of
+\\ff{log}) what its nucleus stands for; a KIND node its content (the
+{\\tt log} in \\ff's box); anything else itself."
+  (cond ((not (typep item 'node)) (list item))
+        ((eq (node-kind item) :math-char) (list (math-char-text item)))
+        ((eq (node-kind item) kind) (copy-list (node-field-value item 'content)))
+        ((and (eq (node-kind item) :math-noad)
+              (eq (math-noad-class item) :ord)
+              (null (math-noad-superscript item))
+              (null (math-noad-subscript item))
+              (math-noad-nucleus item)
+              (every (lambda (part)
+                       (or (stringp part)
+                           (and (typep part 'node)
+                                (or (eq (node-kind part) :math-char)
+                                    (eq (node-kind part) kind)
+                                    (member (node-kind part) (expand-kinds '(:inline)))))))
+                     (math-noad-nucleus item)))
+         (mapcan (lambda (part) (inlines-math-piece part kind))
+                 (copy-list (math-noad-nucleus item))))
+        (t (list item))))
+
+(defun inlines-math-text (items kind)
+  "ITEMS, the content of a KIND node in a formula, as inlines
+(INLINES-MATH-PIECE), adjacent strings joined and the space around them
+(\\ff's trailing space) trimmed."
+  (let ((result '()))
+    (dolist (item (mapcan (lambda (item) (inlines-math-piece item kind)) items))
+      (if (and (stringp item) (stringp (first result)))
+          (setf (first result) (concatenate 'string (first result) item))
+          (push item result)))
+    (trim-title (nreverse result))))
+
+(defun inlines-math-only-p (items)
+  "True when ITEMS hold a node that is math but no inline: what a font
+command in a formula holds when its letters carry scripts
+(`\\i{e}^{…}')."
+  (some (lambda (item)
+          (and (typep item 'node)
+               (not (member (node-kind item) (expand-kinds '(:inline))))))
+        items))
+
+(defun inlines-finish-content (kind)
+  "The on-close function of a container of a KIND node with content: its
+items, in a formula as text (INLINES-MATH-TEXT), become the node, checked
+here.  In a formula, a font command left empty is dropped: what it set
+went to a script, which TeX scans as a field of its own (`$0^\\i{x}$');
+one that still holds math (letters with scripts) is no node either, its
+math stays in the formula: the letters' font is math italic anyway."
+  (lambda (builder container)
+    (let* ((in-math (find-container builder :math))
+           (items (if in-math
+                      (inlines-math-text (container-contents container) kind)
+                      (container-contents container))))
+      (setf (container-items container)
+            (cond ((and in-math (null items)) '())
+                  ((and in-math (inlines-math-only-p items))
+                   (container-contents container))
+                  (t
+                   (let ((node (make-builder-node builder kind
+                                                  :content items
+                                                  :span (join-spans (container-span container)
+                                                                    (container-closing-span container)))))
+                     (dolist (problem (node-problems node (builder-registry builder)))
+                       (report-problem builder :node (node-span node) :message problem))
+                     (list node))))))))
+
 (defun open-content-container (builder key span kind)
   "Open a container of KEY at SPAN for a new node of KIND whose items
-go to its :CONTENT field."
-  (open-container builder key span
-                  :node (make-builder-node builder kind :span span)
-                  :field :content))
+go to its :CONTENT field (INLINES-FINISH-CONTENT)."
+  (open-container builder key span :on-close (inlines-finish-content kind)))
 
 (defun finish-lambda-list-keyword (builder container)
   "Set the name of the :LAMBDA-LIST-KEYWORD node of CONTAINER to the

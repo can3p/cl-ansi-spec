@@ -29,11 +29,11 @@ one string and the empty strings dropped."
 
 (defun span-object (span)
   "The JSON object of the span SPAN."
-  (schema-obj "file" (tex:span-file span)
-              "start" (tex:span-start span)
-              "end" (tex:span-end span)
-              "line" (tex:span-line span)
-              "column" (tex:span-column span)))
+  (schema-obj "file" (model:span-file span)
+              "start" (model:span-start span)
+              "end" (model:span-end span)
+              "line" (model:span-line span)
+              "column" (model:span-column span)))
 
 (declaim (ftype function node-json))
 

@@ -101,8 +101,8 @@ writes for it, the two heading paragraphs, then MORE."
                     (:section :id "ChapThree/1/2" :number "3.1.2" :level 2 :title ("One-Two"))))
                   (:section :id "ChapThree/2" :number "3.2" :level 1 :title ("Two")))))
         nodes)
-    ;; Only the open ends of the job: the chapter and the last section.
-    (is equal '(:unclosed :unclosed) (problem-kinds report))
+    ;; The end of the input closes the chapter and its last section quietly.
+    (is equal '() (problem-kinds report))
     (is equal '() (problem-messages report))))
 
 (define-test structure-skipped-level
