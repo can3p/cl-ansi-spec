@@ -526,39 +526,39 @@
     },
     "enum-math-class": {
       "title": "math-class",
-      "description": "The class of a noad, as TeX gives it.",
+      "description": "The class of a noad, as TeX gives it: the spacing and the limits of\nthe noad follow from it.  The class comes from a character's math code\n\\mathcode, a \\mathord-like command or the construct (a \\left … \\right\nis an inner noad).",
       "oneOf": [
         {
           "const": "ord",
-          "description": "An ordinary symbol."
+          "description": "An ordinary symbol: a letter, a digit, a subformula in braces."
         },
         {
           "const": "op",
-          "description": "A large operator (a sum, an integral)."
+          "description": "A large operator (a sum, an integral, \\log): \\mathop and its\nrelatives."
         },
         {
           "const": "bin",
-          "description": "A binary operation."
+          "description": "A binary operation: +, −, \\cdot."
         },
         {
           "const": "rel",
-          "description": "A relation."
+          "description": "A relation: =, ≤, →."
         },
         {
           "const": "open",
-          "description": "An opening delimiter."
+          "description": "An opening delimiter: ( or [."
         },
         {
           "const": "close",
-          "description": "A closing delimiter."
+          "description": "A closing delimiter: ) or ]."
         },
         {
           "const": "punct",
-          "description": "Punctuation."
+          "description": "Punctuation: a comma, a semicolon."
         },
         {
           "const": "inner",
-          "description": "A delimited subformula (\\left … \\right)."
+          "description": "A delimited subformula (\\left … \\right), or \\ldots."
         },
         {
           "const": "underline",
@@ -574,11 +574,25 @@
         },
         {
           "const": "radical",
-          "description": "A radical (\\radical), its sign the noad's delimiter."
+          "description": "A radical (\\radical, \\sqrt), its sign the noad's delimiter."
         },
         {
           "const": "accent",
-          "description": "An accented nucleus (\\mathaccent), its accent the noad's."
+          "description": "An accented nucleus (\\mathaccent, \\hat), its accent the noad's\ndelimiter."
+        }
+      ]
+    },
+    "enum-math-limits": {
+      "title": "math-limits",
+      "description": "Where an operator's scripts go, when the source said.",
+      "oneOf": [
+        {
+          "const": "limits",
+          "description": "\\limits: the scripts go above and below."
+        },
+        {
+          "const": "no-limits",
+          "description": "\\nolimits: the scripts go beside the operator."
         }
       ]
     },
@@ -8553,7 +8567,7 @@
     "math": {
       "type": "object",
       "title": "math",
-      "description": "A formula: inline between $ and $, or displayed between $$ and $$.",
+      "description": "A formula: inline between $ and $ (an inline of its paragraph), or\ndisplayed between $$ and $$ (a block between paragraphs).  Its content is\nTeX's math list; for example `$$ \\ff{arccos} z = {\\pi\\over2} - \\ff{arcsin} z $$`\nat dict-numbers.tex:1435 is one displayed formula.",
       "properties": {
         "kind": {
           "const": "math",
@@ -8565,7 +8579,10 @@
         "display": {
           "type": "boolean",
           "title": "display",
-          "description": "True for a displayed formula."
+          "description": "True for a displayed formula, false for an inline one.",
+          "examples": [
+            true
+          ]
         },
         "content": {
           "type": "array",
@@ -8588,11 +8605,166 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "content",
-          "description": "The formula's list, in order."
+          "description": "The formula's list, in order; absent for an empty formula.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "x"
+              }
+            ]
+          ]
         },
         "equation-number": {
           "type": "array",
@@ -8615,23 +8787,209 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "equation-number",
-          "description": "A display's equation number, \\eqno or \\leqno; absent when it\nhas none."
+          "description": "A display's equation number, set by \\eqno or \\leqno; absent when\nit has none.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "("
+              }
+            ]
+          ]
+        },
+        "number-left": {
+          "type": "boolean",
+          "title": "number-left",
+          "description": "True when the equation number was set by \\leqno (at the left),\nfalse for \\eqno; absent with no number.",
+          "examples": [
+            false
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "math",
+          "display": true,
+          "content": [
+            {
+              "kind": "math-fraction",
+              "numerator": [
+                {
+                  "kind": "math-char",
+                  "text": "π"
+                }
+              ],
+              "denominator": [
+                {
+                  "kind": "math-char",
+                  "text": "2"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "math-noad": {
       "type": "object",
       "title": "math-noad",
-      "description": "A noad: a nucleus of some class with its scripts.",
+      "description": "A noad: a nucleus of some class with its scripts, TeX's unit of math\nbefore typesetting.  Every character of a formula is the nucleus of one;\nbraces make a subformula the nucleus of an ordinary noad.",
       "properties": {
         "kind": {
           "const": "math-noad",
@@ -8643,17 +9001,26 @@
         "class": {
           "$ref": "#/$defs/enum-math-class",
           "title": "class",
-          "description": "The noad's class."
+          "description": "The noad's class.",
+          "examples": [
+            "ord"
+          ]
         },
         "limits": {
-          "type": "boolean",
+          "$ref": "#/$defs/enum-math-limits",
           "title": "limits",
-          "description": "True for an operator whose scripts go above and below\n(\\limits)."
+          "description": "\\limits or \\nolimits after an operator; absent when the source\nsays neither (TeX then decides by the style).",
+          "examples": [
+            "limits"
+          ]
         },
         "delimiter": {
           "type": "string",
           "title": "delimiter",
-          "description": "A radical's sign or an accent's character, as Unicode; absent\nfor other classes."
+          "description": "A radical's sign or an accent's character, as Unicode; absent for\nthe other classes.",
+          "examples": [
+            "√"
+          ]
         },
         "nucleus": {
           "type": "array",
@@ -8676,11 +9043,166 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "nucleus",
-          "description": "The nucleus: one character, or a subformula; absent for {}."
+          "description": "The nucleus: one character, or a subformula; absent for {}.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "x"
+              }
+            ]
+          ]
         },
         "superscript": {
           "type": "array",
@@ -8703,11 +9225,166 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "superscript",
-          "description": "The superscript; absent when none."
+          "description": "The superscript (^); absent when none.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "2"
+              }
+            ]
+          ]
         },
         "subscript": {
           "type": "array",
@@ -8730,11 +9407,166 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "subscript",
-          "description": "The subscript; absent when none."
+          "description": "The subscript (_, which the sources reach through \\sub); absent\nwhen none.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "i"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -8742,12 +9574,33 @@
         "span",
         "class"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "math-noad",
+          "class": "op",
+          "limits": "no-limits",
+          "nucleus": [
+            {
+              "kind": "math-char",
+              "text": "l"
+            },
+            {
+              "kind": "math-char",
+              "text": "o"
+            },
+            {
+              "kind": "math-char",
+              "text": "g"
+            }
+          ]
+        }
+      ]
     },
     "math-char": {
       "type": "object",
       "title": "math-char",
-      "description": "A character of a formula, mapped from its family's font to Unicode.",
+      "description": "A character of a formula, mapped from its family's font to Unicode by\nthe tables of build-math.lisp (TeX holds a family and a code; the model\nkeeps what they show).",
       "properties": {
         "kind": {
           "const": "math-char",
@@ -8759,7 +9612,10 @@
         "text": {
           "type": "string",
           "title": "text",
-          "description": "The character, as Unicode."
+          "description": "The character, as Unicode.  A font whose slot has no Unicode of\nits own (an extensible piece) is U+FFFD, and the build report says so;\nno character is guessed.",
+          "examples": [
+            "π"
+          ]
         }
       },
       "required": [
@@ -8767,12 +9623,18 @@
         "span",
         "text"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "math-char",
+          "text": "π"
+        }
+      ]
     },
     "math-fraction": {
       "type": "object",
       "title": "math-fraction",
-      "description": "A fraction: \\over, \\atop, \\above and their withdelims forms.",
+      "description": "A fraction: \\over, \\atop, \\above and their withdelims forms\n(\\overwithdelims, …), as at dict-numbers.tex:1435.",
       "properties": {
         "kind": {
           "const": "math-fraction",
@@ -8802,11 +9664,166 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "numerator",
-          "description": "The numerator."
+          "description": "The numerator; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "π"
+              }
+            ]
+          ]
         },
         "denominator": {
           "type": "array",
@@ -8829,38 +9846,227 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "denominator",
-          "description": "The denominator."
+          "description": "The denominator; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "2"
+              }
+            ]
+          ]
         },
         "no-rule": {
           "type": "boolean",
           "title": "no-rule",
-          "description": "True when no bar separates the two (\\atop, or a zero\nthickness)."
+          "description": "True when no bar separates the two: \\atop, or a thickness of zero.",
+          "examples": [
+            false
+          ]
+        },
+        "thickness": {
+          "type": "string",
+          "title": "thickness",
+          "description": "The bar's thickness as written, for \\above; absent for the\nfont's default (\\over, \\atop).",
+          "examples": [
+            "1.0pt"
+          ]
         },
         "left-delimiter": {
           "type": "string",
           "title": "left-delimiter",
-          "description": "The delimiter on the left of a withdelims form, as Unicode;\nabsent otherwise."
+          "description": "The delimiter on the left of a withdelims form, as Unicode; absent\nfor the other forms.",
+          "examples": [
+            "("
+          ]
         },
         "right-delimiter": {
           "type": "string",
           "title": "right-delimiter",
-          "description": "The delimiter on the right of a withdelims form, as Unicode;\nabsent otherwise."
+          "description": "The delimiter on the right of a withdelims form, as Unicode;\nabsent for the other forms.",
+          "examples": [
+            ")"
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "math-fraction",
+          "numerator": [
+            {
+              "kind": "math-char",
+              "text": "π"
+            }
+          ],
+          "denominator": [
+            {
+              "kind": "math-char",
+              "text": "2"
+            }
+          ]
+        }
+      ]
     },
     "math-delimiter": {
       "type": "object",
       "title": "math-delimiter",
-      "description": "A delimiter that grows with its subformula: \\left or \\right.",
+      "description": "A delimiter that grows with its subformula: \\left or \\right, which\nopen and close an inner noad (dict-arrays.tex:27 sets a set in braces).",
       "properties": {
         "kind": {
           "const": "math-delimiter",
@@ -8872,19 +10078,32 @@
         "right": {
           "type": "boolean",
           "title": "right",
-          "description": "True for \\right, false for \\left."
+          "description": "True for \\right, false for \\left.",
+          "examples": [
+            false
+          ]
         },
         "text": {
           "type": "string",
           "title": "text",
-          "description": "The delimiter, as Unicode; absent for the null delimiter (.)."
+          "description": "The delimiter, as Unicode; absent for the null delimiter (the\nperiod: \\left. or \\right.).",
+          "examples": [
+            "{"
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "math-delimiter",
+          "right": false,
+          "text": "{"
+        }
+      ]
     },
     "math-style-change": {
       "type": "object",
@@ -8901,7 +10120,10 @@
         "style": {
           "$ref": "#/$defs/enum-math-style",
           "title": "style",
-          "description": "The new style."
+          "description": "The style in force from here, to the end of the group.",
+          "examples": [
+            "script"
+          ]
         }
       },
       "required": [
@@ -8909,12 +10131,18 @@
         "span",
         "style"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "math-style-change",
+          "style": "script"
+        }
+      ]
     },
     "math-choice": {
       "type": "object",
       "title": "math-choice",
-      "description": "\\mathchoice: four subformulas, of which TeX sets the one for the\nstyle in force; all four are kept.",
+      "description": "\\mathchoice: four subformulas, of which TeX sets the one for the\nstyle in force; all four are kept, since which one shows is a matter of\ntypesetting.",
       "properties": {
         "kind": {
           "const": "math-choice",
@@ -8944,11 +10172,166 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "display",
-          "description": "For display style."
+          "description": "For display style; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "A"
+              }
+            ]
+          ]
         },
         "text": {
           "type": "array",
@@ -8971,11 +10354,166 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "text",
-          "description": "For text style."
+          "description": "For text style; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "a"
+              }
+            ]
+          ]
         },
         "script": {
           "type": "array",
@@ -8998,11 +10536,166 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "script",
-          "description": "For script style."
+          "description": "For script style; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "a"
+              }
+            ]
+          ]
         },
         "scriptscript": {
           "type": "array",
@@ -9025,18 +10718,190 @@
               },
               {
                 "$ref": "#/$defs/math-choice"
+              },
+              {
+                "$ref": "#/$defs/editor-note"
+              },
+              {
+                "$ref": "#/$defs/reviewer-note"
+              },
+              {
+                "$ref": "#/$defs/term-ref"
+              },
+              {
+                "$ref": "#/$defs/operator-ref"
+              },
+              {
+                "$ref": "#/$defs/section-ref"
+              },
+              {
+                "$ref": "#/$defs/figure-ref"
+              },
+              {
+                "$ref": "#/$defs/this-section"
+              },
+              {
+                "$ref": "#/$defs/next-figure"
+              },
+              {
+                "$ref": "#/$defs/param"
+              },
+              {
+                "$ref": "#/$defs/metavariable"
+              },
+              {
+                "$ref": "#/$defs/format-directive"
+              },
+              {
+                "$ref": "#/$defs/lambda-list-keyword"
+              },
+              {
+                "$ref": "#/$defs/code"
+              },
+              {
+                "$ref": "#/$defs/emphasis"
+              },
+              {
+                "$ref": "#/$defs/strong"
+              },
+              {
+                "$ref": "#/$defs/evaluates-to"
+              },
+              {
+                "$ref": "#/$defs/may-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/does-not-evaluate-to"
+              },
+              {
+                "$ref": "#/$defs/equivalent"
+              },
+              {
+                "$ref": "#/$defs/output"
+              },
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "$ref": "#/$defs/citation"
+              },
+              {
+                "$ref": "#/$defs/index-entry"
+              },
+              {
+                "$ref": "#/$defs/issue-start"
+              },
+              {
+                "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/bnf-break"
+              },
+              {
+                "$ref": "#/$defs/bnf-optional"
+              },
+              {
+                "$ref": "#/$defs/bnf-zero-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-one-or-more"
+              },
+              {
+                "$ref": "#/$defs/bnf-repeat-previous"
+              },
+              {
+                "$ref": "#/$defs/bnf-group"
+              },
+              {
+                "$ref": "#/$defs/bnf-parenthesized"
+              },
+              {
+                "$ref": "#/$defs/bnf-bracketed"
+              },
+              {
+                "$ref": "#/$defs/bnf-interleave"
+              },
+              {
+                "$ref": "#/$defs/bnf-required"
+              },
+              {
+                "$ref": "#/$defs/bnf-indirection"
+              },
+              {
+                "$ref": "#/$defs/bnf-caret"
+              },
+              {
+                "$ref": "#/$defs/angle-name"
+              },
+              {
+                "$ref": "#/$defs/math"
+              },
+              {
+                "$ref": "#/$defs/operator-signature"
+              },
+              {
+                "$ref": "#/$defs/setf-signature"
+              },
+              {
+                "$ref": "#/$defs/variable-signature"
+              },
+              {
+                "$ref": "#/$defs/type-signature"
+              },
+              {
+                "$ref": "#/$defs/paragraph"
+              },
+              {
+                "$ref": "#/$defs/code-block"
+              },
+              {
+                "$ref": "#/$defs/item-list"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/figure"
+              },
+              {
+                "$ref": "#/$defs/bnf-rule"
               }
             ]
           },
           "title": "scriptscript",
-          "description": "For scriptscript style."
+          "description": "For scriptscript style; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "math-char",
+                "text": "a"
+              }
+            ]
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "math-choice",
+          "display": [
+            {
+              "kind": "math-char",
+              "text": "A"
+            }
+          ],
+          "text": [
+            {
+              "kind": "math-char",
+              "text": "a"
+            }
+          ]
+        }
+      ]
     }
   }
 }

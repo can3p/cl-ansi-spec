@@ -1270,65 +1270,110 @@ Example:
 
 ### Node kind `:math`
 
-A formula: inline between $ and $, or displayed between $$ and $$.
+A formula: inline between $ and $ (an inline of its paragraph), or
+displayed between $$ and $$ (a block between paragraphs).  Its content is
+TeX's math list; for example `$$ \ff{arccos} z = {\pi\over2} - \ff{arcsin} z $$`
+at dict-numbers.tex:1435 is one displayed formula.
 
 Categories: `:inline`, `:block`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `display` | boolean | no | True for a displayed formula. |
-| `content` | list of node of kind or category `:math-element` | no | The formula's list, in order. |
-| `equation-number` | list of node of kind or category `:math-element` | no | A display's equation number, \eqno or \leqno; absent when it has none. |
+| `display` | boolean | no | True for a displayed formula, false for an inline one. |
+| `content` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | The formula's list, in order; absent for an empty formula. |
+| `equation-number` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | A display's equation number, set by \eqno or \leqno; absent when it has none. |
+| `number-left` | boolean | no | True when the equation number was set by \leqno (at the left), false for \eqno; absent with no number. |
+
+Example:
+
+```lisp
+(:math :display common-lisp:t :content
+ ((:math-fraction :numerator ((:math-char :text "π")) :denominator
+   ((:math-char :text "2")))))
+```
 
 ### Node kind `:math-noad`
 
-A noad: a nucleus of some class with its scripts.
+A noad: a nucleus of some class with its scripts, TeX's unit of math
+before typesetting.  Every character of a formula is the nucleus of one;
+braces make a subformula the nucleus of an ordinary noad.
 
 Categories: `:math-element`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `class` | enumeration `math-class` | yes | The noad's class. |
-| `limits` | boolean | no | True for an operator whose scripts go above and below (\limits). |
-| `delimiter` | string | no | A radical's sign or an accent's character, as Unicode; absent for other classes. |
-| `nucleus` | list of node of kind or category `:math-element` | no | The nucleus: one character, or a subformula; absent for {}. |
-| `superscript` | list of node of kind or category `:math-element` | no | The superscript; absent when none. |
-| `subscript` | list of node of kind or category `:math-element` | no | The subscript; absent when none. |
+| `limits` | enumeration `math-limits` | no | \limits or \nolimits after an operator; absent when the source says neither (TeX then decides by the style). |
+| `delimiter` | string | no | A radical's sign or an accent's character, as Unicode; absent for the other classes. |
+| `nucleus` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | The nucleus: one character, or a subformula; absent for {}. |
+| `superscript` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | The superscript (^); absent when none. |
+| `subscript` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | The subscript (_, which the sources reach through \sub); absent when none. |
+
+Example:
+
+```lisp
+(:math-noad :class :op :limits :no-limits :nucleus
+ ((:math-char :text "l") (:math-char :text "o") (:math-char :text "g")))
+```
 
 ### Node kind `:math-char`
 
-A character of a formula, mapped from its family's font to Unicode.
+A character of a formula, mapped from its family's font to Unicode by
+the tables of build-math.lisp (TeX holds a family and a code; the model
+keeps what they show).
 
 Categories: `:math-element`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `text` | string | yes | The character, as Unicode. |
+| `text` | string | yes | The character, as Unicode. A font whose slot has no Unicode of its own (an extensible piece) is U+FFFD, and the build report says so; no character is guessed. |
+
+Example:
+
+```lisp
+(:math-char :text "π")
+```
 
 ### Node kind `:math-fraction`
 
-A fraction: \over, \atop, \above and their withdelims forms.
+A fraction: \over, \atop, \above and their withdelims forms
+(\overwithdelims, …), as at dict-numbers.tex:1435.
 
 Categories: `:math-element`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `numerator` | list of node of kind or category `:math-element` | no | The numerator. |
-| `denominator` | list of node of kind or category `:math-element` | no | The denominator. |
-| `no-rule` | boolean | no | True when no bar separates the two (\atop, or a zero thickness). |
-| `left-delimiter` | string | no | The delimiter on the left of a withdelims form, as Unicode; absent otherwise. |
-| `right-delimiter` | string | no | The delimiter on the right of a withdelims form, as Unicode; absent otherwise. |
+| `numerator` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | The numerator; absent when empty. |
+| `denominator` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | The denominator; absent when empty. |
+| `no-rule` | boolean | no | True when no bar separates the two: \atop, or a thickness of zero. |
+| `thickness` | string | no | The bar's thickness as written, for \above; absent for the font's default (\over, \atop). |
+| `left-delimiter` | string | no | The delimiter on the left of a withdelims form, as Unicode; absent for the other forms. |
+| `right-delimiter` | string | no | The delimiter on the right of a withdelims form, as Unicode; absent for the other forms. |
+
+Example:
+
+```lisp
+(:math-fraction :numerator ((:math-char :text "π")) :denominator
+ ((:math-char :text "2")))
+```
 
 ### Node kind `:math-delimiter`
 
-A delimiter that grows with its subformula: \left or \right.
+A delimiter that grows with its subformula: \left or \right, which
+open and close an inner noad (dict-arrays.tex:27 sets a set in braces).
 
 Categories: `:math-element`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `right` | boolean | no | True for \right, false for \left. |
-| `text` | string | no | The delimiter, as Unicode; absent for the null delimiter (.). |
+| `text` | string | no | The delimiter, as Unicode; absent for the null delimiter (the period: \left. or \right.). |
+
+Example:
+
+```lisp
+(:math-delimiter :right common-lisp:nil :text "{")
+```
 
 ### Node kind `:math-style-change`
 
@@ -1339,39 +1384,65 @@ Categories: `:math-element`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `style` | enumeration `math-style` | yes | The new style. |
+| `style` | enumeration `math-style` | yes | The style in force from here, to the end of the group. |
+
+Example:
+
+```lisp
+(:math-style-change :style :script)
+```
 
 ### Node kind `:math-choice`
 
 \mathchoice: four subformulas, of which TeX sets the one for the
-style in force; all four are kept.
+style in force; all four are kept, since which one shows is a matter of
+typesetting.
 
 Categories: `:math-element`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `display` | list of node of kind or category `:math-element` | no | For display style. |
-| `text` | list of node of kind or category `:math-element` | no | For text style. |
-| `script` | list of node of kind or category `:math-element` | no | For script style. |
-| `scriptscript` | list of node of kind or category `:math-element` | no | For scriptscript style. |
+| `display` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | For display style; absent when empty. |
+| `text` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | For text style; absent when empty. |
+| `script` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | For script style; absent when empty. |
+| `scriptscript` | list of node of kind or category `:math-element`, `:inline`, `:block` | no | For scriptscript style; absent when empty. |
+
+Example:
+
+```lisp
+(:math-choice :display ((:math-char :text "A")) :text
+ ((:math-char :text "a")))
+```
 
 ### Enumeration `math-class`
 
-The class of a noad, as TeX gives it.
+The class of a noad, as TeX gives it: the spacing and the limits of
+the noad follow from it.  The class comes from a character's math code
+\mathcode, a \mathord-like command or the construct (a \left … \right
+is an inner noad).
 
-- `:ord` - An ordinary symbol.
-- `:op` - A large operator (a sum, an integral).
-- `:bin` - A binary operation.
-- `:rel` - A relation.
-- `:open` - An opening delimiter.
-- `:close` - A closing delimiter.
-- `:punct` - Punctuation.
-- `:inner` - A delimited subformula (\left … \right).
+- `:ord` - An ordinary symbol: a letter, a digit, a subformula in braces.
+- `:op` - A large operator (a sum, an integral, \log): \mathop and its
+relatives.
+- `:bin` - A binary operation: +, −, \cdot.
+- `:rel` - A relation: =, ≤, →.
+- `:open` - An opening delimiter: ( or [.
+- `:close` - A closing delimiter: ) or ].
+- `:punct` - Punctuation: a comma, a semicolon.
+- `:inner` - A delimited subformula (\left … \right), or \ldots.
 - `:underline` - An underlined subformula (\underline).
 - `:overline` - An overlined subformula (\overline).
 - `:vcenter` - A box centred on the axis (\vcenter).
-- `:radical` - A radical (\radical), its sign the noad's delimiter.
-- `:accent` - An accented nucleus (\mathaccent), its accent the noad's.
+- `:radical` - A radical (\radical, \sqrt), its sign the noad's delimiter.
+- `:accent` - An accented nucleus (\mathaccent, \hat), its accent the noad's
+delimiter.
+
+### Enumeration `math-limits`
+
+Where an operator's scripts go, when the source said.
+
+- `:limits` - \limits: the scripts go above and below.
+- `:no-limits` - \nolimits: the scripts go beside the operator.
 
 ### Enumeration `math-style`
 
@@ -1385,7 +1456,11 @@ A style of math, as TeX names it.
 ### Category `:math-element`
 
 What a formula's list holds: noads, characters, fractions,
-delimiters and style changes.
+delimiters, style changes and \mathchoice.  A formula keeps what TeX's
+math list holds, minus the typesetting.  Its fields also take inlines,
+since the sources set words in a formula with a font wrapper
+(`\ff{arccos}` is code), which the vocabulary turns into one, and
+blocks, since a box in a formula may hold any (a table set in a \vcenter).
 
 Kinds: `:math-noad`, `:math-char`, `:math-fraction`, `:math-delimiter`, `:math-style-change`, `:math-choice`.
 

@@ -181,6 +181,26 @@ S-expressions, and the report."
          (sense (first (sexp-field (first (sexp-field (first nodes) :entries)) :senses))))
     (is equal '(", ") (remove-if-not #'stringp (sexp-field sense :content)))))
 
+(define-test glossary-pronunciation-layout
+  :parent glossary
+  ;; The brackets \\pronounced sets in a formula are notation: the
+  ;; formula is unwrapped, its bracket noads dropped, empty formulas
+  ;; (stress marks) dropped.
+  (flet ((noad (class &rest nucleus)
+           (model:make-node :math-noad :class class :nucleus nucleus))
+         (char-node (text) (model:make-node :math-char :text text)))
+    (let* ((strong (model:make-node :strong
+                                    :content (list (model:make-node :math) "nil")))
+           (formula (model:make-node
+                     :math :content (list (noad :open (char-node "["))
+                                          (noad :ord strong)
+                                          (noad :close (char-node "]")))))
+           (result (model::pronunciation-inlines (list formula " " (char-node "x")))))
+      (is = 3 (length result))
+      (is eq strong (first result))
+      (is equal '("nil") (model:node-field-value strong :content))
+      (is equal '(" " "x") (rest result)))))
+
 (define-test glossary-sense-numbers
   :parent glossary
   ;; A number is a sense's when it follows the one before: `integer 1.'

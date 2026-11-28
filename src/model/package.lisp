@@ -64,6 +64,9 @@
    #:plain-text-container-p
    ;; The glossary (build-glossary.lisp, step 3.14)
    #:install-glossary-handlers #:*part-of-speech-texts* #:*usage-texts*
+   ;; Math (build-math.lisp)
+   #:*math-families* #:*math-tables* #:math-family-text
+   #:install-math-handlers
    ;; Semantic inlines (build-inlines.lisp, step 3.13)
    #:install-inline-handlers
    ;; Syntax (build-bnf.lisp)

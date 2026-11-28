@@ -220,9 +220,15 @@ the spans left out, and the build report."
   ;; concept-bvl.tex:1061: `` and '' quotes.
   (true (find-if (lambda (string) (search "(sometimes called a “boa constructor”)." string))
                  (fixture-strings "chap-3" "concept-bvl.tex" 1061 1061)))
-  ;; dict-conses.tex:445: \.u, a dot above, in the code and bold fonts.
+  ;; dict-conses.tex:445: \.u, a dot above, in the code and bold fonts.  The
+  ;; line is a pronunciation, which the sources set inside a formula (3.15m),
+  ;; so the string is looked for at any depth.
   (true (find-if (lambda (string) (search (format nil "u~C" (code-char #x307)) string))
-                 (loop for node in (model:build-fixture "chap-14" :file "dict-conses.tex"
-                                                                  :lines '(445 445))
-                       append (if (stringp node) (list node)
-                                  (getf (rest (model:node-sexp node)) :content))))))
+                 (sexp-strings (mapcar (lambda (node) (if (stringp node) node (model:node-sexp node)))
+                                       (model:build-fixture "chap-14" :file "dict-conses.tex"
+                                                                      :lines '(445 445)))))))
+
+(defun sexp-strings (form)
+  "Every string in the tree FORM."
+  (cond ((stringp form) (list form))
+        ((consp form) (append (sexp-strings (car form)) (sexp-strings (cdr form))))))

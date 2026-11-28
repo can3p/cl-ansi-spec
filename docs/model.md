@@ -74,11 +74,14 @@ A string is plain text. Other inlines:
 ### Math
 
 `(:math :display t …)` holds a formula's list: `:math-noad` (`:class`,
-`:limits`, `:delimiter`, `:nucleus`, `:superscript`, `:subscript`),
-`:math-char` (`:text`, Unicode), `:math-fraction` (`:numerator`,
-`:denominator`, `:no-rule`, delimiters), `:math-delimiter` (`\left`,
-`\right`), `:math-style-change` and `:math-choice`; a display's
-`:equation-number` likewise.
+`:limits` (`:limits` or `:no-limits`, when written), `:delimiter`,
+`:nucleus`, `:superscript`, `:subscript`), `:math-char` (`:text`,
+Unicode), `:math-fraction` (`:numerator`, `:denominator`, `:no-rule`,
+`:thickness`, delimiters), `:math-delimiter` (`\left`, `\right`),
+`:math-style-change` and `:math-choice`; a display's `:equation-number`
+likewise, with `:number-left` for `\leqno`.  The lists also take inlines:
+the sources set words in a formula with a font wrapper (`\ff{arccos}`),
+which the vocabulary turns into a `:code`.
 
 `:target` holds resolved references. An unresolved reference keeps
 `:target nil` and is listed in the build report.
@@ -610,7 +613,9 @@ step has to close them.
 - **Notation.**  `\Noun` … `\Adverb` and `\ANSI` … `\Computers` are
   `:part-of-speech` and `:usage` containers told by their argument text
   (`*part-of-speech-texts*`, `*usage-texts*`); `\pronounced` is a
-  `:pronunciation` container.  In an entry each leaves a tag, and the entry
+  `:pronunciation` container; its square brackets are notation, set in a
+  formula, so the formula is unwrapped to its content (the stress marks
+  `\Stress` sets are formulas that hold nothing and are dropped).  In an entry each leaves a tag, and the entry
   reads the tags when it closes; outside an entry (the glossary's
   introduction explains the notation) the text stays, in italics, and a
   pronunciation keeps its items.  A text that is not in the table is a
@@ -664,7 +669,42 @@ its opening and closing forms (`\lbrac` … `\rbrac`) report the same
 
 ### Math
 
-*Step 3.15m.* Not written yet.
+*Step 3.15m.* `src/model/build-math.lisp` builds the formulas the expander
+makes of math mode ([events.md](events.md), `:math`, `:noad`, …) into a
+small tree of TeX's own noads; nothing is typeset.
+
+- **Containers.** `:math` is a formula (`:display` from the event);
+  `:noad` a noad of the event's class; `:fraction`, `:math-choice` the
+  fractions and `\mathchoice`.  The sub-lists `:nucleus`, `:superscript`,
+  `:subscript`, `:numerator`, `:denominator`, `:choice` and `:eqno` are
+  containers that build no node: when one closes, its items become the
+  field of the node of the container below (empty ones leave it absent).
+  A string a text event left in a math list (a control space) becomes a
+  `:math-char`, so every list holds only math elements and inlines.
+- **Leaves.** `(:math-char :fam f :code c)` is a `:math-char` whose text
+  is the slot of family *f*; `(:left …)`, `(:right …)` a `:math-delimiter`;
+  `(:math-style …)` a `:math-style-change`.
+- **Characters** are mapped by *family*, as the jobs set the families:
+  plain.tex's 0–3 (cmr, cmmi, cmsy, cmex), then `setup-aux.tex:50-59`'s
+  4 (cmbx), 5 (cmti), 6 (cmtt) and the math italic and symbol families
+  7 and 8 (`*math-families*`).  Roman, bold, italic and typewriter families
+  use the layouts of the text fonts (3.12); cmmi, cmsy and cmex have
+  tables of their own (`*math-tables*`: code, Unicode, reason), cmmi and
+  cmsy for every slot, cmex for the delimiters of plain.tex's `\delcode`
+  table, the big operators and the radicals.  Letters and old-style digits
+  of cmmi are kept as plain letters and digits (the italic is the font's);
+  a combining mark (the vector accent, `\not`) stays a combining mark.
+  A slot without a Unicode text (a cmex extensible piece) is shown as
+  U+FFFD and reported (`:diagnostic`), never guessed.
+- **Delimiters** (`\left`, `\right`, withdelims fractions, radicals)
+  come as four numbers, small family and code and large family and code:
+  the text is the small character, else the large; all zero is the null
+  delimiter (the field is absent).
+- **Fractions.** `:thickness` is `:default` (`\over`, `\atop` writes
+  zero) or the dimension as TeX writes it: `:no-rule` is true for zero
+  thickness, `:thickness` holds any other dimension (`\above`).
+- **Not here.** Glue, kerns, boxes and rules in a math list belong to 3.10
+  and 3.11; `\mathchoice`'s four choices keep all four.
 
 ### References
 

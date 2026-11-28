@@ -65,12 +65,34 @@ notation) the text stays in italics."
                                                              text table-name))))
                      (setf (container-items container) '())))))))
 
+(defun pronunciation-inlines (items)
+  "ITEMS, the text of a \\pronounced, without its layout: \\pronounced sets
+the text in square brackets in a formula, and the brackets are the
+notation of a pronunciation, as the glossary's introduction says, so the
+formula is unwrapped to what is inside them (its bracket noads dropped,
+the characters of the others as text), and a formula that holds nothing,
+the mark of a stress, is dropped."
+  (loop for item in items
+        append (if (typep item 'node)
+                   (case (node-kind item)
+                     (:math (pronunciation-inlines (node-field-value item :content)))
+                     (:math-noad
+                      (unless (member (node-field-value item :class) '(:open :close))
+                        (pronunciation-inlines (node-field-value item :nucleus))))
+                     (:math-char (list (node-field-value item :text)))
+                     ((:strong :emphasis :code)
+                      (setf (node-field-value item :content)
+                            (pronunciation-inlines (node-field-value item :content)))
+                      (list item))
+                     (t (list item)))
+                   (list item))))
+
 (defun finish-pronunciation (builder container)
   "The end of a \\pronounced: in an entry, its inlines are the pronunciation,
 left as a tag in the container below; elsewhere they stay where they are."
   (when (in-entry-p builder)
     (let ((inlines (remove-if-not (lambda (item) (inline-item-p builder item))
-                                  (container-contents container))))
+                                  (pronunciation-inlines (container-contents container)))))
       (when inlines
         (add-item builder (make-glossary-tag :pronunciation inlines)))
       (setf (container-items container) '()))))

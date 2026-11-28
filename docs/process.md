@@ -104,6 +104,14 @@ be merged before the next wave starts; a step may start as soon as its
   the JSON Schema, the reference doc): take either side, then run
   `make snapshots` or `make generate` (planned) and commit the result.
   `docs/plan/<id>.md`: each step ticks only its own item, so ticks merge.
+- **Names in shared packages.**  Steps of one wave fill files of the
+  same package, so a helper (function, macro, variable; tests included)
+  carries its area's prefix (`glossary-blank-string-p`,
+  `tables-spec-nodes`): two steps defining one name broke every build of
+  their merge.  A handler a step registers for a key that another area's
+  macros also produce (`\itemitem` inside `\gentry`, an alignment inside
+  a display) is named in the step's pull request: the merge is where such
+  interactions show, and the step whose area the macro belongs to adapts.
 - **Coordinator only**: `PLAN.md`, `AGENTS.md`, the skills, a change to
   another phase (the semantic layer's vocabulary, the expander) that a
   wave step finds it needs: the step stops, reports it, and the
