@@ -73,7 +73,8 @@
   (`src/semantic/vocabulary.sexp`; its reports last, `-- report …`).  Errors as for `make expand`.  Same
   rules: always pass `LINES` and a timeout.
 * `make snapshots` — rewrite `tests/snapshots.sexp`, the event count and
-  hash of every chapter job, printing the jobs whose events changed. Run
+  hash of every chapter job, and `tests/model-snapshots.sexp`, each job's
+  model, printing the jobs whose events changed. Run
   it in the commit that changes the events, after checking why they did.
 * `make model FILE=dict-conses LINES=1702-1759 [JOB=chap-14]` — the model
   built from a spec file's lines: the nodes `build-fixture` builds, one
@@ -139,3 +140,5 @@ session.
   cloned from GitHub (the cloud agent's network reaches GitHub only, so
   e.g. Alexandria/FiveAM from common-lisp.net are not usable).
 * SBCL comes from apt (`apt-get install sbcl`) both locally and in CI.
+  Its heap is 1 GB: a test that builds every job calls `forget-job-runs`
+  first, or the cached fixture runs and the 28 jobs exhaust it.
