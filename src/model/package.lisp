@@ -86,5 +86,11 @@
    #:install-table-handlers
    ;; Ids (ids.lisp)
    #:walk-nodes #:assign-ids
+   ;; Section, chapter and figure references (resolve-sections.lisp, step 3.17)
+   #:resolve-section-references #:table-of-contents #:list-of-figures
+   #:secref-toc-entry #:secref-toc-entry-kind #:secref-toc-entry-id
+   #:secref-toc-entry-number #:secref-toc-entry-title #:secref-toc-entry-children
+   #:secref-figure-entry #:secref-figure-entry-id #:secref-figure-entry-number
+   #:secref-figure-entry-caption #:secref-figure-entry-chapter
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))
