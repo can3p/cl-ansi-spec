@@ -57,8 +57,8 @@ spec/tex/ + patches/ ──► 0 Sources ──► 1 Reader ──► 2 Expander
 | 1 | Reader | characters → tokens with spans, under the *current* catcodes | `cl-ansi-spec/tex` | M1 ✅ |
 | 2 | Expander | tokens → executed TeX: macros, conditionals, assignments, registers | `cl-ansi-spec/expand` | M2 ✅ |
 | 3 | Semantic layer | expander activity → **event stream** | `cl-ansi-spec/semantic` | M2 ✅ |
-| 4 | Model builder | event streams of all chapters → **document model**, resolved references | `cl-ansi-spec/model` | M3 |
-| 5 | Consumers | model → S-expression/JSON exports, HTML site | `cl-ansi-spec/export`, later `…/html` | M3, M5 |
+| 4 | Model builder | event streams of all chapters → **document model**, resolved references | `cl-ansi-spec/model` | M3 ✅ |
+| 5 | Consumers | model → S-expression/JSON exports, HTML site | `cl-ansi-spec/export`, later `…/html` | M3 ✅, M5 |
 
 Development aids are packages outside the phases, depending on them
 one way like a phase: `cl-ansi-spec/inventory` (`src/inventory/`) surveys
@@ -199,7 +199,8 @@ has the export formats, their JSON Schema and versioning.
 | 0 Sources | pristine and vendored trees, search path and resolver done; unified diffs are read and applied strictly (`src/patch/`); the patch set (`src/patch/set.lisp`) is checked and every job reads the patched tree (M4) |
 | 1 Reader | done (M1) |
 | 2–3 Expander, semantic layer | done (M2): TeX below typesetting (`src/expand/`, `make expand`), plain TeX's format, the vocabulary and its observation (`src/semantic/`, `make events`); every chapter job runs and its events are checked (`tests/semantic/spec-jobs.lisp`, `make snapshots`) |
-| 4–5 Model, exports | M3 under way (`docs/plan/m3.md`): packages `cl-ansi-spec/model` (`src/model/`) and `cl-ansi-spec/export` (`src/export/`) laid out, one stub file per step; the builder's ownership table (`src/model/owners.sexp`); the builder core (`src/model/build.lisp`: handler table, container stack, build report, `make model`); the builders of every area; the whole spec builds, ids settled (`src/model/ids.lisp`), its report pinned and each job's model kept as a snapshot (`tests/model/whole-spec.lisp`, `tests/model-snapshots.sexp`); the registry of generated files (`src/export/generate.lisp`, `make generate`) |
+| 4–5 Model, exports | done (M3): the builders of every area (`src/model/`), ids and resolved references, the build report; the whole spec builds, its report pinned and each job's model kept as a snapshot (`tests/model/whole-spec.lisp`, `tests/model-snapshots.sexp`); the JSON Schema and the reference doc generated from the declarations (`make generate`); the exports and the sample export (`make export`, `make sample`), valid against the schema, checked by an external validator in CI ([consuming](consuming.md)) |
+| 5 HTML site | M5 (`PLAN.md`) |
 
 Related: [process](process.md) explains how work advances.
 [History](history/) records finished milestones.
