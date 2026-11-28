@@ -62,6 +62,9 @@
    #:*fonts* #:font-entry #:register-handler #:*layout-codes* #:*ligatures* #:font-file #:font-class
    #:convert-text #:install-text-handlers #:*plain-text-containers*
    #:plain-text-container-p
+   ;; Math (build-math.lisp)
+   #:*math-families* #:*math-tables* #:math-family-text
+   #:install-math-handlers
    ;; Semantic inlines (build-inlines.lisp, step 3.13)
    #:install-inline-handlers
    ;; Syntax (build-bnf.lisp)
