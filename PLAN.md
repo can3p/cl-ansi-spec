@@ -34,4 +34,4 @@ published alongside it.
 
 ## Open questions
 
-- (none; the table-in-cell question went to step 3.19b)
+- (none; the table-in-cell question went to a patch: 3.19p follow-up, #44)
