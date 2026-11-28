@@ -28,17 +28,17 @@ axis are plain periods, the imaginary axis is a column of colons.
 -Imaginary Axis\cr}}$$
 -}
 +\code
-+                Positive
-+             Imaginary Axis
-+                   :
-+       II          :          I
-+                   :
++                    Positive
++                 Imaginary Axis
++                       :
++           II          :          I
++                       :
 + Negative Real Axis ...:... Positive Real Axis
-+                   :
-+      III          :          IV
-+                   :
-+                Negative
-+             Imaginary Axis
++                       :
++          III          :          IV
++                       :
++                    Negative
++                 Imaginary Axis
 +\endcode
 +%
 +%
