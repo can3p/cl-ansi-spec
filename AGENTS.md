@@ -115,6 +115,10 @@ See `docs/process.md`. In short:
   the files it owns; `PLAN.md`, `AGENTS.md`, the skills and changes to
   another phase are the coordinator's (`docs/process.md`, "Parallel
   waves").
+* Coordinator handoff: the coordinator tells the user when to reset its
+  session to save tokens (at a clean break, no merge or test run in
+  flight) and prints the full prompt for the next coordinator session,
+  with the current state; that prompt repeats this rule.
 * Tiers: opus sets contracts (declarations, protocols, rules read from
   the sources) and integrates; sonnet implements against a fixed
   contract and reviews; haiku does mechanical work (generators from a
