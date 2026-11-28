@@ -350,7 +350,64 @@ events into strings, and font runs into inlines.
 
 ### Structure
 
-*Step 3.8.* Not written yet.
+`src/model/build-structure.lisp` (step 3.8) builds the chapters, the
+sections and the standard. Its handlers are the functions of
+`install-structure-handlers`, registered in `*handlers*` at load.
+
+- **No ends.** A chapter and a section are marks (`\beginchapter`,
+  `\beginSection`, …); `\endSection` and its relatives are `\let` to
+  `\empty`, so nothing closes them. The handlers keep one container per
+  chapter and section, keyed by the mark's key, and a mark of level *L*
+  closes the open sections of level *L* or more (a chapter closes them
+  all) and opens its node in the nearest open one of a lower level. These
+  closings are not problems; any other container still open then is
+  reported `:unclosed`. At the end of a job the last chapter and its open
+  sections are closed by the core, which reports each `:unclosed` (the
+  job has no event for `\endchapter`): a build of a whole job has exactly
+  those, no others, until step 3.16 closes them or filters them from
+  its pinned report.
+- **Headings.** After a section's mark the handler takes the events up
+  to the end of the heading paragraph (`\HeadII`…): what comes before is
+  handled as usual, the empty math of the hang is skipped, the first box
+  is the number TeX typeset, and the rest is the title, in a container
+  whose text is not read by font (a heading is bold and the title is not
+  `:strong`). A mark, a text or another container before the paragraph is
+  reported (`:node`, "No heading follows"). A dictionary section has no
+  heading: its title is its chapter's title and "Dictionary", as
+  `\includeDictionary` has the table of contents show it. A chapter's
+  title is the mark's argument, run through the ligatures of its font
+  (`convert-text`); its two heading paragraphs (the running head and the
+  title) are consumed and dropped.
+- **Numbers are counted** (`counted-number`) as TeX's counters are: the
+  parent's number, a `.0` for each level skipped, then one more than the
+  sections of the level since the last one of a higher level (the
+  `\ssecn`… registers). They are **checked** twice: against the number
+  TeX typeset in the heading's box, and against the line `\DefineSection`
+  writes to the section file (`!<label> Section <number>\ <title>`,
+  consumed by the handler of the mark, `parse-reference-write`); a
+  mismatch is a `:node` problem ("counted … but TeX wrote …"). In a build
+  that starts inside a chapter (a fixture) the parent has no number and
+  the typeset one is used unchecked. `\DefineChapter` is checked in the
+  same way: its reference name is the chapter's id, and the two lines it
+  writes give its number.
+- **Ids.** A chapter's id is the reference name of `\beginchapter`
+  (`ChapOne`), a simple chapter's its title. A section's is the label of
+  the `\DefineSection` in it (set when the mark comes, which must be
+  before any subsection of its own: reported else), until then and for a
+  section none names `<parent-id>/<n>`, its *n*-th among its parent's
+  sections; with no parent in the build, `section-<number>`.
+- **Other writes.** The `:write` handler is this step's, whose one owner
+  drops every `\write` the handlers above do not take: the table of
+  contents, the index and the issue files are data the model rebuilds from
+  events.
+- **The standard.** `build-standard` makes the `:document` of the chapter
+  nodes of the jobs in order: those with no number (`\beginSimpleChapter`,
+  chap-0.tex) are the front matter. `job-version` reads `\rev`, the draft's
+  revision, from a job's expander. Calling both for the whole spec is
+  step 3.16's.
+- **Not yet.** Paragraphs, entries and the other blocks of a section's
+  children come from their own steps; until they land they are reported
+  as unhandled events.
 
 ### Entries
 
@@ -426,7 +483,44 @@ for tests).
 
 ### Blocks
 
-*Step 3.10.* Not written yet.
+`src/model/build-blocks.lisp` (step 3.10) builds paragraphs, code, lists
+and notes, and drops the presentational events.
+
+- **Paragraphs.** `(:begin :paragraph)` … `(:end :paragraph)` is a
+  `:paragraph` whose content is what the container collected.  One that
+  holds only spaces (TeX starts one for an empty line) is dropped.
+- **Dropped events.** `*dropped-events*` lists each event type with its
+  reason: `:indent`, `:glue`, `:kern`, `:penalty`, `:rule`, `:language`,
+  `:tex-mark`, `:special`, `:openout`, `:closeout`.  `*discarded-containers*`
+  lists the containers whose whole content goes (`:leaders`, `:insert`,
+  `:vadjust`, `:shipout`).  A `:box` is kept transparent: its content
+  is built in its place.  `:write` is 3.8's.  Nothing else is dropped.
+- **Code.** `\code` … `\endcode` is a `:code-block`; each line is a
+  paragraph there (`\par` is `\endgraf`) and becomes a `:code-line`, its
+  spaces as written (one per `:space`), an empty line a line without
+  content.  The text is plain (`:code-line` is in `*plain-text-containers*`).
+- **Lists.** `\beginlist` … `\endlist` is an `:item-list`, each
+  `\item`, `\itemitem`, `\itemitemitem` an `:item` with the blocks up to
+  the next item of its level or above; items of a deeper level form an
+  `:item-list` in its content, and an `\itemitem` straight in the list
+  (concept-args.tex:15) is an item of it.  The label is the content of the
+  box `\listlabel` sets at the start of the item's first paragraph, so a
+  bullet, which is math, arrives with 3.15m's handlers (the argument of
+  the macro is not read: a source that puts text in it, concept-conditions.tex:248,
+  gets it as the label).
+- **Where TeX is.** The mark of `\item` comes while the *previous* item's
+  paragraph is still open, and `\beginlist` (when no blank line precedes
+  it, concept-args.tex:14) and `\endlist` (`\par\endgroup`) come before the
+  paragraph they end.  So an item mark is remembered and applied when the
+  next paragraph begins, and a list's begin and end wait for the open
+  paragraph to end.  A paragraph ends with `close-block`, which gives
+  the container's on-close function the end span through a weak table
+  (the core's on-close does not get it).
+- **Notes.** `\editornote` and `\reviewer` are marks carrying `:hidden`;
+  the spec sets `\editornotesfalse` (setup-options.tex:23), so their body
+  typesets nothing and the note's text is the argument as TeX shows it,
+  `\term{x}` and `` `` `` as written, not inlines.  A note shown by the
+  options is reported (its typeset copy would also be in the text).
 
 ### Tables and figures
 
@@ -434,7 +528,35 @@ for tests).
 
 ### Inlines
 
-*Step 3.13.* Not written yet.
+*Step 3.13* (`src/model/build-inlines.lisp`; `make model` shows them).
+The node shapes are those of "Node shapes" above; what the builder
+decides:
+
+- **Containers for the macros with an extent, anchors for the rest.**
+  A vocabulary `:begin` opens a container of its key; its `:end`
+  closes it. The text inside a term, parameter, reference or notation
+  is dropped, because the node says it (`:term-ref` and `:operator-ref`
+  keep the *argument* text, not the typeset one: `\term{dotted list}`
+  inflected as `dotted lists` is `:text "dotted list"`). Only
+  `:emphasis`, `:strong`, `:code`, `:citation` and `:input` keep their
+  content, read as plain text (their keys are plain-text containers, so
+  the font does not make a second `:code` inside a `:code`).
+- **References are unresolved.** `:operator-ref` takes its `:via` from
+  the macro's key (`*reference-vias*`) and its `:text` from the *last*
+  argument, as the reference sets it: `\kwd{test}` is `":test"`, `\keyref{key}`
+  is `"\\&key"`. `:section-ref` and `:figure-ref` hold the label as
+  written, trimmed (`"\\OrdinaryLambdaLists"`). No `:target` is set;
+  3.17-3.19 resolve them.
+- **`:lambda-list-keyword`** has no argument: its name is the text its
+  macro typeset (`"&allow-other-keys"`).
+- **Notation** (`:evaluates-to` …, `:output`, `:this-section`) has no
+  field; the math or text the macro typesets is dropped.
+- **Index entries and issues are anchors.** `:index-*` marks are
+  `:index-entry` nodes (`:index-kind` from `*index-kinds*`, `:text` the
+  first argument). `\issue` and `\endissue` are an `:issue-start` and an
+  `:issue-end`, each with the name its macro was called with; the text
+  between them stays in the surrounding container.
+- `\thenextfigure` (`:next-figure`) is built by the figures' step 3.11.
 
 ### Glossary
 
@@ -442,7 +564,29 @@ for tests).
 
 ### Syntax
 
-*Step 3.15.* Not written yet.
+*Step 3.15* (`src/model/build-bnf.lisp`).  The BNF notation is built
+from the begin/end pairs of the vocabulary: a macro with an argument and
+its opening and closing forms (`\lbrac` … `\rbrac`) report the same
+`:begin`/`:end` of one key, so the model does not tell them apart.
+
+- `:bnf-rule` (`\auxbnf`): `name` is the first argument; `definition` is
+  what the rule typeset after it, without the leading `name::`.
+- `:bnf-optional`, `:bnf-zero-or-more`, `:bnf-group`,
+  `:bnf-parenthesized`, `:bnf-bracketed`, `:bnf-required` and
+  `:bnf-one-or-more` hold their `content`.  The glyphs a macro typesets
+  as text (`[ ]`, `( )`, a trailing `*`, `*bnf-glyphs*`) are removed from
+  the content, since the node says it; braces and plus signs are math
+  characters and never were text.
+- `:bnf-interleave` likewise.  `\interleave` calls `\begininterleave`, so
+  an interleaving that begins with no argument right inside one that has
+  no content yet is the same one, not a nested node.
+- `:bnf-break` (`\CR`) and `:bnf-repeat-previous` (`\prevplus`) are leaf
+  nodes, as are `:bnf-caret` (`\hat`; what it draws is dropped),
+  `:angle-name` (`\ang`, `name`) and `:bnf-indirection` (`\down`, `name`).
+- Not done here: the `\param` that follows a `\down` is a separate inline
+  (inlines), so the parameter's name appears twice until the two are
+  merged; the rule's alignment cells belong to tables and figures, and an
+  unhandled alignment event is reported, not dropped silently.
 
 ### Math
 
