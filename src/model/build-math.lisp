@@ -213,7 +213,7 @@ filled with strings: a control space) with each string a :MATH-CHAR."
   "An ON-CLOSE function: the items of the container become FIELD of the
 node of the container below, and are not passed on."
   (lambda (builder container)
-    (let* ((node (container-node (current-container builder)))
+    (let* ((node (container-node* (current-container builder)))
            (items (math-items builder (container-contents container))))
       (setf (container-items container) '())
       (cond ((null node)
@@ -227,23 +227,78 @@ node of the container below, and are not passed on."
 container below when it closes."
   (open-container builder key span :on-close (store-field field)))
 
+(defvar *formula-nodes* (make-hash-table :test 'eq #+sbcl :weakness #+sbcl :key
+                                         #+sbcl :synchronized #+sbcl t)
+  "The :MATH node of each open formula container, which is built before it
+is known whether the formula is math at all (LAYOUT-PAYLOAD).")
+
+(defun container-node* (container)
+  "The node CONTAINER builds, or the formula node of a formula container."
+  (or (container-node container) (gethash container *formula-nodes*)))
+
 (defun open-formula (builder event span)
-  "(:begin :math): the formula, inline or displayed."
-  (let ((node (make-builder-node builder :math
-                                         :display (and (event-property event :display) t))))
-    (open-container builder :math span :node node
-                    :on-close (lambda (builder container)
-                                (let ((items (math-items builder (container-contents container))))
-                                  (setf (container-items container) '())
-                                  (when items
-                                    (setf (node-field-value node 'content (builder-registry builder))
-                                          items)))))))
+  "(:begin :math): a formula, inline or displayed.  Its node is made when
+it closes (CLOSE-FORMULA)."
+  (let ((container (open-container builder :math span)))
+    (setf (gethash container *formula-nodes*)
+          (make-builder-node builder :math :display (and (event-property event :display) t)))))
+
+(defun layout-payload (items)
+  "The block nodes a formula holds when it is no math at all: the sources
+set a table in a display as `$$\\vcenter{\\halign{…}}$$` (\\tabletwo), so the
+formula's only content, through its noads' nuclei, is block nodes.  NIL
+when the formula holds any math, or nothing."
+  (labels ((walk (item)
+             (cond ((and (typep item 'node) (eq (node-kind item) :math-noad))
+                    (and (null (math-noad-superscript item))
+                         (null (math-noad-subscript item))
+                         (let ((nucleus (math-noad-nucleus item)))
+                           (and nucleus (every #'walk nucleus)))))
+                   ((and (typep item 'node) (eq (node-kind item) :math-char))
+                    (string= (math-char-text item) " "))
+                   ((typep item 'node)
+                    (and (member (node-kind item) (expand-kinds '(:block)))
+                         (not (member (node-kind item) (expand-kinds '(:inline :math-element))))
+                         (not (eq (node-kind item) :math))))))
+           (collect (item)
+             (cond ((and (typep item 'node) (eq (node-kind item) :math-noad))
+                    (mapcan #'collect (copy-list (math-noad-nucleus item))))
+                   ((and (typep item 'node) (eq (node-kind item) :math-char)) '())
+                   (t (list item)))))
+    (and items (every #'walk items) (mapcan #'collect (copy-list items)))))
+
+(defun close-formula (builder event span)
+  "(:end :math): the formula becomes a :MATH node, unless it is a layout
+trick around block nodes, which then take its place."
+  (let ((container (find-container builder :math)))
+    (cond
+      ((null container) (close-container builder :math span event))
+      (t
+       (let* ((node (gethash container *formula-nodes*))
+              (parent (second (member container (builder-stack builder))))
+              (before (length (container-items parent))))
+         (close-container builder :math span event)
+         (remhash container *formula-nodes*)
+         (let* ((count (- (length (container-items parent)) before))
+                (items (reverse (subseq (container-items parent) 0 count)))
+                (items (math-items builder items))
+                (payload (layout-payload items)))
+           (setf (container-items parent) (nthcdr count (container-items parent)))
+           (cond (payload
+                  (dolist (block payload) (add-item builder block)))
+                 (t
+                  (when items
+                    (setf (node-field-value node 'content (builder-registry builder)) items))
+                  (setf (node-span node) (join-spans (container-span container) span))
+                  (dolist (problem (node-problems node (builder-registry builder)))
+                    (report-problem builder :node (node-span node) :message problem))
+                  (add-item builder node)))))))))
 
 (defun open-equation-number (builder event span)
   "(:begin :eqno): the equation number of the formula below."
   (let ((owner (find-container builder :math)))
     (when owner
-      (setf (node-field-value (container-node owner) 'number-left (builder-registry builder))
+      (setf (node-field-value (container-node* owner) 'number-left (builder-registry builder))
             (equal (event-property event :command) "leqno"))))
   (open-field builder :eqno span 'equation-number))
 
@@ -305,6 +360,7 @@ every digit before its unit is 0."
 (defun install-math-handlers (table)
   "Register the handlers of step 3.15m in the handler table TABLE."
   (register-handler :begin :math #'open-formula table)
+  (register-handler :end :math #'close-formula table)
   (register-handler :begin :eqno #'open-equation-number table)
   (register-handler :begin :noad #'open-noad table)
   (register-handler :begin :fraction #'open-fraction table)

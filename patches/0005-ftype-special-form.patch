@@ -1,0 +1,8 @@
+Name the kind of setq as the standard does: a Special Operator.
+"Special Form" is the obsolete name; the other special operators say
+\ftype{Special Operator}, and setq is set with \DefspecWithValues.
+--- dict-flow.tex
++++ dict-flow.tex
+@@ -2048,1 +2048,1 @@
+-\begincom{setq}\ftype{Special Form}
++\begincom{setq}\ftype{Special Operator}

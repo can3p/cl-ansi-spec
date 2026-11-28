@@ -15,7 +15,8 @@
 delimiters, style changes and \\mathchoice.  A formula keeps what TeX's
 math list holds, minus the typesetting.  Its fields also take inlines,
 since the sources set words in a formula with a font wrapper
-(`\\ff{arccos}` is code), which the vocabulary turns into one.")
+(`\\ff{arccos}` is code), which the vocabulary turns into one, and
+blocks, since a box in a formula may hold any (a table set in a \\vcenter).")
 
 (define-enum math-class (:area :math)
   "The class of a noad, as TeX gives it: the spacing and the limits of
@@ -61,10 +62,10 @@ TeX's math list; for example `$$ \\ff{arccos} z = {\\pi\\over2} - \\ff{arcsin} z
 at dict-numbers.tex:1435 is one displayed formula."
   (display :boolean :example t
    :doc "True for a displayed formula, false for an inline one.")
-  (content (:node :math-element :inline) :repeated t
+  (content (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "x"))
    :doc "The formula's list, in order; absent for an empty formula.")
-  (equation-number (:node :math-element :inline) :repeated t
+  (equation-number (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "("))
    :doc "A display's equation number, set by \\eqno or \\leqno; absent when
 it has none.")
@@ -88,13 +89,13 @@ says neither (TeX then decides by the style).")
   (delimiter :string :example "√"
    :doc "A radical's sign or an accent's character, as Unicode; absent for
 the other classes.")
-  (nucleus (:node :math-element :inline) :repeated t
+  (nucleus (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "x"))
    :doc "The nucleus: one character, or a subformula; absent for {}.")
-  (superscript (:node :math-element :inline) :repeated t
+  (superscript (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "2"))
    :doc "The superscript (^); absent when none.")
-  (subscript (:node :math-element :inline) :repeated t
+  (subscript (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "i"))
    :doc "The subscript (_, which the sources reach through \\sub); absent
 when none."))
@@ -116,9 +117,9 @@ no character is guessed."))
                :denominator ((:math-char :text "2"))))
   "A fraction: \\over, \\atop, \\above and their withdelims forms
 (\\overwithdelims, …), as at dict-numbers.tex:1435."
-  (numerator (:node :math-element :inline) :repeated t
+  (numerator (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "π")) :doc "The numerator; absent when empty.")
-  (denominator (:node :math-element :inline) :repeated t
+  (denominator (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "2")) :doc "The denominator; absent when empty.")
   (no-rule :boolean :example nil
    :doc "True when no bar separates the two: \\atop, or a thickness of zero.")
@@ -158,12 +159,12 @@ period: \\left. or \\right.)."))
   "\\mathchoice: four subformulas, of which TeX sets the one for the
 style in force; all four are kept, since which one shows is a matter of
 typesetting."
-  (display (:node :math-element :inline) :repeated t
+  (display (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "A")) :doc "For display style; absent when empty.")
-  (text (:node :math-element :inline) :repeated t
+  (text (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "a")) :doc "For text style; absent when empty.")
-  (script (:node :math-element :inline) :repeated t
+  (script (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "a")) :doc "For script style; absent when empty.")
-  (scriptscript (:node :math-element :inline) :repeated t
+  (scriptscript (:node :math-element :inline :block) :repeated t
    :example ((:math-char :text "a"))
    :doc "For scriptscript style; absent when empty."))

@@ -68,14 +68,14 @@
 S-expressions without spans, and the build report."
   (multiple-value-bind (nodes report)
       (model:build-events events :registry model:*registry* :handlers *math-handlers*)
-    (values (mapcar (lambda (node) (strip-spans (model:node-sexp node))) nodes)
+    (values (mapcar (lambda (node) (math-strip-spans (model:node-sexp node))) nodes)
             report)))
 
-(defun strip-spans (form)
+(defun math-strip-spans (form)
   "FORM without its :SPAN entries."
   (cond ((atom form) form)
-        ((eq (first form) :span) (strip-spans (cddr form)))
-        (t (cons (strip-spans (first form)) (strip-spans (rest form))))))
+        ((eq (first form) :span) (math-strip-spans (cddr form)))
+        (t (cons (math-strip-spans (first form)) (math-strip-spans (rest form))))))
 
 (defun mchar (fam code)
   (test-event :math-char nil :fam fam :code code))
@@ -214,7 +214,7 @@ S-expressions without spans, and the build report."
                                            (test-event :end :noad))
                                      :registry model:*registry* :handlers table))))
     (is equal '((:math-noad :class :ord :nucleus ((:math-char :text " "))))
-        (mapcar (lambda (node) (strip-spans (model:node-sexp node))) nodes)))
+        (mapcar (lambda (node) (math-strip-spans (model:node-sexp node))) nodes)))
   ;; A slot without Unicode is reported, and shown as U+FFFD.
   (multiple-value-bind (nodes report) (math-nodes (mchar 3 40))
     (is equal (list (list :math-char :text (string (code-char #xFFFD)))) nodes)
@@ -229,7 +229,7 @@ S-expressions without spans, and the build report."
 
 (defun math-fixture (job file first last)
   "The nodes of JOB built from lines FIRST to LAST of FILE, as S-expressions."
-  (mapcar (lambda (node) (if (stringp node) node (strip-spans (model:node-sexp node))))
+  (mapcar (lambda (node) (if (stringp node) node (math-strip-spans (model:node-sexp node))))
           (model:build-fixture job :file file :lines (list first last))))
 
 (define-test math-real-fraction
