@@ -117,7 +117,13 @@ inflection rules (RESOLVE-TERMS), at its span.")
 tier of the rules, the first kept; or two glossary ids that differ only
 by case.")
     (:missing-sense "A \\meaning sense the glossary entry of its term
-reference does not number."))
+reference does not number.")
+    (:unresolved-reference "A section, figure or operator reference no
+node of its kind has the label or name of (RESOLVE-SECTION-REFERENCES,
+RESOLVE-OPERATOR-REFS), or a section or figure label several have.")
+    (:ambiguous-reference "An operator reference whose name entries of
+several kinds share, none of them the kind its wrapper prefers
+(RESOLVE-OPERATOR-REFS)."))
   "The kinds of PROBLEM a build reports, each with its meaning.")
 
 (defstruct (problem (:constructor make-problem
@@ -507,10 +513,11 @@ revision of the draft (JOB-VERSION)."
 (defun build-model (&key (jobs (chapter-jobs)) (registry *registry*) (handlers *handlers*))
   "Build the chapter jobs JOBS (names, \"chap-14\"; every one by default,
 in the order of the standard) in turn (BUILD-JOB) and settle the ids of
-their nodes (ASSIGN-IDS) and resolve their term references
-(RESOLVE-TERMS); return the top-level nodes of all of them, in
-order, one report, the id collisions and the term problems last, and the revision of the
-draft the jobs give (the first one's)."
+their nodes (ASSIGN-IDS), then resolve their term, section and figure,
+and operator references (RESOLVE-TERMS, RESOLVE-SECTION-REFERENCES,
+OPERATOR-REF-PROBLEMS); return the top-level nodes of all of them, in
+order, one report, the id collisions and the references' problems last,
+and the revision of the draft the jobs give (the first one's)."
   (let* ((reports '()) (version nil)
          (nodes (loop for job in jobs
                       append (multiple-value-bind (nodes report job-version)
@@ -520,6 +527,8 @@ draft the jobs give (the first one's)."
                                nodes))))
     (push (make-build-report (nth-value 1 (assign-ids nodes :registry registry))) reports)
     (push (make-build-report (resolve-terms nodes :registry registry)) reports)
+    (push (make-build-report (resolve-section-references nodes :registry registry)) reports)
+    (push (make-build-report (operator-ref-problems nodes :registry registry)) reports)
     (values nodes (merge-build-reports (nreverse reports)) version)))
 
 ;;; Fixtures: the model of a job's lines

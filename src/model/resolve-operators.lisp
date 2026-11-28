@@ -136,3 +136,15 @@ finding."
                          (push (make-clref-finding node outcome ids message) findings))))))
                 items registry)
     (values resolved (nreverse findings))))
+
+(defun operator-ref-problems (items &key (registry *registry*))
+  "Resolve the :OPERATOR-REFs of ITEMS (RESOLVE-OPERATOR-REFS) and return
+its findings as build problems, :UNRESOLVED-REFERENCE or
+:AMBIGUOUS-REFERENCE, in document order."
+  (mapcar (lambda (finding)
+            (make-problem (ecase (clref-finding-outcome finding)
+                            (:unresolved :unresolved-reference)
+                            (:ambiguous :ambiguous-reference))
+                          (node-span (clref-finding-node finding))
+                          :message (clref-finding-message finding)))
+          (nth-value 1 (resolve-operator-refs items :registry registry))))

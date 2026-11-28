@@ -315,7 +315,9 @@ handlers of an area live in its own file and build the nodes.
   and builds its events (a third value: the draft's revision,
   `job-version`); `build-model` builds the chapter jobs it is given,
   every one by default (`chapter-jobs`, `src/source.lisp`, in the order
-  of the standard), and settles their ids (`assign-ids`);
+  of the standard), settles their ids (`assign-ids`) and resolves the
+  references (`resolve-terms`, `resolve-section-references`,
+  `operator-ref-problems`, "References");
   `build-document` makes the `:document` of them ("Structure").
   `build-fixture` builds the nodes a job appended while the reader was at
   some lines of a file (`dict-conses.tex` 1702–1759 is `endp`): a
@@ -800,8 +802,8 @@ figures (a `:figure-ref`); the ids are the labels of `\DefineChapter`,
 TeX's own numbers.  The generated `setup-sections.tex` and
 `setup-figures.tex` are never read.  A label no node has, or two nodes
 share, leaves the target unset and is one `:unresolved-reference`
-problem (message with the label; the kind is for the coordinator to add
-to `*problem-kinds*`, `build-model` does not call the resolver yet).
+problem (message with the label); `build-model` runs it after
+`assign-ids`.
 
 `table-of-contents` is a list of `secref-toc-entry` (kind, id, number,
 title, children: the entries of the sections, at any depth), one for each
@@ -844,8 +846,9 @@ names.  `:apply nil` only counts.  Rules, in order:
    variable), no target.
 
 Unresolved and ambiguous references are returned as `clref-finding`s
-(node, outcome, candidate ids, message), in document order; they are not
-build problems.  Unresolved ones that are no resolution matter: `\misc`
+(node, outcome, candidate ids, message), in document order;
+`operator-ref-problems`, run by `build-model` after `assign-ids`, makes
+them `:unresolved-reference` and `:ambiguous-reference` problems.  Unresolved ones that are no resolution matter: `\misc`
 with no text or with `\fi \fi` left in a table cell's argument, `\f
 {(eql 't)}` set as a type; `tests/model/resolve-operators.lisp` pins the
 counts.

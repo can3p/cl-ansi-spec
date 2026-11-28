@@ -96,7 +96,7 @@
    #:resolve-operator-refs #:clref-index #:clref-resolve #:clref-normalise
    #:*clref-entryless-vias* #:*clref-preferred-kinds*
    #:clref-finding #:clref-finding-node #:clref-finding-outcome
-   #:clref-finding-entries #:clref-finding-message
+   #:clref-finding-entries #:clref-finding-message #:operator-ref-problems
    ;; Term references (resolve-terms.lisp, step 3.19)
    #:*term-irregulars* #:*term-suffix-rules* #:*term-rules* #:*term-tiers*
    #:resolve-terms
