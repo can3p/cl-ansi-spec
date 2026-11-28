@@ -37,3 +37,33 @@ jobs:
 
       - name: Build and test
         run: make test
+
+      # The external check of docs/exports.md ("Validation"): every chapter,
+      # glossary group and index entry of the export is one instance of the
+      # node schema. The files wrap their content ({"schemaVersion", key}),
+      # so the nodes are unwrapped first. manifest.json and report.json have
+      # no schema and are not checked. ajv-cli is pinned; any violation fails.
+      - name: Validate the export against the schema (external validator)
+        run: |
+          set -euo pipefail
+          make export OUT=build/export
+          nodes="${RUNNER_TEMP}/export-nodes"
+          python3 - build/export "$nodes" <<'PY'
+          import json, pathlib, sys
+
+          export, nodes = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+          nodes.mkdir(parents=True, exist_ok=True)
+
+          def write(name, node):
+              (nodes / name).write_text(json.dumps(node))
+
+          for path in sorted((export / "chapters").glob("*.json")):
+              write(f"chapter-{path.stem}.json", json.loads(path.read_text())["chapter"])
+          for key in ("glossary", "index"):
+              data = json.loads((export / f"{key}.json").read_text())
+              for i, node in enumerate(data[key]):
+                  write(f"{key}-{i:05d}.json", node)
+          PY
+          test -n "$(ls -A "$nodes")" || { echo "no nodes exported" >&2; exit 1; }
+          npx --yes ajv-cli@5.0.0 validate --spec=draft2020 \
+            -s schema/model.schema.json -d "$nodes/*.json"
