@@ -92,6 +92,9 @@
   glossary and index files as JSON and S-expressions, `report.json`,
   `manifest.json`) to `build/export/`; about 25 s. Prints the build's
   problems by kind. `docs/exports.md`, "The whole export".
+* `make sample [OUT=dir]` — write the sample export (a few dictionary
+  entries as JSON and S-expressions, with `manifest.json`) to
+  `build/sample/`; about 25 s. `docs/exports.md`, "The sample export".
 * `make clean` — remove `build/`. `make distclean` — also remove `.deps/`.
 * `(cd spec/tex && sha256sum -c --quiet ../SHA256SUMS)` and
   `(cd vendor/plain && sha256sum -c --quiet ../SHA256SUMS)` — verify pristine
