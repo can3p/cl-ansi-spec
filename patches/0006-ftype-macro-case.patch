@@ -1,0 +1,8 @@
+Capitalise the \ftype of with-open-file.
+Every other entry spells its kind with capitals (\ftype{Macro}); the
+model reads the kind from this text, so the variant is a source error.
+--- dict-streams.tex
++++ dict-streams.tex
+@@ -2802,1 +2802,1 @@
+-\begincom{with-open-file}\ftype{macro}
++\begincom{with-open-file}\ftype{Macro}

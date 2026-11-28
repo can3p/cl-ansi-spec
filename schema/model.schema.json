@@ -719,7 +719,10 @@
         "version": {
           "type": "string",
           "title": "version",
-          "description": "The revision of the draft, the text of \\rev in setup-version.tex."
+          "description": "The revision of the draft, the text of \\rev in setup-version.tex.",
+          "examples": [
+            "15.17"
+          ]
         },
         "front-matter": {
           "type": "array",
@@ -727,7 +730,21 @@
             "$ref": "#/$defs/chapter"
           },
           "title": "front-matter",
-          "description": "The unnumbered chapters of chap-0.tex (\\beginSimpleChapter), in\norder; absent when the model is built from part of the jobs."
+          "description": "The unnumbered chapters of chap-0.tex (\\beginSimpleChapter), in\norder; absent when the model is built from part of the jobs.",
+          "examples": [
+            [
+              {
+                "kind": "chapter",
+                "id": "Credits",
+                "title": [
+                  {
+                    "kind": "text",
+                    "text": "Credits"
+                  }
+                ]
+              }
+            ]
+          ]
         },
         "chapters": {
           "type": "array",
@@ -735,7 +752,22 @@
             "$ref": "#/$defs/chapter"
           },
           "title": "chapters",
-          "description": "The numbered chapters (\\beginchapter), 1 to 26, then the\nappendix A, in that order."
+          "description": "The numbered chapters (\\beginchapter), 1 to 26, then the\nappendix A, in that order.",
+          "examples": [
+            [
+              {
+                "kind": "chapter",
+                "id": "ChapOne",
+                "number": "1",
+                "title": [
+                  {
+                    "kind": "text",
+                    "text": "Introduction"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -744,7 +776,38 @@
         "version",
         "chapters"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "document",
+          "version": "15.17",
+          "front-matter": [
+            {
+              "kind": "chapter",
+              "id": "Credits",
+              "title": [
+                {
+                  "kind": "text",
+                  "text": "Credits"
+                }
+              ]
+            }
+          ],
+          "chapters": [
+            {
+              "kind": "chapter",
+              "id": "ChapOne",
+              "number": "1",
+              "title": [
+                {
+                  "kind": "text",
+                  "text": "Introduction"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "chapter": {
       "type": "object",
@@ -761,12 +824,18 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The chapter's id: the reference name of \\beginchapter (its third\nargument, e.g. ChapOne), or a simple chapter's title."
+          "description": "The chapter's id: the reference name of \\beginchapter (its third\nargument, e.g. ChapOne), or a simple chapter's title.",
+          "examples": [
+            "ChapFifteen"
+          ]
         },
         "number": {
           "type": "string",
           "title": "number",
-          "description": "The chapter's number as \\beginchapter's first argument gives it\n(\"1\" … \"26\", \"A\"); absent for a simple chapter."
+          "description": "The chapter's number as \\beginchapter's first argument gives it\n(\"1\" … \"26\", \"A\"); absent for a simple chapter.",
+          "examples": [
+            "15"
+          ]
         },
         "title": {
           "type": "array",
@@ -895,7 +964,15 @@
             ]
           },
           "title": "title",
-          "description": "The chapter's title, \\beginchapter's second argument or the\nsimple chapter's one."
+          "description": "The chapter's title, \\beginchapter's second argument or the\nsimple chapter's one.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Arrays"
+              }
+            ]
+          ]
         },
         "children": {
           "type": "array",
@@ -958,7 +1035,23 @@
             ]
           },
           "title": "children",
-          "description": "What the chapter holds, in order: the blocks before its first\nsection, then its sections."
+          "description": "What the chapter holds, in order: the blocks before its first\nsection, then its sections.",
+          "examples": [
+            [
+              {
+                "kind": "section",
+                "id": "ArrayConcepts",
+                "number": "15.1",
+                "level": 1,
+                "title": [
+                  {
+                    "kind": "text",
+                    "text": "Array Concepts"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -967,7 +1060,34 @@
         "id",
         "title"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "chapter",
+          "id": "ChapFifteen",
+          "number": "15",
+          "title": [
+            {
+              "kind": "text",
+              "text": "Arrays"
+            }
+          ],
+          "children": [
+            {
+              "kind": "section",
+              "id": "ArrayConcepts",
+              "number": "15.1",
+              "level": 1,
+              "title": [
+                {
+                  "kind": "text",
+                  "text": "Array Concepts"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "section": {
       "type": "object",
@@ -984,22 +1104,34 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The label of the \\DefineSection that names the section, or\n<parent-id>/<n> for a section that none names (its n-th among its\nparent's sections)."
+          "description": "The label of the \\DefineSection that names the section, or\n<parent-id>/<n> for a section that none names (its n-th among its\nparent's sections).",
+          "examples": [
+            "ArrayElements"
+          ]
         },
         "number": {
           "type": "string",
           "title": "number",
-          "description": "The section's number, its chapter's and the count of each level\njoined by dots (\"14.1.2\"), as the :write of its \\DefineSection\nconfirms."
+          "description": "The section's number, its chapter's and the count of each level\njoined by dots (\"14.1.2\"), as the :write of its \\DefineSection\nconfirms.",
+          "examples": [
+            "15.1.1"
+          ]
         },
         "level": {
           "type": "integer",
           "title": "level",
-          "description": "The level, 1 for a section of the chapter, 2 for a subsection,\nand so on to 5."
+          "description": "The level, 1 for a section of the chapter, 2 for a subsection,\nand so on to 5.",
+          "examples": [
+            2
+          ]
         },
         "dictionary": {
           "type": "boolean",
           "title": "dictionary",
-          "description": "True for a dictionary section, begun by \\includeDictionary: its\nchildren are dictionary entries."
+          "description": "True for a dictionary section, begun by \\includeDictionary: its\nchildren are dictionary entries.",
+          "examples": [
+            true
+          ]
         },
         "title": {
           "type": "array",
@@ -1128,7 +1260,15 @@
             ]
           },
           "title": "title",
-          "description": "The section's title, the argument of the macro that began it."
+          "description": "The section's title, the argument of the macro that began it.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Array Elements"
+              }
+            ]
+          ]
         },
         "children": {
           "type": "array",
@@ -1194,7 +1334,23 @@
             ]
           },
           "title": "children",
-          "description": "What the section holds, in order: blocks, dictionary entries,\nglossary groups and its subsections."
+          "description": "What the section holds, in order: blocks, dictionary entries,\nglossary groups and its subsections.",
+          "examples": [
+            [
+              {
+                "kind": "section",
+                "id": "ArrayElements/1",
+                "number": "15.1.1.1",
+                "level": 3,
+                "title": [
+                  {
+                    "kind": "text",
+                    "text": "Array Indices"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -1205,7 +1361,35 @@
         "level",
         "title"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "section",
+          "id": "ArrayElements",
+          "number": "15.1.1",
+          "level": 2,
+          "title": [
+            {
+              "kind": "text",
+              "text": "Array Elements"
+            }
+          ],
+          "children": [
+            {
+              "kind": "section",
+              "id": "ArrayElements/1",
+              "number": "15.1.1.1",
+              "level": 3,
+              "title": [
+                {
+                  "kind": "text",
+                  "text": "Array Indices"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "dictionary-entry": {
       "type": "object",
@@ -1222,7 +1406,10 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The entry's id: its first name, or <name>/<entry-kind> when two\nentries share a first name (docs/exports.md, \"Ids\")."
+          "description": "The entry's id: its first name, or <name>/<entry-kind> when two\nentries share a first name (docs/exports.md, \"Ids\").",
+          "examples": [
+            "endp"
+          ]
         },
         "names": {
           "type": "array",
@@ -1230,12 +1417,20 @@
             "type": "string"
           },
           "title": "names",
-          "description": "The names the entry describes, the comma-separated list of\n\\begincom's first argument, in order."
+          "description": "The names the entry describes, the comma-separated list of\n\\begincom's first argument, in order.",
+          "examples": [
+            [
+              "endp"
+            ]
+          ]
         },
         "entry-kind": {
           "$ref": "#/$defs/enum-entry-kind",
           "title": "entry-kind",
-          "description": "What the names are, from the entry's \\ftype."
+          "description": "What the names are, from the entry's \\ftype.",
+          "examples": [
+            "function"
+          ]
         },
         "parts": {
           "type": "array",
@@ -1243,7 +1438,42 @@
             "$ref": "#/$defs/part"
           },
           "title": "parts",
-          "description": "The entry's parts, one per \\label, in order."
+          "description": "The entry's parts, one per \\label, in order.",
+          "examples": [
+            [
+              {
+                "kind": "part",
+                "title": "Syntax",
+                "content": [
+                  {
+                    "kind": "operator-signature",
+                    "operator": "function",
+                    "names": [
+                      "endp"
+                    ],
+                    "lambda-list": [
+                      {
+                        "kind": "text",
+                        "text": "list"
+                      }
+                    ],
+                    "values": [
+                      {
+                        "kind": "text",
+                        "text": "generalized-boolean"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "part",
+                "title": "Side Effects",
+                "none": true,
+                "confidence": "."
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -1253,7 +1483,50 @@
         "names",
         "entry-kind"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "dictionary-entry",
+          "id": "endp",
+          "names": [
+            "endp"
+          ],
+          "entry-kind": "function",
+          "parts": [
+            {
+              "kind": "part",
+              "title": "Syntax",
+              "content": [
+                {
+                  "kind": "operator-signature",
+                  "operator": "function",
+                  "names": [
+                    "endp"
+                  ],
+                  "lambda-list": [
+                    {
+                      "kind": "text",
+                      "text": "list"
+                    }
+                  ],
+                  "values": [
+                    {
+                      "kind": "text",
+                      "text": "generalized-boolean"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "part",
+              "title": "Side Effects",
+              "none": true,
+              "confidence": "."
+            }
+          ]
+        }
+      ]
     },
     "part": {
       "type": "object",
@@ -1270,12 +1543,26 @@
         "title": {
           "type": "string",
           "title": "title",
-          "description": "The heading, the text of the \\label before its colon."
+          "description": "The heading, the text of the \\label before its colon.",
+          "examples": [
+            "Side Effects"
+          ]
         },
         "none": {
           "type": "boolean",
           "title": "none",
-          "description": "True when the part says only \"None.\" (\\None after the\n\\label)."
+          "description": "True when the part says only \"None.\" (\\None after the\n\\label).",
+          "examples": [
+            true
+          ]
+        },
+        "confidence": {
+          "type": "string",
+          "title": "confidence",
+          "description": "For a part that says None: the punctuation after it in the\nsource (\".\", \"!\" or \"?\"), how sure the authors are that the part\nis empty; absent otherwise.",
+          "examples": [
+            "."
+          ]
         },
         "content": {
           "type": "array",
@@ -1332,7 +1619,30 @@
             ]
           },
           "title": "content",
-          "description": "The part's blocks; absent when NONE is true."
+          "description": "The part's blocks; absent when NONE is true.",
+          "examples": [
+            [
+              {
+                "kind": "operator-signature",
+                "operator": "function",
+                "names": [
+                  "endp"
+                ],
+                "lambda-list": [
+                  {
+                    "kind": "text",
+                    "text": "list"
+                  }
+                ],
+                "values": [
+                  {
+                    "kind": "text",
+                    "text": "generalized-boolean"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -1340,7 +1650,15 @@
         "span",
         "title"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "part",
+          "title": "Side Effects",
+          "none": true,
+          "confidence": "."
+        }
+      ]
     },
     "operator-signature": {
       "type": "object",
@@ -1357,7 +1675,10 @@
         "operator": {
           "$ref": "#/$defs/enum-operator",
           "title": "operator",
-          "description": "The kind of operator, by the macro."
+          "description": "The kind of operator, by the macro.",
+          "examples": [
+            "function"
+          ]
         },
         "names": {
           "type": "array",
@@ -1365,7 +1686,12 @@
             "type": "string"
           },
           "title": "names",
-          "description": "The operator's name, or the names of the \\entry lines of a\n-Multi form, which share the lambda list and values."
+          "description": "The operator's name, or the names of the \\entry lines of a\n-Multi form, which share the lambda list and values.",
+          "examples": [
+            [
+              "endp"
+            ]
+          ]
         },
         "lambda-list": {
           "type": "array",
@@ -1494,7 +1820,15 @@
             ]
           },
           "title": "lambda-list",
-          "description": "The lambda list as written, with its parameters and lambda list\nkeywords; absent when empty."
+          "description": "The lambda list as written, with its parameters and lambda list\nkeywords; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "list"
+              }
+            ]
+          ]
         },
         "values": {
           "type": "array",
@@ -1623,12 +1957,23 @@
             ]
           },
           "title": "values",
-          "description": "The values as written after the arrow; absent for a form\nwithout values (\\Defun, \\Defmeth) and when NO-RETURN is true."
+          "description": "The values as written after the arrow; absent for a form\nwithout values (\\Defun, \\Defmeth) and when NO-RETURN is true.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "generalized-boolean"
+              }
+            ]
+          ]
         },
         "no-return": {
           "type": "boolean",
           "title": "no-return",
-          "description": "True for a NoReturn form: the operator never returns normally."
+          "description": "True for a NoReturn form: the operator never returns normally.",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -1637,7 +1982,28 @@
         "operator",
         "names"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "operator-signature",
+          "operator": "function",
+          "names": [
+            "endp"
+          ],
+          "lambda-list": [
+            {
+              "kind": "text",
+              "text": "list"
+            }
+          ],
+          "values": [
+            {
+              "kind": "text",
+              "text": "generalized-boolean"
+            }
+          ]
+        }
+      ]
     },
     "setf-signature": {
       "type": "object",
@@ -1657,7 +2023,12 @@
             "type": "string"
           },
           "title": "names",
-          "description": "The accessor's name, or the names of the \\entry lines of a\n-Multi form."
+          "description": "The accessor's name, or the names of the \\entry lines of a\n-Multi form.",
+          "examples": [
+            [
+              "nth"
+            ]
+          ]
         },
         "lambda-list": {
           "type": "array",
@@ -1786,7 +2157,15 @@
             ]
           },
           "title": "lambda-list",
-          "description": "The accessor's lambda list as written; absent when empty."
+          "description": "The accessor's lambda list as written; absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "n list"
+              }
+            ]
+          ]
         },
         "new-value": {
           "type": "array",
@@ -1915,7 +2294,15 @@
             ]
           },
           "title": "new-value",
-          "description": "The new value as written."
+          "description": "The new value as written.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "new-object"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -1924,12 +2311,32 @@
         "names",
         "new-value"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "setf-signature",
+          "names": [
+            "nth"
+          ],
+          "lambda-list": [
+            {
+              "kind": "text",
+              "text": "n list"
+            }
+          ],
+          "new-value": [
+            {
+              "kind": "text",
+              "text": "new-object"
+            }
+          ]
+        }
+      ]
     },
     "variable-signature": {
       "type": "object",
       "title": "variable-signature",
-      "description": "The syntax of a variable or a constant: \\Defvar, \\Defvarnoast,\n\\Defcon.",
+      "description": "The syntax of a variable or a constant: \\Defvar, \\Defvarnoast,\n\\Defcon.  No entry of the sources uses them (a variable's entry has\nno signature), so no node of the spec is an example of the builder's\noutput.",
       "properties": {
         "kind": {
           "const": "variable-signature",
@@ -1941,12 +2348,18 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The variable's name, with its asterisks when the source sets\nthem."
+          "description": "The variable's name, with its asterisks when the source sets\nthem.",
+          "examples": [
+            "*print-pretty*"
+          ]
         },
         "constant": {
           "type": "boolean",
           "title": "constant",
-          "description": "True for a constant variable (\\Defcon)."
+          "description": "True for a constant variable (\\Defcon).",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -1954,7 +2367,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "variable-signature",
+          "name": "*print-pretty*"
+        }
+      ]
     },
     "type-signature": {
       "type": "object",
@@ -1971,7 +2390,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The type specifier's symbol."
+          "description": "The type specifier's symbol.",
+          "examples": [
+            "cons"
+          ]
         },
         "syntax": {
           "type": "array",
@@ -2100,7 +2522,29 @@
             ]
           },
           "title": "syntax",
-          "description": "The lines of the compound form after the name, with their BNF\nnotation; absent when there are none."
+          "description": "The lines of the compound form after the name, with their BNF\nnotation; absent when there are none.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-bracketed",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "car-typespec "
+                  },
+                  {
+                    "kind": "bnf-optional",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "cdr-typespec"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -2108,7 +2552,33 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "type-signature",
+          "name": "cons",
+          "syntax": [
+            {
+              "kind": "bnf-bracketed",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "car-typespec "
+                },
+                {
+                  "kind": "bnf-optional",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "cdr-typespec"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "paragraph": {
       "type": "object",
@@ -2249,7 +2719,28 @@
             ]
           },
           "title": "content",
-          "description": "The paragraph's text and inlines, in order."
+          "description": "The paragraph's text and inlines, in order.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "The "
+              },
+              {
+                "kind": "emphasis",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "global environment"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": " is that part of an environment ..."
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -2257,7 +2748,44 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "paragraph",
+          "content": [
+            {
+              "kind": "text",
+              "text": "A "
+            },
+            {
+              "kind": "emphasis",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "call"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " is a "
+            },
+            {
+              "kind": "strong",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "safe call"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " if each of the following ..."
+            }
+          ]
+        }
+      ]
     },
     "code-block": {
       "type": "object",
@@ -2277,7 +2805,23 @@
             "$ref": "#/$defs/code-line"
           },
           "title": "lines",
-          "description": "The lines, in order, blank ones included."
+          "description": "The lines, in order, blank ones included.",
+          "examples": [
+            [
+              {
+                "kind": "code-line",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": " (let ((x 1))"
+                  }
+                ]
+              },
+              {
+                "kind": "code-line"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -2285,7 +2829,32 @@
         "span",
         "lines"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "code-block",
+          "lines": [
+            {
+              "kind": "code-line",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": " (let ((x 1))"
+                }
+              ]
+            },
+            {
+              "kind": "code-line",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "   (declare (special x))"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "code-line": {
       "type": "object",
@@ -2426,14 +2995,33 @@
             ]
           },
           "title": "content",
-          "description": "The line's text, its spaces kept, and its inlines (terms,\nexample notation); absent for a blank line."
+          "description": "The line's text, its spaces kept, and its inlines (terms,\nexample notation); absent for a blank line.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "   (declare (special x))"
+              }
+            ]
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "code-line",
+          "content": [
+            {
+              "kind": "text",
+              "text": "   (declare (special x))"
+            }
+          ]
+        }
+      ]
     },
     "item-list": {
       "type": "object",
@@ -2453,7 +3041,31 @@
             "$ref": "#/$defs/item"
           },
           "title": "items",
-          "description": "The list's items, in order."
+          "description": "The list's items, in order.",
+          "examples": [
+            [
+              {
+                "kind": "item",
+                "label": [
+                  {
+                    "kind": "text",
+                    "text": "•"
+                  }
+                ],
+                "content": [
+                  {
+                    "kind": "paragraph",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "bindings of functions."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -2461,7 +3073,54 @@
         "span",
         "items"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "item-list",
+          "items": [
+            {
+              "kind": "item",
+              "label": [
+                {
+                  "kind": "text",
+                  "text": "•"
+                }
+              ],
+              "content": [
+                {
+                  "kind": "paragraph",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "bindings of dynamic variables."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "item",
+              "label": [
+                {
+                  "kind": "text",
+                  "text": "•"
+                }
+              ],
+              "content": [
+                {
+                  "kind": "paragraph",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "bindings of functions."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "item": {
       "type": "object",
@@ -2602,7 +3261,15 @@
             ]
           },
           "title": "label",
-          "description": "The item's label, the macro's argument (a bullet, a number, a\nterm); absent when empty."
+          "description": "The item's label, the macro's argument (a bullet, a number, a\nterm); absent when empty.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "•"
+              }
+            ]
+          ]
         },
         "content": {
           "type": "array",
@@ -2659,14 +3326,49 @@
             ]
           },
           "title": "content",
-          "description": "The item's blocks."
+          "description": "The item's blocks.",
+          "examples": [
+            [
+              {
+                "kind": "paragraph",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "bindings of dynamic variables."
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "item",
+          "label": [
+            {
+              "kind": "text",
+              "text": "•"
+            }
+          ],
+          "content": [
+            {
+              "kind": "paragraph",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "bindings of dynamic variables."
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "editor-note": {
       "type": "object",
@@ -2807,12 +3509,23 @@
             ]
           },
           "title": "content",
-          "description": "The note's text."
+          "description": "The note's text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "KMP: ``derivatives??'' terminology to be worked on."
+              }
+            ]
+          ]
         },
         "hidden": {
           "type": "boolean",
           "title": "hidden",
-          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document."
+          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document.",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -2820,7 +3533,19 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "editor-note",
+          "content": [
+            {
+              "kind": "text",
+              "text": "KMP: ``derivatives??'' terminology to be worked on."
+            }
+          ],
+          "hidden": true
+        }
+      ]
     },
     "reviewer-note": {
       "type": "object",
@@ -2961,12 +3686,23 @@
             ]
           },
           "title": "content",
-          "description": "The note's text."
+          "description": "The note's text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Is the order of other things specified??"
+              }
+            ]
+          ]
         },
         "hidden": {
           "type": "boolean",
           "title": "hidden",
-          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document."
+          "description": "True when the options (\\editornotesfalse) hide the note from\nthe typeset document.",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -2974,7 +3710,19 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "reviewer-note",
+          "content": [
+            {
+              "kind": "text",
+              "text": "Is the order of other things specified??"
+            }
+          ],
+          "hidden": true
+        }
+      ]
     },
     "table": {
       "type": "object",
@@ -3682,17 +4430,26 @@
         "text": {
           "type": "string",
           "title": "text",
-          "description": "The term as written, inflected (\"dotted lists\")."
+          "description": "The term as written, inflected (\"dotted lists\").",
+          "examples": [
+            "dotted lists"
+          ]
         },
         "defining": {
           "type": "boolean",
           "title": "defining",
-          "description": "True for \\newterm and \\newtermidx: the use defines the term."
+          "description": "True for \\newterm and \\newtermidx: the use defines the term.",
+          "examples": [
+            true
+          ]
         },
         "sense": {
           "type": "integer",
           "title": "sense",
-          "description": "The glossary sense meant, from the \\meaning that follows;\nabsent when none does."
+          "description": "The glossary sense meant, from the \\meaning that follows;\nabsent when none does.",
+          "examples": [
+            1
+          ]
         },
         "target": {
           "oneOf": [
@@ -3704,7 +4461,13 @@
             }
           ],
           "title": "target",
-          "description": "The glossary entry of the term; absent while unresolved."
+          "description": "The glossary entry of the term; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "glossary",
+              "id": "dotted list"
+            }
+          ]
         }
       },
       "required": [
@@ -3713,7 +4476,17 @@
         "text",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "term-ref",
+          "text": "dotted lists",
+          "target": {
+            "kind": "glossary",
+            "id": "dotted list"
+          }
+        }
+      ]
     },
     "operator-ref": {
       "type": "object",
@@ -3730,12 +4503,18 @@
         "text": {
           "type": "string",
           "title": "text",
-          "description": "The name as the reference sets it."
+          "description": "The name as the reference sets it.",
+          "examples": [
+            "endp"
+          ]
         },
         "via": {
           "$ref": "#/$defs/enum-reference-kind",
           "title": "via",
-          "description": "The macro the reference was written with."
+          "description": "The macro the reference was written with.",
+          "examples": [
+            "function"
+          ]
         },
         "target": {
           "oneOf": [
@@ -3747,7 +4526,13 @@
             }
           ],
           "title": "target",
-          "description": "The dictionary entry of the name; absent while unresolved."
+          "description": "The dictionary entry of the name; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "entry",
+              "id": "endp"
+            }
+          ]
         }
       },
       "required": [
@@ -3757,7 +4542,18 @@
         "via",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "operator-ref",
+          "text": "endp",
+          "via": "function",
+          "target": {
+            "kind": "entry",
+            "id": "endp"
+          }
+        }
+      ]
     },
     "section-ref": {
       "type": "object",
@@ -3774,7 +4570,10 @@
         "label": {
           "type": "string",
           "title": "label",
-          "description": "The label referred to, as written after \\secref."
+          "description": "The label referred to, as written after \\secref.",
+          "examples": [
+            "OrdinaryLambdaLists"
+          ]
         },
         "target": {
           "oneOf": [
@@ -3789,7 +4588,13 @@
             }
           ],
           "title": "target",
-          "description": "The section or chapter of the label; absent while unresolved."
+          "description": "The section or chapter of the label; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "section",
+              "id": "OrdinaryLambdaLists"
+            }
+          ]
         }
       },
       "required": [
@@ -3798,7 +4603,17 @@
         "label",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "section-ref",
+          "label": "OrdinaryLambdaLists",
+          "target": {
+            "kind": "section",
+            "id": "OrdinaryLambdaLists"
+          }
+        }
+      ]
     },
     "figure-ref": {
       "type": "object",
@@ -3815,7 +4630,10 @@
         "label": {
           "type": "string",
           "title": "label",
-          "description": "The label referred to, as written after \\figref."
+          "description": "The label referred to, as written after \\figref.",
+          "examples": [
+            "FigConses"
+          ]
         },
         "target": {
           "oneOf": [
@@ -3827,7 +4645,13 @@
             }
           ],
           "title": "target",
-          "description": "The figure of the label; absent while unresolved."
+          "description": "The figure of the label; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "figure",
+              "id": "14-1"
+            }
+          ]
         }
       },
       "required": [
@@ -3836,7 +4660,17 @@
         "label",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "figure-ref",
+          "label": "FigConses",
+          "target": {
+            "kind": "figure",
+            "id": "14-1"
+          }
+        }
+      ]
     },
     "this-section": {
       "type": "object",
@@ -3860,7 +4694,13 @@
             }
           ],
           "title": "target",
-          "description": "The section the words are in; absent while unresolved."
+          "description": "The section the words are in; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "section",
+              "id": "Conses"
+            }
+          ]
         }
       },
       "required": [
@@ -3868,7 +4708,16 @@
         "span",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "this-section",
+          "target": {
+            "kind": "section",
+            "id": "Conses"
+          }
+        }
+      ]
     },
     "next-figure": {
       "type": "object",
@@ -3892,7 +4741,13 @@
             }
           ],
           "title": "target",
-          "description": "The next figure; absent while unresolved."
+          "description": "The next figure; absent while unresolved.",
+          "examples": [
+            {
+              "kind": "figure",
+              "id": "14-1"
+            }
+          ]
         }
       },
       "required": [
@@ -3900,7 +4755,16 @@
         "span",
         "target"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "next-figure",
+          "target": {
+            "kind": "figure",
+            "id": "14-1"
+          }
+        }
+      ]
     },
     "param": {
       "type": "object",
@@ -3917,7 +4781,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The parameter's name."
+          "description": "The parameter's name.",
+          "examples": [
+            "list"
+          ]
         }
       },
       "required": [
@@ -3925,7 +4792,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "param",
+          "name": "list"
+        }
+      ]
     },
     "metavariable": {
       "type": "object",
@@ -3942,7 +4815,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The metavariable's name."
+          "description": "The metavariable's name.",
+          "examples": [
+            "var"
+          ]
         }
       },
       "required": [
@@ -3950,7 +4826,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "metavariable",
+          "name": "var"
+        }
+      ]
     },
     "format-directive": {
       "type": "object",
@@ -3967,7 +4849,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The directive after its tilde, e.g. \"A\"."
+          "description": "The directive after its tilde, e.g. \"A\".",
+          "examples": [
+            "A"
+          ]
         }
       },
       "required": [
@@ -3975,7 +4860,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "format-directive",
+          "name": "A"
+        }
+      ]
     },
     "lambda-list-keyword": {
       "type": "object",
@@ -3992,7 +4883,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The keyword with its ampersand, e.g. \"&optional\"."
+          "description": "The keyword with its ampersand, e.g. \"&optional\".",
+          "examples": [
+            "&optional"
+          ]
         }
       },
       "required": [
@@ -4000,7 +4894,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "lambda-list-keyword",
+          "name": "&optional"
+        }
+      ]
     },
     "code": {
       "type": "object",
@@ -4141,7 +5041,15 @@
             ]
           },
           "title": "content",
-          "description": "The code's text."
+          "description": "The code's text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "(endp nil)"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4149,7 +5057,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "code",
+          "content": [
+            {
+              "kind": "text",
+              "text": "(endp nil)"
+            }
+          ]
+        }
+      ]
     },
     "emphasis": {
       "type": "object",
@@ -4290,7 +5209,15 @@
             ]
           },
           "title": "content",
-          "description": "The emphasised text."
+          "description": "The emphasised text.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "true"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4298,7 +5225,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "emphasis",
+          "content": [
+            {
+              "kind": "text",
+              "text": "true"
+            }
+          ]
+        }
+      ]
     },
     "strong": {
       "type": "object",
@@ -4439,7 +5377,15 @@
             ]
           },
           "title": "content",
-          "description": "The text set in bold."
+          "description": "The text set in bold.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Examples:"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4447,7 +5393,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "strong",
+          "content": [
+            {
+              "kind": "text",
+              "text": "Examples:"
+            }
+          ]
+        }
+      ]
     },
     "evaluates-to": {
       "type": "object",
@@ -4466,7 +5423,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "evaluates-to"
+        }
+      ]
     },
     "may-evaluate-to": {
       "type": "object",
@@ -4485,7 +5447,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "may-evaluate-to"
+        }
+      ]
     },
     "does-not-evaluate-to": {
       "type": "object",
@@ -4504,7 +5471,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "does-not-evaluate-to"
+        }
+      ]
     },
     "equivalent": {
       "type": "object",
@@ -4523,7 +5495,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "equivalent"
+        }
+      ]
     },
     "output": {
       "type": "object",
@@ -4542,7 +5519,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "output"
+        }
+      ]
     },
     "input": {
       "type": "object",
@@ -4683,7 +5665,15 @@
             ]
           },
           "title": "content",
-          "description": "The input."
+          "description": "The input.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "(read)"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4691,7 +5681,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "input",
+          "content": [
+            {
+              "kind": "text",
+              "text": "(read)"
+            }
+          ]
+        }
+      ]
     },
     "citation": {
       "type": "object",
@@ -4832,7 +5833,15 @@
             ]
           },
           "title": "content",
-          "description": "The title as set."
+          "description": "The title as set.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "CLtL"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -4840,7 +5849,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "citation",
+          "content": [
+            {
+              "kind": "text",
+              "text": "CLtL"
+            }
+          ]
+        }
+      ]
     },
     "index-entry": {
       "type": "object",
@@ -4857,12 +5877,18 @@
         "index-kind": {
           "$ref": "#/$defs/enum-index-kind",
           "title": "index-kind",
-          "description": "What is indexed."
+          "description": "What is indexed.",
+          "examples": [
+            "ref"
+          ]
         },
         "text": {
           "type": "string",
           "title": "text",
-          "description": "The indexed text, as written."
+          "description": "The indexed text, as written.",
+          "examples": [
+            "endp"
+          ]
         }
       },
       "required": [
@@ -4871,7 +5897,14 @@
         "index-kind",
         "text"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "index-entry",
+          "index-kind": "ref",
+          "text": "endp"
+        }
+      ]
     },
     "issue-start": {
       "type": "object",
@@ -4888,7 +5921,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The issue's name, e.g. \"DOTTED-LIST-ARGUMENTS:CLARIFY\"."
+          "description": "The issue's name, e.g. \"DOTTED-LIST-ARGUMENTS:CLARIFY\".",
+          "examples": [
+            "DOTTED-LIST-ARGUMENTS:CLARIFY"
+          ]
         }
       },
       "required": [
@@ -4896,7 +5932,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "issue-start",
+          "name": "DOTTED-LIST-ARGUMENTS:CLARIFY"
+        }
+      ]
     },
     "issue-end": {
       "type": "object",
@@ -4913,7 +5955,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The issue's name."
+          "description": "The issue's name.",
+          "examples": [
+            "DOTTED-LIST-ARGUMENTS:CLARIFY"
+          ]
         }
       },
       "required": [
@@ -4921,7 +5966,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "issue-end",
+          "name": "DOTTED-LIST-ARGUMENTS:CLARIFY"
+        }
+      ]
     },
     "glossary-group": {
       "type": "object",
@@ -5483,7 +6534,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The non-terminal defined."
+          "description": "The non-terminal defined.",
+          "examples": [
+            "wholevar"
+          ]
         },
         "definition": {
           "type": "array",
@@ -5612,7 +6666,20 @@
             ]
           },
           "title": "definition",
-          "description": "The right side, with its notation and line breaks."
+          "description": "The right side, with its notation and line breaks; the name and\nthe glyphs the notation macros typeset (brackets, parentheses, stars) are\nnot repeated in it.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-bracketed",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "&whole var"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5621,7 +6688,24 @@
         "name",
         "definition"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-rule",
+          "name": "wholevar",
+          "definition": [
+            {
+              "kind": "bnf-bracketed",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "&whole var"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "bnf-break": {
       "type": "object",
@@ -5640,7 +6724,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-break"
+        }
+      ]
     },
     "bnf-optional": {
       "type": "object",
@@ -5781,7 +6870,15 @@
             ]
           },
           "title": "content",
-          "description": "The optional part."
+          "description": "The optional part.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "supplied-p-parameter"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5789,7 +6886,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-optional",
+          "content": [
+            {
+              "kind": "text",
+              "text": "supplied-p-parameter"
+            }
+          ]
+        }
+      ]
     },
     "bnf-zero-or-more": {
       "type": "object",
@@ -5930,7 +7038,20 @@
             ]
           },
           "title": "content",
-          "description": "What repeats."
+          "description": "What repeats.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-group",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "var"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -5938,7 +7059,23 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-zero-or-more",
+          "content": [
+            {
+              "kind": "bnf-group",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "var"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "bnf-one-or-more": {
       "type": "object",
@@ -6079,7 +7216,15 @@
             ]
           },
           "title": "content",
-          "description": "What repeats."
+          "description": "What repeats.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6087,7 +7232,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-one-or-more",
+          "content": [
+            {
+              "kind": "text",
+              "text": "var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-repeat-previous": {
       "type": "object",
@@ -6106,7 +7262,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-repeat-previous"
+        }
+      ]
     },
     "bnf-group": {
       "type": "object",
@@ -6247,7 +7408,15 @@
             ]
           },
           "title": "content",
-          "description": "The group's content."
+          "description": "The group's content.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6255,7 +7424,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-group",
+          "content": [
+            {
+              "kind": "text",
+              "text": "var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-parenthesized": {
       "type": "object",
@@ -6396,7 +7576,15 @@
             ]
           },
           "title": "content",
-          "description": "What the parentheses hold."
+          "description": "What the parentheses hold.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "keyword-name var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6404,7 +7592,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-parenthesized",
+          "content": [
+            {
+              "kind": "text",
+              "text": "keyword-name var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-bracketed": {
       "type": "object",
@@ -6545,7 +7744,15 @@
             ]
           },
           "title": "content",
-          "description": "What the brackets hold."
+          "description": "What the brackets hold.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "&rest var"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6553,7 +7760,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-bracketed",
+          "content": [
+            {
+              "kind": "text",
+              "text": "&rest var"
+            }
+          ]
+        }
+      ]
     },
     "bnf-interleave": {
       "type": "object",
@@ -6694,7 +7912,24 @@
             ]
           },
           "title": "content",
-          "description": "The alternatives."
+          "description": "The alternatives.",
+          "examples": [
+            [
+              {
+                "kind": "bnf-required",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "A"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": " B"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6702,7 +7937,40 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-interleave",
+          "content": [
+            {
+              "kind": "bnf-required",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "A"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "bnf-required",
+              "content": [
+                {
+                  "kind": "text",
+                  "text": "B"
+                }
+              ]
+            },
+            {
+              "kind": "text",
+              "text": " B"
+            }
+          ]
+        }
+      ]
     },
     "bnf-required": {
       "type": "object",
@@ -6843,7 +8111,15 @@
             ]
           },
           "title": "content",
-          "description": "What is required."
+          "description": "What is required.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "A"
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6851,7 +8127,18 @@
         "span",
         "content"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-required",
+          "content": [
+            {
+              "kind": "text",
+              "text": "A"
+            }
+          ]
+        }
+      ]
     },
     "bnf-indirection": {
       "type": "object",
@@ -6868,7 +8155,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The non-terminal."
+          "description": "The non-terminal.",
+          "examples": [
+            "pattern"
+          ]
         }
       },
       "required": [
@@ -6876,7 +8166,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-indirection",
+          "name": "pattern"
+        }
+      ]
     },
     "bnf-caret": {
       "type": "object",
@@ -6895,7 +8191,12 @@
         "kind",
         "span"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "bnf-caret"
+        }
+      ]
     },
     "angle-name": {
       "type": "object",
@@ -6912,7 +8213,10 @@
         "name": {
           "type": "string",
           "title": "name",
-          "description": "The name, e.g. \"Newline\"."
+          "description": "The name, e.g. \"Newline\".",
+          "examples": [
+            "Newline"
+          ]
         }
       },
       "required": [
@@ -6920,7 +8224,13 @@
         "span",
         "name"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "angle-name",
+          "name": "Newline"
+        }
+      ]
     },
     "math": {
       "type": "object",

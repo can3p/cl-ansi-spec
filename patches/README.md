@@ -25,6 +25,14 @@ patch set, `src/patch/set.lisp`):
   patch, the hunk and the line.
 - Patches must apply independently of each other; no patch may depend on
   another's context.
+- Keep the line count where possible (uncomment rather than add a line),
+  so spans, `make events LINES=` and test fixtures keep their lines; a
+  patch that must add or remove lines says so in its header.
+- A source error found later (an unresolved reference caused by a typo, a
+  malformed `\ftype`) is fixed by a new patch here, never by a special
+  case in code; the step that finds it writes it.
+- Before writing a patch, show with `make events` that the error is the
+  sources' own and that the patched text gives the structure expected.
 
 The set is checked when it loads (`make test`, `make patched`): a name not
 of that form, a duplicate number, an empty header, a patch that does not
@@ -37,4 +45,6 @@ Patches so far: `0001-syntax-type-table-definitions` (the abbreviations the
 syntax-type table of concept-syntax.tex uses were commented out),
 `0002-loop-numeric-accumulation-group` (a row break inside a brace group of
 dict-iteration.tex), `0003-defsetf-lambda-list-closing-paren` (a rule that opens a parenthesis and
-never closes it).
+never closes it),
+`0004-ftype-function-case`, `0005-ftype-special-form` and `0006-ftype-macro-case`
+(the three `\ftype` texts that spelled an entry kind otherwise: `function`, `Special Form`, `macro`).

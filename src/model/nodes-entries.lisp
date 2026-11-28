@@ -55,75 +55,129 @@ variable nor type (\\ftype{Symbol}).")
   (:generic-function "A generic function: \\Defgen and its variants.")
   (:method "A method of a generic function: \\Defmeth."))
 
-(define-node dictionary-entry (:area :entries)
+(define-node dictionary-entry
+    (:area :entries
+     :example (:dictionary-entry
+               :id "endp" :names ("endp") :entry-kind :function
+               :parts ((:part :title "Syntax"
+                        :content ((:operator-signature
+                                   :operator :function :names ("endp")
+                                   :lambda-list ("list") :values ("generalized-boolean"))))
+                       (:part :title "Side Effects" :none t :confidence "."))))
   "A dictionary entry, from \\begincom to \\endcom: the description of
 one or more defined names of one kind."
   (id :string :required t
    :doc "The entry's id: its first name, or <name>/<entry-kind> when two
-entries share a first name (docs/exports.md, \"Ids\").")
+entries share a first name (docs/exports.md, \"Ids\")."
+   :example "endp")
   (names :string :required t :repeated t
    :doc "The names the entry describes, the comma-separated list of
-\\begincom's first argument, in order.")
+\\begincom's first argument, in order."
+   :example ("endp"))
   (entry-kind (:enum entry-kind) :required t
-   :doc "What the names are, from the entry's \\ftype.")
+   :doc "What the names are, from the entry's \\ftype."
+   :example :function)
   (parts (:node :part) :repeated t
-   :doc "The entry's parts, one per \\label, in order."))
+   :doc "The entry's parts, one per \\label, in order."
+   :example ((:part :title "Syntax" :content ((:operator-signature
+                                               :operator :function :names ("endp")
+                                               :lambda-list ("list")
+                                               :values ("generalized-boolean"))))
+             (:part :title "Side Effects" :none t :confidence "."))))
 
-(define-node part (:area :entries)
+(define-node part
+    (:area :entries
+     :example (:part :title "Side Effects" :none t :confidence "."))
   "A part of a dictionary entry: a \\label heading (Syntax, Arguments and
 Values, Description, …) and what follows it up to the next \\label or
 the entry's end."
   (title :string :required t
-   :doc "The heading, the text of the \\label before its colon.")
+   :doc "The heading, the text of the \\label before its colon."
+   :example "Side Effects")
   (none :boolean
    :doc "True when the part says only \"None.\" (\\None after the
-\\label).")
+\\label)."
+   :example t)
+  (confidence :string
+   :doc "For a part that says None: the punctuation after it in the
+source (\".\", \"!\" or \"?\"), how sure the authors are that the part
+is empty; absent otherwise."
+   :example ".")
   (content (:node :block) :repeated t
-   :doc "The part's blocks; absent when NONE is true."))
+   :doc "The part's blocks; absent when NONE is true."
+   :example ((:operator-signature :operator :function :names ("endp")
+              :lambda-list ("list") :values ("generalized-boolean")))))
 
-(define-node operator-signature (:area :entries :categories (:block))
+(define-node operator-signature
+    (:area :entries :categories (:block)
+     :example (:operator-signature :operator :function :names ("endp")
+               :lambda-list ("list") :values ("generalized-boolean")))
   "The syntax of an operator as a Syntax part sets it: \\Defun,
 \\Defmac, \\Defspec, \\Defgen and their WithValues, WithValuesNewline
 and NoReturn variants, \\Defmeth, \\DefunMultiWithValues, and the
 reader half of \\DefunMultiAccessorWithValues."
   (operator (:enum operator) :required t
-   :doc "The kind of operator, by the macro.")
+   :doc "The kind of operator, by the macro."
+   :example :function)
   (names :string :required t :repeated t
    :doc "The operator's name, or the names of the \\entry lines of a
--Multi form, which share the lambda list and values.")
+-Multi form, which share the lambda list and values."
+   :example ("endp"))
   (lambda-list :inlines
    :doc "The lambda list as written, with its parameters and lambda list
-keywords; absent when empty.")
+keywords; absent when empty."
+   :example ("list"))
   (values :inlines
    :doc "The values as written after the arrow; absent for a form
-without values (\\Defun, \\Defmeth) and when NO-RETURN is true.")
+without values (\\Defun, \\Defmeth) and when NO-RETURN is true."
+   :example ("generalized-boolean"))
   (no-return :boolean
-   :doc "True for a NoReturn form: the operator never returns normally."))
+   :doc "True for a NoReturn form: the operator never returns normally."
+   :example t))
 
-(define-node setf-signature (:area :entries :categories (:block))
+(define-node setf-signature
+    (:area :entries :categories (:block)
+     :example (:setf-signature :names ("nth") :lambda-list ("n list")
+               :new-value ("new-object")))
   "The syntax of a setf form: \\Defsetf, \\DefsetfMulti, and the setf
 half of \\DefunMultiAccessorWithValues."
   (names :string :required t :repeated t
    :doc "The accessor's name, or the names of the \\entry lines of a
--Multi form.")
+-Multi form."
+   :example ("nth"))
   (lambda-list :inlines
-   :doc "The accessor's lambda list as written; absent when empty.")
+   :doc "The accessor's lambda list as written; absent when empty."
+   :example ("n list"))
   (new-value :inlines :required t
-   :doc "The new value as written."))
+   :doc "The new value as written."
+   :example ("new-object")))
 
-(define-node variable-signature (:area :entries :categories (:block))
+(define-node variable-signature
+    (:area :entries :categories (:block)
+     :example (:variable-signature :name "*print-pretty*"))
   "The syntax of a variable or a constant: \\Defvar, \\Defvarnoast,
-\\Defcon."
+\\Defcon.  No entry of the sources uses them (a variable's entry has
+no signature), so no node of the spec is an example of the builder's
+output."
   (name :string :required t
    :doc "The variable's name, with its asterisks when the source sets
-them.")
+them."
+   :example "*print-pretty*")
   (constant :boolean
-   :doc "True for a constant variable (\\Defcon)."))
+   :doc "True for a constant variable (\\Defcon)."
+   :example t))
 
-(define-node type-signature (:area :entries :categories (:block))
+(define-node type-signature
+    (:area :entries :categories (:block)
+     :example (:type-signature :name "cons"
+               :syntax ((:bnf-bracketed
+                         :content ("car-typespec " (:bnf-optional :content ("cdr-typespec")))))))
   "The syntax of a compound type specifier: \\Deftype."
   (name :string :required t
-   :doc "The type specifier's symbol.")
+   :doc "The type specifier's symbol."
+   :example "cons")
   (syntax :inlines
    :doc "The lines of the compound form after the name, with their BNF
-notation; absent when there are none."))
+notation; absent when there are none."
+   :example ((:bnf-bracketed
+              :content ("car-typespec " (:bnf-optional :content ("cdr-typespec")))))))
