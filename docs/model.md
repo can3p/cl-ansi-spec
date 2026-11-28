@@ -812,7 +812,7 @@ caption, chapter id), both in document order.
 (`\DefineChapter{ChapTwo}{Syntax}`: the id and a short name) and a
 section may be given a second `\DefineSection` (2.1 is `CharacterSyntax`
 in chap-2.tex and `TheStandardSyntax` in concept-syntax.tex; the last
-wins).  The references through the label the node does not keep (37 of the
+wins).  The references through the label the node does not keep (41 of the
 whole spec's 44 unresolved ones, pinned by label in
 `tests/model/resolve-sections.lisp`) stay unresolved until the chapter and
 section nodes keep their other labels, a change of step 3.8's files.  The

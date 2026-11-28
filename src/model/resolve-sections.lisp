@@ -27,9 +27,9 @@ document order."
     (walk-nodes (lambda (node)
                   (when (eq (node-kind node) kind)
                     (let ((id (node-field-value node :id registry)))
-                      (when id (setf (gethash id table)
-                                     (append (gethash id table) (list node)))))))
+                      (when id (push node (gethash id table))))))
                 items registry)
+    (maphash (lambda (id nodes) (setf (gethash id table) (nreverse nodes))) table)
     table))
 
 (defun secref-span-text (node)
@@ -100,12 +100,14 @@ the entries of its sections."
   id number caption chapter)
 
 (defun secref-toc-section (section registry)
+  "The SECREF-TOC-ENTRY of SECTION and, below it, of its subsections."
   (make-toc-entry :section (node-field-value section :id registry)
                   (node-field-value section :number registry)
                   (node-field-value section :title registry)
                   (secref-toc-children (node-field-value section :children registry) registry)))
 
 (defun secref-toc-children (children registry)
+  "The entries of the sections among CHILDREN, in order."
   (loop for child in children
         when (and (typep child 'node) (eq (node-kind child) :section))
           collect (secref-toc-section child registry)))

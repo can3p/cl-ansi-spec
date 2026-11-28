@@ -107,7 +107,7 @@ label and to a label two nodes share."
       ("ConstituentTraitsOfStdChars" 3 ,figure)))
   "The labels of the whole spec's references that resolve to nothing:
 (label count reason).  The chapter and section rows are a gap of the
-model (docs/model.md, \"References: sections and figures\"), not of the
+model (docs/model.md, \"References, Sections, chapters and figures\"), not of the
 sources.")
 
 (defvar *secref-whole* nil
