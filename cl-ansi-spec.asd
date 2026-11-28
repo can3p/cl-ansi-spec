@@ -127,7 +127,8 @@ Lisp draft standard (dpANS3)."
                              (:file "write-sexp")
                              (:file "write-json")
                              (:file "files")
-                             (:file "manifest"))))
+                             (:file "manifest")
+                             (:file "sample"))))
   :in-order-to ((test-op (test-op "cl-ansi-spec/tests"))))
 
 (defsystem "cl-ansi-spec/tests"
