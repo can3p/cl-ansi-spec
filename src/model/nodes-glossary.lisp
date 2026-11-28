@@ -86,7 +86,7 @@ the glossary's end."
   (pronunciation :inlines
    :doc "How the term is pronounced, \\pronounced's argument, with its
 stress marks; absent when not given."
-   :example ("nil"))
+   :example ((:strong :content ("nil"))))
   (parts-of-speech (:enum part-of-speech) :repeated t
    :doc "The parts of speech given after the term, before the senses, in
 order."

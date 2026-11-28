@@ -17,6 +17,14 @@ job.
 | `front-matter` | list of node of kind or category `:chapter` | no | The unnumbered chapters of chap-0.tex (\beginSimpleChapter), in order; absent when the model is built from part of the jobs. |
 | `chapters` | list of node of kind or category `:chapter` | yes | The numbered chapters (\beginchapter), 1 to 26, then the appendix A, in that order. |
 
+Example:
+
+```lisp
+(:document :version "15.17" :front-matter
+ ((:chapter :id "Credits" :title ("Credits"))) :chapters
+ ((:chapter :id "ChapOne" :number "1" :title ("Introduction"))))
+```
+
 ### Node kind `:chapter`
 
 A chapter: a numbered one begun by \beginchapter, or an unnumbered
@@ -29,6 +37,14 @@ one of the front matter begun by \beginSimpleChapter or
 | `number` | string | no | The chapter's number as \beginchapter's first argument gives it ("1" … "26", "A"); absent for a simple chapter. |
 | `title` | inline list | yes | The chapter's title, \beginchapter's second argument or the simple chapter's one. |
 | `children` | list of node of kind or category `:section`, `:dictionary-entry`, `:block` | no | What the chapter holds, in order: the blocks before its first section, then its sections. |
+
+Example:
+
+```lisp
+(:chapter :id "ChapFifteen" :number "15" :title ("Arrays") :children
+ ((:section :id "ArrayConcepts" :number "15.1" :level 1 :title
+   ("Array Concepts"))))
+```
 
 ### Node kind `:section`
 
@@ -45,6 +61,15 @@ to the next section of its level or above, or the chapter's end.
 | `dictionary` | boolean | no | True for a dictionary section, begun by \includeDictionary: its children are dictionary entries. |
 | `title` | inline list | yes | The section's title, the argument of the macro that began it. |
 | `children` | list of node of kind or category `:section`, `:dictionary-entry`, `:glossary-group`, `:block` | no | What the section holds, in order: blocks, dictionary entries, glossary groups and its subsections. |
+
+Example:
+
+```lisp
+(:section :id "ArrayElements" :number "15.1.1" :level 2 :title
+ ("Array Elements") :children
+ ((:section :id "ArrayElements/1" :number "15.1.1.1" :level 3 :title
+   ("Array Indices"))))
+```
 
 ### Target kind `:chapter`
 
@@ -74,6 +99,17 @@ one or more defined names of one kind.
 | `entry-kind` | enumeration `entry-kind` | yes | What the names are, from the entry's \ftype. |
 | `parts` | list of node of kind or category `:part` | no | The entry's parts, one per \label, in order. |
 
+Example:
+
+```lisp
+(:dictionary-entry :id "endp" :names ("endp") :entry-kind :function
+ :parts
+ ((:part :title "Syntax" :content
+   ((:operator-signature :operator :function :names ("endp")
+     :lambda-list ("list") :values ("generalized-boolean"))))
+  (:part :title "Side Effects" :none common-lisp:t :confidence ".")))
+```
+
 ### Node kind `:part`
 
 A part of a dictionary entry: a \label heading (Syntax, Arguments and
@@ -84,7 +120,14 @@ the entry's end.
 |---|---|---|---|
 | `title` | string | yes | The heading, the text of the \label before its colon. |
 | `none` | boolean | no | True when the part says only "None." (\None after the \label). |
+| `confidence` | string | no | For a part that says None: the punctuation after it in the source (".", "!" or "?"), how sure the authors are that the part is empty; absent otherwise. |
 | `content` | list of node of kind or category `:block` | no | The part's blocks; absent when NONE is true. |
+
+Example:
+
+```lisp
+(:part :title "Side Effects" :none common-lisp:t :confidence ".")
+```
 
 ### Node kind `:operator-signature`
 
@@ -103,6 +146,13 @@ Categories: `:block`.
 | `values` | inline list | no | The values as written after the arrow; absent for a form without values (\Defun, \Defmeth) and when NO-RETURN is true. |
 | `no-return` | boolean | no | True for a NoReturn form: the operator never returns normally. |
 
+Example:
+
+```lisp
+(:operator-signature :operator :function :names ("endp") :lambda-list
+ ("list") :values ("generalized-boolean"))
+```
+
 ### Node kind `:setf-signature`
 
 The syntax of a setf form: \Defsetf, \DefsetfMulti, and the setf
@@ -116,10 +166,19 @@ Categories: `:block`.
 | `lambda-list` | inline list | no | The accessor's lambda list as written; absent when empty. |
 | `new-value` | inline list | yes | The new value as written. |
 
+Example:
+
+```lisp
+(:setf-signature :names ("nth") :lambda-list ("n list") :new-value
+ ("new-object"))
+```
+
 ### Node kind `:variable-signature`
 
 The syntax of a variable or a constant: \Defvar, \Defvarnoast,
-\Defcon.
+\Defcon.  No entry of the sources uses them (a variable's entry has
+no signature), so no node of the spec is an example of the builder's
+output.
 
 Categories: `:block`.
 
@@ -127,6 +186,12 @@ Categories: `:block`.
 |---|---|---|---|
 | `name` | string | yes | The variable's name, with its asterisks when the source sets them. |
 | `constant` | boolean | no | True for a constant variable (\Defcon). |
+
+Example:
+
+```lisp
+(:variable-signature :name "*print-pretty*")
+```
 
 ### Node kind `:type-signature`
 
@@ -138,6 +203,14 @@ Categories: `:block`.
 |---|---|---|---|
 | `name` | string | yes | The type specifier's symbol. |
 | `syntax` | inline list | no | The lines of the compound form after the name, with their BNF notation; absent when there are none. |
+
+Example:
+
+```lisp
+(:type-signature :name "cons" :syntax
+ ((:bnf-bracketed :content
+   ("car-typespec " (:bnf-optional :content ("cdr-typespec"))))))
+```
 
 ### Enumeration `entry-kind`
 
@@ -204,6 +277,14 @@ Categories: `:block`.
 |---|---|---|---|
 | `content` | inline list | yes | The paragraph's text and inlines, in order. |
 
+Example:
+
+```lisp
+(:paragraph :content
+ ("A " (:emphasis :content ("call")) " is a "
+  (:strong :content ("safe call")) " if each of the following ..."))
+```
+
 ### Node kind `:code-block`
 
 Code, from \code to \endcode, each line as it is written.
@@ -214,6 +295,14 @@ Categories: `:block`.
 |---|---|---|---|
 | `lines` | list of node of kind or category `:code-line` | yes | The lines, in order, blank ones included. |
 
+Example:
+
+```lisp
+(:code-block :lines
+ ((:code-line :content (" (let ((x 1))"))
+  (:code-line :content ("   (declare (special x))"))))
+```
+
 ### Node kind `:code-line`
 
 A line of a code block.
@@ -221,6 +310,12 @@ A line of a code block.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | no | The line's text, its spaces kept, and its inlines (terms, example notation); absent for a blank line. |
+
+Example:
+
+```lisp
+(:code-line :content ("   (declare (special x))"))
+```
 
 ### Node kind `:item-list`
 
@@ -233,6 +328,16 @@ Categories: `:block`.
 |---|---|---|---|
 | `items` | list of node of kind or category `:item` | yes | The list's items, in order. |
 
+Example:
+
+```lisp
+(:item-list :items
+ ((:item :label ("•") :content
+   ((:paragraph :content ("bindings of dynamic variables."))))
+  (:item :label ("•") :content
+   ((:paragraph :content ("bindings of functions."))))))
+```
+
 ### Node kind `:item`
 
 An item of a list: \item, \itemitem or \itemitemitem and what
@@ -243,6 +348,13 @@ end.  Items of a lower level after it form an item list in its content.
 |---|---|---|---|
 | `label` | inline list | no | The item's label, the macro's argument (a bullet, a number, a term); absent when empty. |
 | `content` | list of node of kind or category `:block` | no | The item's blocks. |
+
+Example:
+
+```lisp
+(:item :label ("•") :content
+ ((:paragraph :content ("bindings of dynamic variables."))))
+```
 
 ### Node kind `:editor-note`
 
@@ -256,6 +368,14 @@ Categories: `:block`, `:inline`.
 | `content` | inline list | yes | The note's text. |
 | `hidden` | boolean | no | True when the options (\editornotesfalse) hide the note from the typeset document. |
 
+Example:
+
+```lisp
+(:editor-note :content
+ ("KMP: ``derivatives??'' terminology to be worked on.") :hidden
+ common-lisp:t)
+```
+
 ### Node kind `:reviewer-note`
 
 A reviewer's note, \reviewer: a remark of a reviewer, not part of
@@ -267,6 +387,13 @@ Categories: `:block`, `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The note's text. |
 | `hidden` | boolean | no | True when the options (\editornotesfalse) hide the note from the typeset document. |
+
+Example:
+
+```lisp
+(:reviewer-note :content ("Is the order of other things specified??")
+ :hidden common-lisp:t)
+```
 
 ### Category `:block`
 
@@ -287,7 +414,19 @@ Categories: `:block`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `rows` | list of node of kind or category `:row` | yes | The table's rows, in order. |
+| `rows` | list of node of kind or category `:row` | yes | The table's rows, in order: the rows TeX set, but not the spacing rows between its rules, whose cells are all empty. |
+
+Example:
+
+```lisp
+(:table :rows
+ ((:row :header common-lisp:t :cells
+   ((:cell :content ((:strong :content ("Abbreviation"))))
+    (:cell :content ((:strong :content ("Meaning"))))))
+  (:row :cells
+   ((:cell :content ((:emphasis :content ("adj."))))
+    (:cell :content ("adjective"))))))
+```
 
 ### Node kind `:row`
 
@@ -295,8 +434,16 @@ A row of a table.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `header` | boolean | no | True for a row of column headings (the heading arguments of \tablefigtwo and its relatives). |
-| `cells` | list of node of kind or category `:cell` | yes | The row's cells, in order. |
+| `header` | boolean | no | True for the first row of a table when every cell that has content holds nothing but bold text: the row of column headings (\tablefigtwo, \tabletwo). |
+| `cells` | list of node of kind or category `:cell` | yes | The row's cells, in order; the columns that only draw a rule (\vrule in their template) have none. |
+
+Example:
+
+```lisp
+(:row :header common-lisp:t :cells
+ ((:cell :content ((:strong :content ("Context"))))
+  (:cell :content ((:strong :content ("Kind of Lambda List"))))))
+```
 
 ### Node kind `:cell`
 
@@ -304,8 +451,15 @@ A cell of a row.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `content` | inline list | no | The cell's text and inlines; absent for an empty cell. |
+| `content` | inline list | no | The cell's text and inlines, without the spaces around them; absent for an empty cell. |
 | `columns` | integer | no | The number of columns the cell spans when \span joined more than one; absent for one. |
+
+Example:
+
+```lisp
+(:cell :content
+ ((:strong :content ("defun")) " " (:emphasis :content ("form"))))
+```
 
 ### Node kind `:figure`
 
@@ -316,10 +470,21 @@ Categories: `:block`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `id` | string | yes | The label of the \DefineFigure that names the figure, or <chapter-id>/fig-<n> for a figure that none names. |
+| `id` | string | yes | The label of the \DefineFigure that names the figure, or <chapter-id>/fig-<n> for a figure that none names (n the second part of its number). |
 | `number` | string | yes | The figure's number, its chapter's and its own joined by a hyphen ("14-1"), from the caption, checked against the :write of its \DefineFigure when there is one. |
 | `caption` | inline list | no | The caption's text after the number; absent when the figure has none. |
 | `content` | list of node of kind or category `:block` | yes | What the figure shows: a table, or other blocks. |
+
+Example:
+
+```lisp
+(:figure :id "ObjectSystemClasses" :number "4-7" :caption
+ ("Object System Classes") :content
+ ((:table :rows
+   ((:row :cells
+     ((:cell :content ("class"))
+      (:cell :content ("standard-class"))))))))
+```
 
 ### Target kind `:figure`
 
@@ -343,6 +508,12 @@ Categories: `:inline`.
 | `sense` | integer | no | The glossary sense meant, from the \meaning that follows; absent when none does. |
 | `target` | reference (target `:glossary`) | no | The glossary entry of the term; absent while unresolved. |
 
+Example:
+
+```lisp
+(:term-ref :text "dotted lists" :target (:glossary "dotted list"))
+```
+
 ### Node kind `:operator-ref`
 
 A reference to a defined name: \clref and its wrappers.
@@ -355,6 +526,12 @@ Categories: `:inline`.
 | `via` | enumeration `reference-kind` | yes | The macro the reference was written with. |
 | `target` | reference (target `:entry`) | no | The dictionary entry of the name; absent while unresolved. |
 
+Example:
+
+```lisp
+(:operator-ref :text "endp" :via :function :target (:entry "endp"))
+```
+
 ### Node kind `:section-ref`
 
 A reference to a section or a chapter: \secref.
@@ -365,6 +542,13 @@ Categories: `:inline`.
 |---|---|---|---|
 | `label` | string | yes | The label referred to, as written after \secref. |
 | `target` | reference (target `:section`, `:chapter`) | no | The section or chapter of the label; absent while unresolved. |
+
+Example:
+
+```lisp
+(:section-ref :label "OrdinaryLambdaLists" :target
+ (:section "OrdinaryLambdaLists"))
+```
 
 ### Node kind `:figure-ref`
 
@@ -377,6 +561,12 @@ Categories: `:inline`.
 | `label` | string | yes | The label referred to, as written after \figref. |
 | `target` | reference (target `:figure`) | no | The figure of the label; absent while unresolved. |
 
+Example:
+
+```lisp
+(:figure-ref :label "FigConses" :target (:figure "14-1"))
+```
+
 ### Node kind `:this-section`
 
 The words `this section': \thissection, \Thissection, a reference to
@@ -387,6 +577,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `target` | reference (target `:section`) | no | The section the words are in; absent while unresolved. |
+
+Example:
+
+```lisp
+(:this-section :target (:section "Conses"))
+```
 
 ### Node kind `:next-figure`
 
@@ -399,6 +595,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `target` | reference (target `:figure`) | no | The next figure; absent while unresolved. |
 
+Example:
+
+```lisp
+(:next-figure :target (:figure "14-1"))
+```
+
 ### Node kind `:param`
 
 A parameter of the operator described: \param.
@@ -408,6 +610,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The parameter's name. |
+
+Example:
+
+```lisp
+(:param :name "list")
+```
 
 ### Node kind `:metavariable`
 
@@ -419,6 +627,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The metavariable's name. |
 
+Example:
+
+```lisp
+(:metavariable :name "var")
+```
+
 ### Node kind `:format-directive`
 
 A format directive: \formatOp, \formatdirective.
@@ -428,6 +642,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The directive after its tilde, e.g. "A". |
+
+Example:
+
+```lisp
+(:format-directive :name "A")
+```
 
 ### Node kind `:lambda-list-keyword`
 
@@ -440,6 +660,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The keyword with its ampersand, e.g. "&optional". |
 
+Example:
+
+```lisp
+(:lambda-list-keyword :name "&optional")
+```
+
 ### Node kind `:code`
 
 Code within text: \f, \ff, and text in the typewriter font outside
@@ -451,6 +677,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The code's text. |
 
+Example:
+
+```lisp
+(:code :content ("(endp nil)"))
+```
+
 ### Node kind `:emphasis`
 
 Emphasis: \i, \j, and italic text outside vocabulary entries.
@@ -460,6 +692,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | The emphasised text. |
+
+Example:
+
+```lisp
+(:emphasis :content ("true"))
+```
 
 ### Node kind `:strong`
 
@@ -471,6 +709,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The text set in bold. |
 
+Example:
+
+```lisp
+(:strong :content ("Examples:"))
+```
+
 ### Node kind `:evaluates-to`
 
 The arrow `evaluates to' of an example: \EV.
@@ -478,6 +722,12 @@ The arrow `evaluates to' of an example: \EV.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:evaluates-to)
+```
 
 ### Node kind `:may-evaluate-to`
 
@@ -488,6 +738,12 @@ Categories: `:inline`.
 
 _No fields._
 
+Example:
+
+```lisp
+(:may-evaluate-to)
+```
+
 ### Node kind `:does-not-evaluate-to`
 
 The arrow `does not evaluate to' of an example: \NV.
@@ -495,6 +751,12 @@ The arrow `does not evaluate to' of an example: \NV.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:does-not-evaluate-to)
+```
 
 ### Node kind `:equivalent`
 
@@ -504,6 +766,12 @@ Categories: `:inline`.
 
 _No fields._
 
+Example:
+
+```lisp
+(:equivalent)
+```
+
 ### Node kind `:output`
 
 The triangle that marks the output of an example, which follows it:
@@ -512,6 +780,12 @@ The triangle that marks the output of an example, which follows it:
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:output)
+```
 
 ### Node kind `:input`
 
@@ -523,6 +797,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The input. |
 
+Example:
+
+```lisp
+(:input :content ("(read)"))
+```
+
 ### Node kind `:citation`
 
 The title of a work the standard cites: \CLtL, \CLtLTwo and the
@@ -533,6 +813,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | The title as set. |
+
+Example:
+
+```lisp
+(:citation :content ("CLtL"))
+```
 
 ### Node kind `:index-entry`
 
@@ -546,6 +832,12 @@ Categories: `:inline`, `:block`.
 | `index-kind` | enumeration `index-kind` | yes | What is indexed. |
 | `text` | string | yes | The indexed text, as written. |
 
+Example:
+
+```lisp
+(:index-entry :index-kind :ref :text "endp")
+```
+
 ### Node kind `:issue-start`
 
 Where the text an X3J13 issue brought begins: \issue.  Issues are
@@ -557,6 +849,12 @@ Categories: `:inline`, `:block`.
 |---|---|---|---|
 | `name` | string | yes | The issue's name, e.g. "DOTTED-LIST-ARGUMENTS:CLARIFY". |
 
+Example:
+
+```lisp
+(:issue-start :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
+```
+
 ### Node kind `:issue-end`
 
 Where the text an X3J13 issue brought ends: \endissue, the one end
@@ -567,6 +865,12 @@ Categories: `:inline`, `:block`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The issue's name. |
+
+Example:
+
+```lisp
+(:issue-end :name "DOTTED-LIST-ARGUMENTS:CLARIFY")
+```
 
 ### Enumeration `reference-kind`
 
@@ -743,7 +1047,14 @@ Categories: `:block`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The non-terminal defined. |
-| `definition` | inline list | yes | The right side, with its notation and line breaks. |
+| `definition` | inline list | yes | The right side, with its notation and line breaks; the name and the glyphs the notation macros typeset (brackets, parentheses, stars) are not repeated in it. |
+
+Example:
+
+```lisp
+(:bnf-rule :name "wholevar" :definition
+ ((:bnf-bracketed :content ("&whole var"))))
+```
 
 ### Node kind `:bnf-break`
 
@@ -752,6 +1063,12 @@ A line break within the right side of a BNF rule: \CR.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-break)
+```
 
 ### Node kind `:bnf-optional`
 
@@ -764,6 +1081,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The optional part. |
 
+Example:
+
+```lisp
+(:bnf-optional :content ("supplied-p-parameter"))
+```
+
 ### Node kind `:bnf-zero-or-more`
 
 What may appear any number of times, starred: \star.
@@ -773,6 +1096,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What repeats. |
+
+Example:
+
+```lisp
+(:bnf-zero-or-more :content ((:bnf-group :content ("var"))))
+```
 
 ### Node kind `:bnf-one-or-more`
 
@@ -784,6 +1113,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | What repeats. |
 
+Example:
+
+```lisp
+(:bnf-one-or-more :content ("var"))
+```
+
 ### Node kind `:bnf-repeat-previous`
 
 A plus alone: what precedes appears one or more times (\prevplus,
@@ -792,6 +1127,12 @@ after a group split over lines).
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-repeat-previous)
+```
 
 ### Node kind `:bnf-group`
 
@@ -804,6 +1145,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The group's content. |
 
+Example:
+
+```lisp
+(:bnf-group :content ("var"))
+```
+
 ### Node kind `:bnf-parenthesized`
 
 Its content in literal parentheses: \paren, or \lparen … \rparen.
@@ -813,6 +1160,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What the parentheses hold. |
+
+Example:
+
+```lisp
+(:bnf-parenthesized :content ("keyword-name var"))
+```
 
 ### Node kind `:bnf-bracketed`
 
@@ -825,6 +1178,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | What the brackets hold. |
 
+Example:
+
+```lisp
+(:bnf-bracketed :content ("&rest var"))
+```
+
 ### Node kind `:bnf-interleave`
 
 Alternatives in any order, each at most once: \interleave, or
@@ -836,6 +1195,14 @@ Categories: `:inline`.
 |---|---|---|---|
 | `content` | inline list | yes | The alternatives. |
 
+Example:
+
+```lisp
+(:bnf-interleave :content
+ ((:bnf-required :content ("A")) " " (:bnf-required :content ("B"))
+  " B"))
+```
+
 ### Node kind `:bnf-required`
 
 Within an interleaving, what must appear exactly once: \one.
@@ -845,6 +1212,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `content` | inline list | yes | What is required. |
+
+Example:
+
+```lisp
+(:bnf-required :content ("A"))
+```
 
 ### Node kind `:bnf-indirection`
 
@@ -856,6 +1229,12 @@ Categories: `:inline`.
 |---|---|---|---|
 | `name` | string | yes | The non-terminal. |
 
+Example:
+
+```lisp
+(:bnf-indirection :name "pattern")
+```
+
 ### Node kind `:bnf-caret`
 
 The caret character `^' of a syntax description: \hat.
@@ -863,6 +1242,12 @@ The caret character `^' of a syntax description: \hat.
 Categories: `:inline`.
 
 _No fields._
+
+Example:
+
+```lisp
+(:bnf-caret)
+```
 
 ### Node kind `:angle-name`
 
@@ -874,6 +1259,12 @@ Categories: `:inline`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | The name, e.g. "Newline". |
+
+Example:
+
+```lisp
+(:angle-name :name "Newline")
+```
 
 ## Math
 

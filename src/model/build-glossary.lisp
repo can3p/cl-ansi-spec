@@ -104,7 +104,7 @@ the \\meaning set (a subscript) is dropped."
 
 ;;; Splitting an entry's items into senses
 
-(defun blank-string-p (item)
+(defun glossary-blank-string-p (item)
   "True when ITEM is a string of nothing but spaces."
   (and (stringp item) (every (lambda (char) (member char '(#\Space #\Tab #\Newline))) item)))
 
@@ -150,10 +150,10 @@ not count."
       (close-segment))
     (nreverse segments)))
 
-(defun trim-inlines (items)
+(defun glossary-trim-inlines (items)
   "ITEMS without the spaces around them and the empty strings: the
 leading space of the first string and the trailing space of the last."
-  (let ((items (remove-if #'blank-string-p items)))
+  (let ((items (remove-if #'glossary-blank-string-p items)))
     (when (stringp (first items))
       (setf (first items) (string-left-trim " " (first items))))
     (let ((last (last items)))
@@ -164,7 +164,7 @@ leading space of the first string and the trailing space of the last."
 (defun heading-item-p (item term)
   "True when ITEM only repeats the entry's heading: the term in bold, the
 index entry of the term, a space."
-  (or (blank-string-p item)
+  (or (glossary-blank-string-p item)
       (and (stringp item) (string= (string-trim " " item) term))
       (and (typep item 'node)
            (case (node-kind item)
@@ -191,7 +191,7 @@ examples, the rest its definition."
                        :span span :number number
                        :parts-of-speech (tags-of tags :part-of-speech)
                        :usages (tags-of tags :usage)
-                       :content (trim-inlines content)
+                       :content (glossary-trim-inlines content)
                        :examples examples)))
 
 (defun tags-of (tags kind)
@@ -199,7 +199,7 @@ examples, the rest its definition."
   (loop for tag in tags
         when (eq (glossary-tag-kind tag) kind) collect (glossary-tag-value tag)))
 
-(defun separator-p (item)
+(defun glossary-separator-p (item)
   "True when ITEM is a string of the commas and spaces that set the
 notation of an entry apart (`\\Noun, \\TransitiveVerb')."
   (and (stringp item) (every (lambda (char) (member char '(#\, #\Space))) item)))
@@ -210,7 +210,7 @@ comma of `\\Noun, \\TransitiveVerb' is notation, the comma between two
 references is text."
   (loop for (previous item next) on (cons nil items)
         while item
-        unless (and (separator-p item)
+        unless (and (glossary-separator-p item)
                     (or (glossary-tag-p previous) (glossary-tag-p next)))
           collect item))
 
@@ -235,7 +235,7 @@ of speech and usages (those before the first sense number) and its senses."
       (set-field :usages (tags-of head-tags :usage))
       (set-field :senses
                  (if numbered
-                     (append (when (notevery #'blank-string-p head-body)
+                     (append (when (notevery #'glossary-blank-string-p head-body)
                                (list (sense-of builder nil head-body span)))
                              (loop for (number . body) in numbered
                                    collect (sense-of builder number (drop-separators body) span)))
@@ -255,6 +255,37 @@ letter set in bold before the first is dropped, it repeats the letter."
 
 ;;; Entries and groups run until the next one
 
+;;; The layout of the glossary is the macros' own: `\beginlist' around it,
+;;; one list and one item for each letter (`\indextab' ends the list and
+;;; begins another), one paragraph for each entry.  None of it is the
+;;; glossary's structure, which the marks give, so it is dropped here.
+
+(defvar *glossary-lists* (make-hash-table :test 'eq :weakness :key)
+  "The number of lists the glossary's macros have open, by builder: its
+own `\\beginlist' and the one each letter begins.  A list's end is
+dropped while one is open.")
+
+(defun glossary-lists (builder)
+  "The number of lists the glossary has open in BUILDER's build."
+  (gethash builder *glossary-lists* 0))
+
+(defun (setf glossary-lists) (count builder)
+  (setf (gethash builder *glossary-lists*) count))
+
+(defun glossary-layout-p (builder event)
+  "True when EVENT is the layout of the glossary (paragraphs, items,
+lists) and so is dropped; a list's begin and end are counted."
+  (let ((type (event-type event))
+        (key (event-key event)))
+    (case key
+      (:paragraph (member type '(:begin :end)))
+      ((:item :item-2) (eq type :mark))
+      (:list (case type
+               (:begin (incf (glossary-lists builder)) t)
+               (:end (when (plusp (glossary-lists builder))
+                       (decf (glossary-lists builder))
+                       t)))))))
+
 (defun ends-outside-p (builder container event)
   "True when EVENT is the end of a container below CONTAINER (the stack
 is innermost first), which therefore ends the glossary's text as well."
@@ -263,9 +294,10 @@ is innermost first), which therefore ends the glossary's text as well."
          (and outer (member outer (rest (member container (builder-stack builder))))))))
 
 (defun run-until (builder container stop-p)
-  "Hand the events that follow to their handlers until one satisfies
-STOP-P (a function of the event) or ends a container below CONTAINER, or
-the events end.  Return the span of the last event handled."
+  "Hand the events that follow to their handlers, but for the glossary's
+layout, until one satisfies STOP-P (a function of the event) or ends a
+container below CONTAINER, or the events end.  Return the span of the
+last event handled."
   (let ((last nil))
     (loop
       (let ((event (peek-event builder)))
@@ -274,7 +306,8 @@ the events end.  Return the span of the last event handled."
                   (ends-outside-p builder container event))
           (return last))
         (multiple-value-bind (event span) (next-event builder)
-          (dispatch builder event span)
+          (unless (glossary-layout-p builder event)
+            (dispatch builder event span))
           (setf last span))))))
 
 (defun glossary-mark-p (event &rest keys)
@@ -287,9 +320,19 @@ the events end.  Return the span of the last event handled."
     (let ((end (run-until builder container stop-p)))
       (close-container builder key (or end span)))))
 
+(defun drop-glossary-list (builder)
+  "The glossary's own `\\beginlist', open when its first letter begins, is
+dropped, and counted as open so that its end is."
+  (let ((container (current-container builder)))
+    (when (and (eq (container-key container) :list)
+               (null (container-items container)))
+      (pop (builder-stack builder))
+      (incf (glossary-lists builder)))))
+
 (defun letter-handler (builder event span)
   "A \\firstindextab or \\indextab: a group of entries, to the next letter."
   (let ((letter (first (event-argument-texts builder event))))
+    (drop-glossary-list builder)
     (open-and-run builder :glossary-letter span
                   (make-builder-node builder :glossary-group :letter letter)
                   #'finish-group

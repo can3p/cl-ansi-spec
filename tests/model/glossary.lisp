@@ -282,7 +282,8 @@ S-expressions, and the report."
          (senses (sexp-field entry :senses)))
     (is equal '(:adjective) (sexp-field entry :parts-of-speech))
     (is equal '(1 2) (mapcar (lambda (sense) (sexp-field sense :number)) senses))
-    (true (search "specific point in time" (first (sexp-field (first senses) :content)))))
+    (true (find-if (lambda (item) (and (stringp item) (search "specific point in time" item)))
+                   (sexp-field (first senses) :content))))
   ;; :170: access, two parts of speech, a part of speech in each sense.
   (let ((entry (find "access" (group-entries (glossary-fixture 161 177))
                      :key (lambda (entry) (sexp-field entry :id)) :test #'equal)))
@@ -293,7 +294,9 @@ S-expressions, and the report."
   ;; :157: the first group, a pronunciation.
   (let ((entry (first (group-entries (glossary-fixture 155 160)))))
     (is equal "()" (sexp-field entry :id))
-    (is equal '("nil") (sexp-field entry :pronunciation))))
+    (is equal '(:strong :content ("nil"))
+        (subseq (first (sexp-field entry :pronunciation)) 0 3)
+        "the pronunciation is set in bold")))
 
 (define-test glossary-whole
   :parent glossary

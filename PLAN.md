@@ -11,10 +11,10 @@ Goal: a semantic model of the standard, parsed from `spec/tex/`
 
 - Current, in parallel waves (`docs/process.md`, "Parallel waves"):
   **M3 — Semantic document model** (`docs/plan/m3.md`, its wave table
-  says which steps can run now) and **M4 — Patch tooling**
-  (`docs/plan/m4.md`, in M3's waves A and B).
+  says which steps can run now).
 - Done: M0 (scaffold), M1 (TeX reader) — [`docs/history/m0-m1.md`](docs/history/m0-m1.md);
-  M2 (expander and semantic layer) — [`docs/history/m2.md`](docs/history/m2.md).
+  M2 (expander and semantic layer) — [`docs/history/m2.md`](docs/history/m2.md);
+  M4 (patch tooling) — [`docs/history/m4.md`](docs/history/m4.md).
 
 ## Milestones
 
@@ -23,8 +23,8 @@ step updates) when it is planned; the file is deleted when the milestone
 closes and its history goes to `docs/history/`.  Not yet planned in detail:
 M5.
 
-### M3 — Semantic document model, M4 — Patch tooling
-Planned: `docs/plan/m3.md`, `docs/plan/m4.md`.
+### M3 — Semantic document model
+Planned: `docs/plan/m3.md`.
 
 ### M5 — Consumers
 An HTML site (our own HyperSpec-like rendering, nothing borrowed from the

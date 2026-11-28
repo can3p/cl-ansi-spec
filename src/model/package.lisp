@@ -64,5 +64,17 @@
    #:plain-text-container-p
    ;; The glossary (build-glossary.lisp, step 3.14)
    #:install-glossary-handlers #:*part-of-speech-texts* #:*usage-texts*
+   ;; Semantic inlines (build-inlines.lisp, step 3.13)
+   #:install-inline-handlers
+   ;; Syntax (build-bnf.lisp)
+   #:install-bnf-handlers #:*bnf-containers* #:*bnf-leaves* #:*bnf-marks*
+   #:*bnf-glyphs* #:bnf-rule-name #:bnf-rule-definition
+   ;; Structure (build-structure.lisp)
+   #:install-structure-handlers #:job-version #:build-standard
+   #:parse-reference-write #:counted-number
+   ;; Dictionary entries (build-entries.lisp, step 3.9)
+   #:install-entry-handlers
+   ;; Tables and figures (build-tables.lisp)
+   #:install-table-handlers
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))

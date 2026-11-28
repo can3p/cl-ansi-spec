@@ -1,0 +1,8 @@
+Capitalise the \ftype of encode-universal-time.
+Every other entry spells its kind with capitals (\ftype{Function}); the
+model reads the kind from this text, so the variant is a source error.
+--- dict-environment.tex
++++ dict-environment.tex
+@@ -83,1 +83,1 @@
+-\begincom{encode-universal-time}\ftype{function}
++\begincom{encode-universal-time}\ftype{Function}
