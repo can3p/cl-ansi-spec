@@ -35,21 +35,21 @@
     table)
   "The entry handlers, the text handlers, a paragraph and a parameter.")
 
-(defun strip-spans (item)
+(defun entries-strip-spans (item)
   "ITEM, a string or the S-expression of a node, without its spans."
   (if (atom item)
       item
       (cons (first item)
             (loop for (key value) on (rest item) by #'cddr
                   unless (eq key :span)
-                    append (list key (if (consp value) (mapcar #'strip-spans value) value))))))
+                    append (list key (if (consp value) (mapcar #'entries-strip-spans value) value))))))
 
 (defun entry-sexps (&rest events)
   "The nodes the EVENTS build with the entry handlers, as S-expressions
 without spans, and the build report."
   (multiple-value-bind (nodes report)
       (model:build-events events :registry model:*registry* :handlers *entry-handlers*)
-    (values (mapcar (lambda (node) (strip-spans (if (stringp node) node (model:node-sexp node))))
+    (values (mapcar (lambda (node) (entries-strip-spans (if (stringp node) node (model:node-sexp node))))
                     nodes)
             report)))
 
@@ -322,7 +322,7 @@ S-expressions without spans, and the report."
   (multiple-value-bind (nodes report)
       (model:build-fixture (job-of-file file) :file file :lines (list first last)
                                               :handlers *entry-handlers*)
-    (values (mapcar (lambda (node) (strip-spans (if (stringp node) node (model:node-sexp node))))
+    (values (mapcar (lambda (node) (entries-strip-spans (if (stringp node) node (model:node-sexp node))))
                     nodes)
             report)))
 
