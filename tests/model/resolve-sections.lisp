@@ -93,18 +93,52 @@ label and to a label two nodes share."
 
 ;;; The whole spec
 
+(defparameter *secref-unresolved*
+  (let ((chapter "the short name of a chapter, the second label of its \\DefineChapter, which the chapter node does not keep (it holds the first, its id)")
+        (section "the second label \\DefineSection gives a section already labelled: the node keeps the last, so this one finds nothing")
+        (figure "a figure whose \\DefineFigure is commented out in the source (concept-syntax.tex:386)"))
+    `(("Conditions" 7 ,chapter) ("Syntax" 6 ,chapter) ("Reader" 3 ,chapter)
+      ("TypesAndClasses" 2 ,chapter) ("Printer" 2 ,chapter) ("Strings" 1 ,chapter)
+      ("Streams" 1 ,chapter) ("Objects" 1 ,chapter) ("Numbers" 1 ,chapter)
+      ("Iteration" 1 ,chapter) ("Glossary" 1 ,chapter)
+      ("EvaluationAndCompilation" 1 ,chapter) ("DataAndControlFlow" 1 ,chapter)
+      ("CharacterSyntax" 7 ,section) ("MacroLambdaLists" 4 ,section)
+      ("CompilationTerms" 2 ,section)
+      ("ConstituentTraitsOfStdChars" 3 ,figure)))
+  "The labels of the whole spec's references that resolve to nothing:
+(label count reason).  The chapter and section rows are a gap of the
+model (docs/model.md, \"References: sections and figures\"), not of the
+sources.")
+
 (defvar *secref-whole* nil
   "The problems of resolving the whole spec's references, once per run.")
 
 (defun secref-whole-problems ()
   (or *secref-whole*
-      (setf *secref-whole*
-            (list (model:resolve-section-references (whole-spec-nodes))))))
+      (setf *secref-whole* (model:resolve-section-references (whole-spec-nodes)))))
+
+(defun secref-problem-label (problem)
+  "The label a problem of the form `... has the label \"X\".' names."
+  (let* ((message (model:problem-message problem))
+         (start (1+ (position #\" message))))
+    (subseq message start (position #\" message :start start))))
 
 (define-test resolve-sections-whole-spec
   :parent resolve-sections
-  (let ((problems (first (secref-whole-problems))))
-    (is equal '() (mapcar (lambda (p) (list (model:span-file (model:problem-span p))
-                                            (model:span-line (model:problem-span p))
-                                            (model:problem-message p)))
-                          problems))))
+  (let* ((problems (secref-whole-problems))
+         (labels (mapcar #'secref-problem-label problems)))
+    (is equal (sort (copy-list (mapcar #'first *secref-unresolved*)) #'string<)
+        (sort (remove-duplicates labels :test #'string=) #'string<))
+    (loop for (label count) in *secref-unresolved*
+          do (is = count (count label labels :test #'string=)))
+    (true (every (lambda (problem) (eq :unresolved-reference (model:problem-kind problem))) problems))))
+
+(define-test resolve-sections-whole-spec-resolved
+  :parent resolve-sections
+  (secref-whole-problems)
+  (let ((refs (append (whole-spec-all :section-ref) (whole-spec-all :figure-ref))))
+    (true (> (count-if #'secref-target refs) 1000))
+    (is = (length (secref-whole-problems)) (count-if-not #'secref-target refs))
+    ;; Every figure of the spec is in the list, once.
+    (let ((figures (model:list-of-figures (whole-spec-nodes))))
+      (is = (length figures) (length (whole-spec-all :figure))))))
