@@ -4,7 +4,6 @@
 ;;;; The layout is checked on fixture declarations in a registry of
 ;;;; their own, so it does not depend on the kinds the model declares;
 ;;;; the real reference is checked only for having a section per kind.
-;;;; Owner: step 3.5 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

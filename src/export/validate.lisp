@@ -3,7 +3,6 @@
 ;;;; The validator of the JSON Schema subset of docs/exports.md ("Validation").
 ;;;; It works on parsed JSON (cl-ansi-spec/json) and reports every error with
 ;;;; the JSON Pointer (RFC 6901) of the offending part of the instance.
-;;;; Owner: step 3.6 of docs/plan/m3.md.
 ;;;;
 ;;;; Subset: `type`, `const`, `enum`, `required`, `properties`,
 ;;;; `additionalProperties`, `items`, `$ref` (to `#` or a JSON Pointer

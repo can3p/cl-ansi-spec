@@ -2,7 +2,6 @@
 ;;;;
 ;;;; Tests of operator references (src/model/resolve-operators.lisp): each
 ;;;; rule on a small model made here, then the whole spec's counts.
-;;;; Owner: step 3.18 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

@@ -6,7 +6,6 @@
 ;;;; tests/model/undocumented-<area>.sexp; an undocumented item missing
 ;;;; from its list fails, and so does a listed item that is now
 ;;;; documented or gone.  The lists are empty when the milestone closes.
-;;;; Owner: step 3.1.
 
 (in-package #:cl-ansi-spec/tests)
 

@@ -3,7 +3,6 @@
 ;;;; The model builder's suite, and its ownership table
 ;;;; (src/model/owners.sexp): every vocabulary key and every event kind
 ;;;; of docs/events.md has exactly one owner, whose handler file exists.
-;;;; Owner: step 3.0.
 
 (in-package #:cl-ansi-spec/tests)
 

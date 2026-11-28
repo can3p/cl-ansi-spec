@@ -3,7 +3,6 @@
 ;;;; Tests of blocks (src/model/build-blocks.lisp): paragraphs, code, lists
 ;;;; with their items at three levels, notes and the dropped events, on
 ;;;; events made here and on real lines of the spec.
-;;;; Owner: step 3.10 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

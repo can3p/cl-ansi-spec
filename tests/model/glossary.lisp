@@ -2,7 +2,6 @@
 ;;;;
 ;;;; Tests of the glossary (src/model/build-glossary.lisp): the notation of
 ;;;; entries, their senses, and the real lines of the spec.
-;;;; Owner: step 3.14 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

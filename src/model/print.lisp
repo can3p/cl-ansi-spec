@@ -3,8 +3,7 @@
 ;;;; A generic S-expression printer of nodes over the registry: a node is
 ;;;; written (kind :field value ... :span span), its fields in the order
 ;;;; of its declaration, as docs/model.md writes nodes.  Used by `make
-;;;; model' and the tests; the export writers are step 3.7's.
-;;;; Owner: step 3.3 of docs/plan/m3.md.
+;;;; model' and the tests; the export writers are in cl-ansi-spec/export.
 
 (in-package #:cl-ansi-spec/model)
 

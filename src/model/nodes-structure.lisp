@@ -3,7 +3,7 @@
 ;;;; The node kinds of the document's structure (docs/model.md,
 ;;;; "Structure"): the standard, its chapters and their sections of every
 ;;;; level, and the target kinds that point to chapters and sections.
-;;;; Owner: step 3.2 (shapes), then 3.8 of docs/plan/m3.md (the examples).
+;;;; Its examples are in this file.
 
 (in-package #:cl-ansi-spec/model)
 

@@ -3,8 +3,7 @@
 ;;;; The node kinds of blocks (docs/model.md, "Blocks"): the category
 ;;;; :block, paragraphs, code, lists and their items, editor and reviewer
 ;;;; notes.
-;;;; Owner: step 3.2 (shapes), then 3.10 of docs/plan/m3.md (documentation
-;;;; and examples, through tests/model/undocumented-blocks.sexp).
+;;;; Its documentation ratchet: tests/model/undocumented-blocks.sexp.
 
 (in-package #:cl-ansi-spec/model)
 

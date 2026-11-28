@@ -3,10 +3,9 @@
 ;;;; The node kinds of math (docs/model.md, "Math"): formulas as a small
 ;;;; tree of noads, characters, fractions, delimiters and styles, nothing
 ;;;; typeset; characters are Unicode by font family.
-;;;; Owner: step 3.2 (shapes), then 3.15m of docs/plan/m3.md
-;;;; (documentation and examples; 3.15m also added the fields NUMBER-LEFT,
-;;;; THICKNESS and the enum MATH-LIMITS, which the events carry and the
-;;;; shapes of 3.2 had no place for).
+;;;; Its documentation and examples came later; the fields NUMBER-LEFT,
+;;;; THICKNESS and the enum MATH-LIMITS were added then, because the events
+;;;; carry them and the first shapes had no place for them.
 
 (in-package #:cl-ansi-spec/model)
 

@@ -5,7 +5,6 @@
 ;;;; directory: every file listed in the manifest with its digest, every
 ;;;; node of the JSON files valid against the schema, the S-expression
 ;;;; files read back, and the report pinned.
-;;;; Owner: step 3.20 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

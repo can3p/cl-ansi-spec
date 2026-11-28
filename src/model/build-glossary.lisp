@@ -3,7 +3,6 @@
 ;;;; The handlers that build the glossary from their events: the groups of
 ;;;; one letter, their entries, the entries' senses and the notation the
 ;;;; senses carry (docs/model.md, "Glossary").
-;;;; Owner: step 3.14 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/model)
 

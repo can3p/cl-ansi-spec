@@ -3,7 +3,6 @@
 ;;;; Tests of structure (src/model/build-structure.lisp): chapters and
 ;;;; sections nested by level, their numbers counted and checked, their ids,
 ;;;; the standard; on events made here and on real jobs of the spec.
-;;;; Owner: step 3.8 of docs/plan/m3.md.
 
 (in-package #:cl-ansi-spec/tests)
 

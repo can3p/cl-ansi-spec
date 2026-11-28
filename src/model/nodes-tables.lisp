@@ -2,8 +2,7 @@
 ;;;;
 ;;;; The node kinds of tables and figures (docs/model.md, "Tables and
 ;;;; figures"), and the target kind that points to figures.
-;;;; Owner: step 3.2 (shapes), then 3.11 of docs/plan/m3.md (documentation
-;;;; and examples, through tests/model/undocumented-tables.sexp).
+;;;; Its documentation ratchet: tests/model/undocumented-tables.sexp.
 
 (in-package #:cl-ansi-spec/model)
 
