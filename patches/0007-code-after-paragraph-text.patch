@@ -1,0 +1,24 @@
+End the paragraph before a \code that follows its text directly.
+\code skips the end of its own line, so with the paragraph still open the
+code's first line ran into the paragraph and the block came out empty.
+A \par at the end of the preceding line (line count preserved) closes the
+paragraph first.  Sites: dict-flow.tex:413, dict-conses.tex:4199 and
+:4203, dict-sequences.tex:103.
+--- dict-flow.tex
++++ dict-flow.tex
+@@ -413,1 +413,1 @@
+-an access to the \term{function cell}, as in:
++an access to the \term{function cell}, as in:\par
+--- dict-conses.tex
++++ dict-conses.tex
+@@ -4199,1 +4199,1 @@
+-The effect of
++The effect of\par
+@@ -4203,1 +4203,1 @@
+-is roughly equivalent to
++is roughly equivalent to\par
+--- dict-sequences.tex
++++ dict-sequences.tex
+@@ -103,1 +103,1 @@
+-From a functional standpoint,
++From a functional standpoint,\par

@@ -1,0 +1,11 @@
+Comment out the empty \code ... \endcode that opens the Examples of type-of.
+The text that belonged in it is already commented out just above (the
+pre-issue wording); what the block held is gone, and the real examples
+follow after the \issue.  Lines commented, count preserved.
+--- dict-types.tex
++++ dict-types.tex
+@@ -1652,2 +1652,2 @@
+-\code
+-\endcode
++%\code
++%\endcode

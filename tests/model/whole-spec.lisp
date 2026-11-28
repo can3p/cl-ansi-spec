@@ -52,22 +52,12 @@ not fit in the heap."
 (defparameter *whole-spec-problems*
   (let ((sub-sense "a sense the glossary numbers only as a whole: \\meaning
 names its sub-sense (1a, 2b), which the reference keeps as the sense's
-number (docs/model.md, \"Glossary\")")
-        (code-run-in "\\code on the line after a paragraph's text: TeX skips the
-end of the \\code line, so the code's first line runs into the
-paragraph and the block, after it, is empty; a source error for 3.16p"))
+number (docs/model.md, \"Glossary\")"))
     `(("chap-3" :diagnostic "dict-eval-compile.tex" 4092
        "The sense \"1a\" is a sub-sense of 1, kept as 1." ,sub-sense)
-      ("chap-4" :node "dict-types.tex" 1652 ":CODE-BLOCK has no lines"
-       "an empty \\code ... \\endcode in the Examples of type-of; a source
-error for 3.16p")
-      ("chap-5" :node "dict-flow.tex" 414 ":CODE-BLOCK has no lines" ,code-run-in)
       ("chap-12" :node "concept-numbers.tex" 580 nil
        "the quadrant diagram of the branch cuts, drawn as an \\halign inside a
 cell of another: a cell holds inlines, not a table")
-      ("chap-14" :node "dict-conses.tex" 4200 ":CODE-BLOCK has no lines" ,code-run-in)
-      ("chap-14" :node "dict-conses.tex" 4204 ":CODE-BLOCK has no lines" ,code-run-in)
-      ("chap-17" :node "dict-sequences.tex" 104 ":CODE-BLOCK has no lines" ,code-run-in)
       ("chap-26" :diagnostic "concept-glossary.tex" 131 "The sense \"n\" is not a number."
        "the glossary's own explanation of the notation, \\term{something}\\meaning{n}")
       ("chap-26" :diagnostic "concept-glossary.tex" 270
@@ -83,14 +73,10 @@ cell of another: a cell holds inlines, not a table")
       ("chap-26" :diagnostic "concept-glossary.tex" 5045
        "The sense \"2a\" is a sub-sense of 2, kept as 2." ,sub-sense)
       ("chap-26" :diagnostic "concept-glossary.tex" 5046
-       "The sense \"2b\" is a sub-sense of 2, kept as 2." ,sub-sense)
-      (nil :id-collision "concept-streams.tex" 81
-       "The section id \"OpenAndClosedStreams\" is also that of the node at concept-files.tex:46."
-       "\\DefineSection{OpenAndClosedStreams} names two sections; a source
-error for 3.16p")))
+       "The sense \"2b\" is a sub-sense of 2, kept as 2." ,sub-sense)))
   "The problems of the whole spec's build, (job kind file line message
-why): each a source error left to a patch (3.16p), a construct the model
-does not hold or a diagnostic of a rule, with the reason.  A NIL message
+why): a construct the model does not hold or a diagnostic of a rule,
+with the reason.  A NIL message
 stands for any (one too long to pin, holding a node's printed form).")
 
 (defun whole-spec-problem-row (problem)
