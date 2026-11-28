@@ -34,4 +34,7 @@ published alongside it.
 
 ## Open questions
 
-- (none)
+- A table inside a table cell (`concept-numbers.tex:580`, the quadrant
+  diagram) is not held by the table builder (pinned in
+  `*whole-spec-problems*` since 3.16).  Owner to decide at M3's close:
+  a builder fix or a patch.
