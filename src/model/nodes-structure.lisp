@@ -49,6 +49,11 @@ one of the front matter begun by \\beginSimpleChapter or
    :example "ChapFifteen"
    :doc "The chapter's id: the reference name of \\beginchapter (its third
 argument, e.g. ChapOne), or a simple chapter's title.")
+  (aliases :string :repeated t
+   :example ("Syntax")
+   :doc "The other labels that name the chapter, which a reference may
+use: the short name, the second argument of \\DefineChapter
+(\\DefineChapter{ChapTwo}{Syntax}).")
   (number :string
    :example "15"
    :doc "The chapter's number as \\beginchapter's first argument gives it
@@ -76,7 +81,13 @@ to the next section of its level or above, or the chapter's end."
    :example "ArrayElements"
    :doc "The label of the \\DefineSection that names the section, or
 <parent-id>/<n> for a section that none names (its n-th among its
-parent's sections).")
+parent's sections).  When the sources name a section twice, the last label.")
+  (aliases :string :repeated t
+   :example ("CharacterSyntax")
+   :doc "The other labels that name the section, which a reference may
+use: those of its earlier \\DefineSection when the sources name the
+section twice (2.1 is CharacterSyntax in chap-2.tex and
+TheStandardSyntax in concept-syntax.tex).")
   (number :string :required t
    :example "15.1.1"
    :doc "The section's number, its chapter's and the count of each level

@@ -433,7 +433,11 @@ sections and the standard. Its handlers are the functions of
   the `\DefineSection` in it (set when the mark comes, which must be
   before any subsection of its own: reported else), until then and for a
   section none names `<parent-id>/<n>`, its *n*-th among its parent's
-  sections; with no parent in the build, `section-<number>`.
+  sections; with no parent in the build, `section-<number>`.  The other
+  labels that name a node are its `:aliases`: a chapter's short name (the
+  second argument of `\DefineChapter`) and, for a section the sources
+  name twice (2.1: `CharacterSyntax` in chap-2.tex, `TheStandardSyntax` in
+  concept-syntax.tex; the last is the id), its earlier labels.
 - **Other writes.** The `:write` handler is this step's, whose one owner
   drops every `\write` the handlers above do not take: the table of
   contents, the index and the issue files are data the model rebuilds from
@@ -595,7 +599,12 @@ registered in `*handlers*` at load).
   anything but rows in an alignment, is reported.  The first row is a
   heading (`:header`) when every cell that has content holds nothing but
   a bold run (`\tablefigtwo`'s heading arguments, `\tabletwo`'s `\b`).
-  Only `\halign` is read as a table; a `\valign` is reported.
+  Only `\halign` is read as a table; a `\valign` is reported.  An alignment inside a
+  cell of another (the quadrant diagram of concept-numbers.tex:580, a
+  drawing set as nested `\halign`s, not data) is reported and not held: a
+  cell holds inlines, and a table in one would change the shape every
+  consumer reads.  Only a patch of the source can turn it into something
+  the model holds; the problem is pinned in `*whole-spec-problems*`.
 - **Figures.** `\DefineFigure` (a mark) gives the label, and the `:write`
   after it (left to 3.8, which drops it) the number TeX wrote; both wait
   for the `:figure` that follows (a `\DefineFigure` always precedes its
@@ -643,7 +652,16 @@ decides:
 - **References are unresolved.** `:operator-ref` takes its `:via` from
   the macro's key (`*reference-vias*`) and its `:text` from the *last*
   argument, as the reference sets it: `\kwd{test}` is `":test"`, `\keyref{key}`
-  is `"\\&key"`. `:section-ref` and `:figure-ref` hold the label as
+  is `"\\&key"`.
+- **Reference texts of table cells.** A table template
+  that wraps each cell in `\misc{##}` (`\displaythree`, setup-tables.tex)
+  gives the argument what TeX read of the cell: a cell that begins with
+  `*`, `-`, `<` or `>` (active characters, conditionals) keeps the `\fi`s
+  that close them (`*\fi \fi package*`), which `reference-text` removes,
+  and a bold `>` is the math symbol `{$\spGT $}`, read back as `>`.  An
+  empty cell is a reference with no name: no node.  A name set with `\f`
+  (`\typeref{\f{(eql 't)}}`: a type specifier, no entry's name) is a
+  `:code` of what it typeset. `:section-ref` and `:figure-ref` hold the label as
   written, trimmed (`"\\OrdinaryLambdaLists"`). No `:target` is set;
   3.17-3.19 resolve them ("References", below).
 - **`:lambda-list-keyword`** has no argument: its name is the text its
@@ -810,17 +828,13 @@ title, children: the entries of the sections, at any depth), one for each
 chapter; `list-of-figures` a list of `secref-figure-entry` (id, number,
 caption, chapter id), both in document order.
 
-*Known gap.*  A node holds one id.  A chapter has two labels
-(`\DefineChapter{ChapTwo}{Syntax}`: the id and a short name) and a
-section may be given a second `\DefineSection` (2.1 is `CharacterSyntax`
-in chap-2.tex and `TheStandardSyntax` in concept-syntax.tex; the last
-wins).  The references through the label the node does not keep (41 of the
-whole spec's 44 unresolved ones, pinned by label in
-`tests/model/resolve-sections.lisp`) stay unresolved until the chapter and
-section nodes keep their other labels, a change of step 3.8's files.  The
-other 3 reference a figure whose `\DefineFigure` is commented out in the
-source (concept-syntax.tex:386).  `:this-section` and `:next-figure` are not
-resolved here.
+A label names a node by its id or by one of its `:aliases` (a chapter's
+short name, a section's earlier label); the target holds the node's id.
+Two nodes that one label names are ambiguous.  The whole spec's only
+unresolved references (3) are to a figure whose `\DefineFigure` is
+commented out in the source (concept-syntax.tex:386), pinned in
+`tests/model/resolve-sections.lisp`.  `:this-section` and `:next-figure`
+are not resolved here.
 
 #### Operators
 
@@ -848,10 +862,8 @@ names.  `:apply nil` only counts.  Rules, in order:
 Unresolved and ambiguous references are returned as `clref-finding`s
 (node, outcome, candidate ids, message), in document order;
 `operator-ref-problems`, run by `build-model` after `assign-ids`, makes
-them `:unresolved-reference` and `:ambiguous-reference` problems.  Unresolved ones that are no resolution matter: `\misc`
-with no text or with `\fi \fi` left in a table cell's argument, `\f
-{(eql 't)}` set as a type; `tests/model/resolve-operators.lisp` pins the
-counts.
+them `:unresolved-reference` and `:ambiguous-reference` problems.  What is left unresolved is names the dictionary has no
+entry for; `tests/model/resolve-operators.lisp` pins the counts.
 
 #### Terms
 

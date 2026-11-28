@@ -132,6 +132,62 @@ strings its macro typeset."
         (apply #'concatenate 'string
                (remove-if-not #'stringp (container-contents container)))))
 
+(defun reference-text-without-conditionals (text)
+  "TEXT without the `\\fi' tokens (and the spaces TeX skips after each) it
+holds.  A reference set in a table cell that begins with an active
+character (`*' is `\\ST', a conditional) is read by TeX after the
+conditional's branch, and the `\\fi's that close the conditional stay in the
+cell: `*\\fi \\fi package*' is the cell `*package*'."
+  (with-output-to-string (out)
+    (let ((position 0) (end (length text)))
+      (loop
+        (let ((fi (search "\\fi" text :start2 position)))
+          (cond ((null fi) (write-string text out :start position) (return))
+                ((and (< (+ fi 3) end) (alpha-char-p (char text (+ fi 3))))
+                 (write-string text out :start position :end (+ fi 3))
+                 (setf position (+ fi 3)))
+                (t
+                 (write-string text out :start position :end fi)
+                 (setf position (position #\Space text :start (+ fi 3) :test #'char/=))
+                 (unless position (return)))))))))
+
+(defparameter *reference-math-glyphs*
+  '(("{$\\spGT $}" . ">") ("{$\\spLT $}" . "<"))
+  "What a table cell's `>' and `<' (active, `\\GT' and `\\LT') leave in a
+reference's argument when the cell is set bold: the math symbol the
+character stands for.")
+
+(defun reference-text (text)
+  "The name a reference's last argument TEXT stands for, trimmed: without
+the `\\fi's of a cell's active first character
+(REFERENCE-TEXT-WITHOUT-CONDITIONALS), with the math symbols such a
+character was set as (*REFERENCE-MATH-GLYPHS*) as the character."
+  (let ((text (reference-text-without-conditionals text)))
+    (loop for (glyph . character) in *reference-math-glyphs*
+          do (loop for at = (search glyph text)
+                   while at
+                   do (setf text (concatenate 'string (subseq text 0 at) character
+                                              (subseq text (+ at (length glyph)))))))
+    (string-trim '(#\Space #\Tab #\Newline) text)))
+
+(defun reference-code-text-p (text)
+  "True when TEXT is a reference's argument set as code with `\\f' (a type
+specifier, `\\f {(eql 't)}'): the reference names no entry, its content
+is the code."
+  (and (> (length text) 2)
+       (string= "\\f" text :end2 2)
+       (not (alpha-char-p (char text 2)))))
+
+(defun open-reference (builder event key span via)
+  "The handler of a reference macro of KEY: an unresolved :OPERATOR-REF
+with the name its last argument sets; but no node for a reference with no
+name (an empty cell of a table whose template wraps each cell in `\\misc',
+set as nothing), and a :CODE for one set as code with `\\f'."
+  (let ((text (reference-text (last-argument-text builder event))))
+    (cond ((string= text "") (open-container builder key span))
+          ((reference-code-text-p text) (open-content-container builder key span :code))
+          (t (open-node-container builder key span :operator-ref :text text :via via)))))
+
 (defun install-inline-handlers (table)
   "Register the handlers of step 3.13 in the handler table TABLE."
   (flet ((begin (key function)
@@ -172,9 +228,7 @@ strings its macro typeset."
     (loop for (key . via) in *reference-vias*
           do (let ((key key) (via via))
                (begin key (lambda (builder event span)
-                            (open-node-container builder key span :operator-ref
-                                                 :text (last-argument-text builder event)
-                                                 :via via)))))
+                            (open-reference builder event key span via)))))
     (begin :secref (lambda (builder event span)
                      (open-node-container builder :secref span :section-ref
                                           :label (trimmed-argument builder event 0))))

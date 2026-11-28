@@ -313,6 +313,20 @@ and its NUMBER, and what the builder counted."
                            :message (format nil "~A ~A counted ~A, but TeX wrote ~A."
                                             word label number written-number))))))
 
+(defun default-section-id-p (id number)
+  "True when ID is a generated id of a section numbered NUMBER
+(DEFAULT-SECTION-ID): `<parent-id>/<n>' (a label has no slash) or
+`section-<number>'."
+  (or (find #\/ id) (equal id (format nil "section-~A" number))))
+
+(defun add-structure-alias (builder node label)
+  "Keep LABEL, another label of the chapter or section NODE, among its
+:ALIASES, once."
+  (let ((aliases (field-of builder node :aliases)))
+    (unless (member label aliases :test #'equal)
+      (setf (node-field-value node :aliases (builder-registry builder))
+            (append aliases (list label))))))
+
 (defun define-section (builder event span)
   "\\DefineSection: the label is the id of the section it is in; the
 number TeX wrote on the next line must be the one counted."
@@ -328,7 +342,13 @@ number TeX wrote on the next line must be the one counted."
              (report-problem builder :node span
                              :message (format nil "\\DefineSection ~A follows a subsection of its section."
                                               label)))
-           (setf (node-field-value node :id (builder-registry builder)) label)
+           (let ((previous (field-of builder node :id)))
+             (when (and previous (not (equal previous label))
+                        (not (default-section-id-p previous (field-of builder node :number))))
+               (add-structure-alias builder node previous)))
+           (setf (node-field-value node :id (builder-registry builder)) label
+                 (node-field-value node :aliases (builder-registry builder))
+                 (remove label (field-of builder node :aliases) :test #'equal))
            (check-reference-write builder (take-section-write builder) "Section" label
                                   (field-of builder node :number) span)))))
 
@@ -350,7 +370,9 @@ two lines TeX wrote (by name and by title) must give its number."
            (check-reference-write builder (take-section-write builder) "Chapter"
                                   (first arguments) (field-of builder node :number) span)
            (check-reference-write builder (take-section-write builder) "Chapter"
-                                  (second arguments) (field-of builder node :number) span)))))
+                                  (second arguments) (field-of builder node :number) span)
+           (when (and (second arguments) (not (equal (second arguments) (first arguments))))
+             (add-structure-alias builder node (second arguments)))))))
 
 (defun install-structure-handlers (table)
   "Register the handlers of step 3.8 in the handler table TABLE."

@@ -91,7 +91,7 @@ writes for it, the two heading paragraphs, then MORE."
                      (section-events :subsubsection "Deep" "3.1.1.1")
                      (section-events :subsection "One-Two" "3.1.2")
                      (section-events :section "Two" "3.2")))
-    (is equal '((:chapter :id "ChapThree" :number "3" :title ("Evaluation")
+    (is equal '((:chapter :id "ChapThree" :aliases ("Evaluation") :number "3" :title ("Evaluation")
                  :children
                  ((:section :id "ChapThree/1" :number "3.1" :level 1 :title ("One")
                    :children
@@ -149,6 +149,40 @@ writes for it, the two heading paragraphs, then MORE."
                 (getf (rest (first nodes)) :children)))
     (is equal '("Section Conformance counted 1.2, but TeX wrote 1.3.") (problem-messages report))))
 
+(define-test structure-aliases
+  :parent model-structure
+  ;; A chapter keeps the short name of its \\DefineChapter; a section named
+  ;; twice keeps the label that is not its id, once.
+  (multiple-value-bind (nodes report)
+      (apply #'structure-sexps
+             (append (chapter-events "2" "Syntax" "ChapTwo")
+                     (section-events :section "Character Syntax" "2.1"
+                                     (mark :define-section "CharacterSyntax")
+                                     (test-event :write nil :stream 5
+                                                 :tokens "!CharacterSyntax Section 2.1\\ Character Syntax")
+                                     (mark :define-section "TheStandardSyntax")
+                                     (test-event :write nil :stream 5
+                                                 :tokens "!TheStandardSyntax Section 2.1\\ Character Syntax")
+                                     (mark :define-section "TheStandardSyntax")
+                                     (test-event :write nil :stream 5
+                                                 :tokens "!TheStandardSyntax Section 2.1\\ Character Syntax"))))
+    (is equal '() (problem-messages report))
+    (let ((chapter (first nodes)) (section (first (getf (rest (first nodes)) :children))))
+      (is equal '("Syntax") (getf (rest chapter) :aliases))
+      (is equal "TheStandardSyntax" (getf (rest section) :id))
+      (is equal '("CharacterSyntax") (getf (rest section) :aliases))))
+  ;; A, B, A: the id is not its own alias; a label shaped like a generated
+  ;; id is kept.
+  (let* ((nodes (apply #'structure-sexps
+                       (append (chapter-events "2" "Syntax" "ChapTwo")
+                               (section-events :section "S" "2.1"
+                                               (mark :define-section "section-2.1")
+                                               (mark :define-section "B")
+                                               (mark :define-section "section-2.1")))))
+         (section (first (getf (rest (first nodes)) :children))))
+    (is equal "section-2.1" (getf (rest section) :id))
+    (is equal '("B") (getf (rest section) :aliases))))
+
 (define-test structure-write-lines
   :parent model-structure
   (is equal '("Definitions" "1.4")
@@ -166,7 +200,7 @@ writes for it, the two heading paragraphs, then MORE."
              (append (chapter-events "15" "Arrays" "ChapFifteen")
                      (list (mark :dictionary "dict-arrays")
                            (test-event :write nil :stream 0 :tokens "!215.1 Arrays Dictionary"))))
-    (is equal '((:chapter :id "ChapFifteen" :number "15" :title ("Arrays")
+    (is equal '((:chapter :id "ChapFifteen" :aliases ("Arrays") :number "15" :title ("Arrays")
                  :children ((:section :id "ChapFifteen/1" :number "15.1" :level 1
                              :dictionary t :title ("Arrays Dictionary")))))
         nodes)
