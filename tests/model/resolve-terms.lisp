@@ -128,12 +128,12 @@ it (a \\newtermidx's index entry)."
   "The reasons of tests/model/unresolved-terms.sexp.")
 
 (defparameter *terms-rule-counts*
-  '(((:name . :exact) . 20779) ((:last-word . :s) . 4127)
+  '(((:name . :exact) . 20791) ((:last-word . :s) . 4129)
     ((:last-word . :irregular) . 35) ((:last-word . :d) . 88)
     ((:last-word . :es) . 244) ((:last-word . :ed) . 161)
     ((:last-word . :ing) . 55) ((:last-word . :ing-e) . 39)
     ((:last-word . :ies) . 12) ((:last-word . :doubled-ing) . 17)
-    ((:last-word . :doubled-ed) . 3) ((:first-word . :ies) . 11)
+    ((:last-word . :doubled-ed) . 3) ((:first-word . :ies) . 12)
     ((:first-word . :ing) . 5))
   "How often each tier and rule resolves a reference of the whole spec,
 in the order of first use.

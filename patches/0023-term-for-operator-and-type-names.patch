@@ -1,0 +1,43 @@
+The prose names an operator or a type with \term, which is for glossary
+words; the spec's idiom is \funref, \macref, \typeref (and \f for a feature
+keyword, as the neighbours of lispm do): funcall (concept-eval.tex),
+invoke-restart, with-slots and storage-condition (dict-conditions.tex),
+interactive-stream-p (dict-streams.tex), make-symbol (dict-symbols.tex),
+with-compilation-unit (dict-system-construction.tex), lispm
+(concept-systems.tex).
+--- concept-eval.tex
++++ concept-eval.tex
+@@ -689,1 +689,1 @@
+-A \term{lambda form} is equivalent to using \term{funcall} of a
++A \term{lambda form} is equivalent to using \funref{funcall} of a
+--- dict-conditions.tex
++++ dict-conditions.tex
+@@ -67,1 +67,1 @@
+-that are accessible by \term{with-slots} is \term{implementation-dependent}.
++that are accessible by \macref{with-slots} is \term{implementation-dependent}.
+@@ -342,1 +342,1 @@
+-While some \clisp\ operations might signal \term{storage-condition}
++While some \clisp\ operations might signal \typeref{storage-condition}
+@@ -2868,1 +2868,1 @@
+-\term{invoke-restart} provides primitive functionality, and \term{restart functions}
++\funref{invoke-restart} provides primitive functionality, and \term{restart functions}
+--- dict-streams.tex
++++ dict-streams.tex
+@@ -142,1 +142,1 @@
+-  The functions \funref{input-stream-p} and \term{interactive-stream-p} 
++  The functions \funref{input-stream-p} and \funref{interactive-stream-p} 
+--- dict-symbols.tex
++++ dict-symbols.tex
+@@ -372,1 +372,1 @@
+-\term{make-symbol}, the consequences are undefined if a
++\funref{make-symbol}, the consequences are undefined if a
+--- dict-system-construction.tex
++++ dict-system-construction.tex
+@@ -693,1 +693,1 @@
+-use of \term{with-compilation-unit} might not have any effect.
++use of \macref{with-compilation-unit} might not have any effect.
+--- concept-systems.tex
++++ concept-systems.tex
+@@ -90,1 +90,1 @@
+- in \term{implementation} C, none of the features \f{spice}, \term{lispm}, or \f{perq} are
++ in \term{implementation} C, none of the features \f{spice}, \f{lispm}, or \f{perq} are

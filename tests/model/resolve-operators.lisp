@@ -110,7 +110,7 @@ against the test model."
 ;;; The whole spec
 
 (defparameter *whole-spec-operator-findings*
-  '(:resolved 12323 :ambiguous 267 :unresolved 309)
+  '(:resolved 12330 :ambiguous 267 :unresolved 309)
   "What resolving the whole spec's operator references finds; change it
 deliberately, with the reason.  The
 unresolved ones are source or builder matters, not resolution: a

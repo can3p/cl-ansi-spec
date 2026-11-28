@@ -1,0 +1,7 @@
+"compound type specifer" (sic) in concept-loop.tex; the glossary term is
+compound type specifier.
+--- concept-loop.tex
++++ concept-loop.tex
+@@ -491,1 +491,1 @@
+-is a \term{compound type specifer}.
++is a \term{compound type specifier}.

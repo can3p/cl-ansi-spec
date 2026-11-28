@@ -1,0 +1,7 @@
+\term{object.} in dict-objects.tex has the sentence's period inside the
+braces; the glossary term is "object".
+--- dict-objects.tex
++++ dict-objects.tex
+@@ -3035,1 +3035,1 @@
+-\param{method-combination-argument}---an \term{object.}
++\param{method-combination-argument}---an \term{object}.

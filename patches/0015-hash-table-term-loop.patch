@@ -1,0 +1,7 @@
+\term{hash-table} in concept-loop.tex: the glossary term is "hash table"
+(the hyphenated form is the parameter name used elsewhere in the file).
+--- concept-loop.tex
++++ concept-loop.tex
+@@ -995,1 +995,1 @@
+-  iterates over the elements, keys, and values of a \term{hash-table}.
++  iterates over the elements, keys, and values of a \term{hash table}.

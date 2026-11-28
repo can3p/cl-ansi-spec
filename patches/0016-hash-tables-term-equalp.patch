@@ -1,0 +1,7 @@
+\term{hash-tables} in dict-flow.tex: the glossary term is "hash table",
+here in the plural.
+--- dict-flow.tex
++++ dict-flow.tex
+@@ -3974,1 +3974,1 @@
+-\funref{equalp} descends \term{hash-tables} by first comparing the count of entries
++\funref{equalp} descends \term{hash tables} by first comparing the count of entries

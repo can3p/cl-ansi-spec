@@ -1,0 +1,7 @@
+\term{method defining form} in concept-args.tex: the glossary entry is
+"method-defining form", hyphenated.
+--- concept-args.tex
++++ concept-args.tex
+@@ -98,1 +98,1 @@
+-\itemitem{--} the point of entry into the body of the \term{method defining form},
++\itemitem{--} the point of entry into the body of the \term{method-defining form},

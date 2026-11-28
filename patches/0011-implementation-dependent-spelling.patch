@@ -1,0 +1,10 @@
+"implemention-dependent" (sic) in the two structure printing examples of
+concept-bvl.tex; the glossary term is implementation-dependent.
+--- concept-bvl.tex
++++ concept-bvl.tex
+@@ -1111,1 +1111,1 @@
+- (create-foo 10) \EV #S(FOO A 10 B 2 C SEA D 2 E \term{implemention-dependent} F EFF)
++ (create-foo 10) \EV #S(FOO A 10 B 2 C SEA D 2 E \term{implementation-dependent} F EFF)
+@@ -1113,1 +1113,1 @@
+-\EV #S(FOO A 10 B BEE C SEE D DEE E \term{implemention-dependent} F EFF)
++\EV #S(FOO A 10 B BEE C SEE D DEE E \term{implementation-dependent} F EFF)

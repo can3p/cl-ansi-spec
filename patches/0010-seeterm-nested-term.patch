@@ -1,0 +1,9 @@
+In concept-glossary.tex the entry "closed" writes \seeterm\term{close}.
+\seeterm takes the term as its argument and wraps it in \term itself
+(setup-document.tex:396), so the extra \term nests one in the other and the
+reference text is the control sequence \term. Pass the argument alone.
+--- concept-glossary.tex
++++ concept-glossary.tex
+@@ -842,1 +842,1 @@
+-  having been \term{closed} (\seeterm\term{close}).
++  having been \term{closed} (\seeterm{close}).
