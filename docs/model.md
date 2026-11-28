@@ -721,11 +721,16 @@ step has to close them.
   context, `(of an array)`), a first sense without a number.  An
   entry without `1.` has one sense without a number.  Tags after a number
   are that sense's.  A `:glossary-example` (`\gexample`) goes to the
-  sense's `:examples`, not to its definition.  Commas that set the notation
-  apart (`\Noun, \TransitiveVerb`, next to a tag) are dropped; those in
-  the text stay.  A sense has the span of its entry: the events do not say
-  where a number was typed.  Numbers are found by order, so a ` 2. ` inside
-  sense 1's text, after sense 1 began, would split it; the glossary has
+  sense's `:examples`, not to its definition, and a `:figure` set after
+  the definition, which shows it as the next figure (`exponent marker`,
+  concept-glossary.tex:1772-1781), to its `:figures`.  In the
+  introduction, which shows the notation in a paragraph
+  (concept-glossary.tex:105-106), a `:glossary-example` is an inline.
+  Commas that set the notation apart (`\Noun, \TransitiveVerb`, next to a
+  tag) are dropped; those in the text stay.  A sense has the span of its
+  entry: the events do not say where a number was typed.  Numbers are
+  found by order, so a ` 2. ` inside sense 1's text, after sense 1
+  began, would split it; the glossary has
   none (`glossary-whole` checks that every sense has a definition).
 - **Meanings.**  `\meaning{n}` (`:sense`) sets the `:sense` of the
   `:term-ref` it follows, from the integer its text starts with; `2a` is
@@ -777,8 +782,10 @@ small tree of TeX's own noads; nothing is typeset.
   `:subscript`, `:numerator`, `:denominator`, `:choice` and `:eqno` are
   containers that build no node: when one closes, its items become the
   field of the node of the container below (empty ones leave it absent).
-  A string a text event left in a math list (a control space) becomes a
-  `:math-char`, so every list holds only math elements and inlines.
+  A string a text event left in a math list (a control space, the text
+  of an `\hbox`) becomes a `:math-char` with the span of that list (from
+  its beginning to its end: the string keeps no span of its own), so every
+  list holds only math elements and inlines.
 - **Leaves.** `(:math-char :fam f :code c)` is a `:math-char` whose text
   is the slot of family *f*; `(:left …)`, `(:right …)` a `:math-delimiter`;
   `(:math-style …)` a `:math-style-change`.

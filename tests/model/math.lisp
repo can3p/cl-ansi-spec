@@ -197,24 +197,43 @@ S-expressions without spans, and the build report."
                   (test-event :begin :eqno :command "leqno") (mchar 0 49)
                   (test-event :end :eqno) (test-event :end :math))))
 
+(defun math-string-nodes (&rest events)
+  "The nodes of EVENTS built with the math handlers and a :SPACE handler
+that leaves the string \" \" in the list, as a control space does."
+  (let ((table (model:install-math-handlers (model:make-handler-table))))
+    (model:register-handler :space nil
+                            (lambda (builder event span)
+                              (declare (ignore event span))
+                              (model:add-item builder " "))
+                            table)
+    (model:build-events events :registry model:*registry* :handlers table)))
+
+(defun math-span-range (node)
+  "(start end) of NODE's span."
+  (list (model:span-start (model:node-span node)) (model:span-end (model:node-span node))))
+
 (define-test math-strings-and-problems
   :parent math
-  ;; A control space reaches the list as a string: it becomes a character.
-  (let ((nodes (let ((table (model:install-math-handlers (model:make-handler-table))))
-                 (model:register-handler
-                  :space nil
-                  (lambda (builder event span)
-                    (declare (ignore event span))
-                    (model:add-item builder " "))
-                  table)
-                 (model:build-events (list (test-event :begin :noad :class :ord)
-                                           (test-event :begin :nucleus)
-                                           (test-event :space nil)
-                                           (test-event :end :nucleus)
-                                           (test-event :end :noad))
-                                     :registry model:*registry* :handlers table))))
+  ;; A control space reaches the list as a string: it becomes a character
+  ;; with the span of its list, the string keeping no span of its own.
+  (let* ((nodes (math-string-nodes (test-event :begin :noad :class :ord)
+                                   (test-event :begin :nucleus :span (test-span 1 2 3))
+                                   (test-event :space nil :span (test-span 1 3 4))
+                                   (test-event :end :nucleus :span (test-span 1 5 6))
+                                   (test-event :end :noad)))
+         (char (first (model:node-field-value (first nodes) :nucleus))))
     (is equal '((:math-noad :class :ord :nucleus ((:math-char :text " "))))
-        (mapcar (lambda (node) (math-strip-spans (model:node-sexp node))) nodes)))
+        (mapcar (lambda (node) (math-strip-spans (model:node-sexp node))) nodes))
+    (is equal '(2 6) (math-span-range char))
+    (is equal '() (model:node-problems char)))
+  ;; The same in the formula's own list.
+  (let* ((nodes (math-string-nodes (test-event :begin :math :span (test-span 1 2 3))
+                                   (test-event :space nil :span (test-span 1 3 4))
+                                   (test-event :end :math :span (test-span 1 7 8))))
+         (char (first (model:node-field-value (first nodes) :content))))
+    (is equal '((:math :content ((:math-char :text " "))))
+        (mapcar (lambda (node) (math-strip-spans (model:node-sexp node))) nodes))
+    (is equal '(2 8) (math-span-range char)))
   ;; A slot without Unicode is reported, and shown as U+FFFD.
   (multiple-value-bind (nodes report) (math-nodes (mchar 3 40))
     (is equal (list (list :math-char :text (string (code-char #xFFFD)))) nodes)

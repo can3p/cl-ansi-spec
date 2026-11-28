@@ -234,12 +234,8 @@ only: they describe the export, not the model.
 `tests/export/whole-spec.lisp` writes the export of the whole spec to a
 temporary directory and checks every digest of the manifest, every node
 of the JSON files against the schema (3.6), the S-expression files, and
-the counts of the report by kind (pinned there). The real export still
-breaks the schema in 63 places (`*export-schema-violations*`: 54
-`math-char` nodes without a span; 8 `figure` and 1 `glossary-example` nodes
-where the declaration of their parent does not allow them); the test pins
-them as a ratchet, so a new violation fails it and a fixed one must be
-removed from the list.
+the counts of the report by kind (pinned there). Every node of the
+export is valid against the schema.
 
 The validator's cost matters here: a `oneOf` over node kinds validates only
 the branches whose constant `kind` matches the instance's, and a schema is

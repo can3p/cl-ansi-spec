@@ -198,12 +198,15 @@ text."
   (setf (node-span node) span)
   (add-item builder node))
 
-(defun math-items (builder items)
-  "ITEMS (the items of a math container, which text events may have
-filled with strings: a control space) with each string a :MATH-CHAR."
+(defun math-items (builder items span)
+  "ITEMS (the items of a math list, which text events may have filled
+with strings: the \" \" of a control space, the \"from\" of
+`$C\\sub{\\hbox{{\\prmseven from}}}$' (concept-change-class.tex:4)) with
+each string a :MATH-CHAR of SPAN, the span of the list: a string keeps
+no span of its own."
   (mapcar (lambda (item)
             (if (stringp item)
-                (make-builder-node builder :math-char :text item)
+                (make-builder-node builder :math-char :text item :span span)
                 item))
           items))
 
@@ -214,7 +217,9 @@ filled with strings: a control space) with each string a :MATH-CHAR."
 node of the container below, and are not passed on."
   (lambda (builder container)
     (let* ((node (container-node* (current-container builder)))
-           (items (math-items builder (container-contents container))))
+           (items (math-items builder (container-contents container)
+                              (join-spans (container-span container)
+                                          (container-closing-span container)))))
       (setf (container-items container) '())
       (cond ((null node)
              (report-problem builder :unmatched-end (container-span container)
@@ -281,7 +286,8 @@ trick around block nodes, which then take its place."
          (remhash container *formula-nodes*)
          (let* ((count (- (length (container-items parent)) before))
                 (items (reverse (subseq (container-items parent) 0 count)))
-                (items (math-items builder items))
+                (items (math-items builder items
+                                   (join-spans (container-span container) span)))
                 (payload (layout-payload items)))
            (setf (container-items parent) (nthcdr count (container-items parent)))
            (cond (payload

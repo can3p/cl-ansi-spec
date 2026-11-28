@@ -79,16 +79,6 @@ errors, by kind (tests/model/whole-spec.lisp pins each).")
   (map 'list (lambda (group) (cons (json-member group "kind") (json-member group "count")))
        groups))
 
-(defparameter *export-schema-violations*
-  '((("missing required property \"span\"" "math-char") . 54)
-    (("unknown kind \"figure\"" "figure") . 8)
-    (("unknown kind \"glossary-example\"" "glossary-example") . 1))
-  "What the real export still breaks of the schema, ((message kind) .
-count): the math builder makes :math-char nodes without a span, and a
-glossary sense's content holds figure and glossary-example nodes its
-declaration does not allow.  They are builder or declaration defects of
-other steps, pinned here so none is added unnoticed; the list only shrinks.")
-
 (defun export-json-at (node pointer)
   "The value of the parsed JSON NODE at the JSON POINTER, or NIL."
   (let ((value node))
@@ -109,7 +99,7 @@ the error is at."
 (defun export-check-files (directory records schema)
   "Check the files of an export under DIRECTORY, listed by RECORDS: the
 digests, the JSON nodes against SCHEMA (what they break is the second
-value, ((message kind) . count), as *EXPORT-SCHEMA-VIOLATIONS* lists), the
+value, ((message kind) . count), kind that of the node at the error), the
 S-expression forms.  The first value is the number of nodes checked."
   (dolist (record records)
     (is equal (cdr record)
@@ -171,8 +161,7 @@ S-expression forms.  The first value is the number of nodes checked."
                       (json-member (json-member manifest "source") "patches")))
              (multiple-value-bind (nodes violations) (export-check-files directory records schema)
                (true (plusp nodes))
-               (is equal *export-schema-violations*
-                   (sort violations #'string< :key (lambda (cell) (first (car cell))))))
+               (is equal '() violations "the export breaks the schema"))
              ;; The report is pinned.
              (let ((report (cl-ansi-spec/json:parse-json-file
                             (merge-pathnames "report.json" directory))))
