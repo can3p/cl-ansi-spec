@@ -616,7 +616,10 @@ closing brace, and the table at :279-302 uses them (0001). Two rules are
 left unbalanced by the sources, which the semantic layer reports, not TeX: the numeric-accumulation rule of dict-iteration.tex
 breaks a row inside `\curly` (0002) and the defsetf lambda list of
 concept-bvl.tex lacks its `\rparen` (0003). With the patches, no job has an
-error or an unbalanced report.
+error or an unbalanced report.  Structural source errors the model
+reports are patched too: a `\code` on the line after a paragraph's text
+(0007, a `\par`), an empty `\code` (0008), and
+`\DefineSection{OpenAndClosedStreams}` used for two sections (0009).
 
 Formats and jobs (`src/expand/format.lisp`), §§1299-1337:
 

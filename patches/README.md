@@ -44,7 +44,11 @@ diffing only. `vendor/` is never patched.
 Patches so far: `0001-syntax-type-table-definitions` (the abbreviations the
 syntax-type table of concept-syntax.tex uses were commented out),
 `0002-loop-numeric-accumulation-group` (a row break inside a brace group of
-dict-iteration.tex), `0003-defsetf-lambda-list-closing-paren` (a rule that opens a parenthesis and
-never closes it),
-`0004-ftype-function-case`, `0005-ftype-special-form` and `0006-ftype-macro-case`
-(the three `\ftype` texts that spelled an entry kind otherwise: `function`, `Special Form`, `macro`).
+dict-iteration.tex), `0003-defsetf-lambda-list-closing-paren` (a rule that
+opens a parenthesis and never closes it), `0004-ftype-function-case`,
+`0005-ftype-special-form` and `0006-ftype-macro-case` (the three `\ftype`
+texts that spelled an entry kind otherwise: `function`, `Special Form`,
+`macro`), `0007-code-after-paragraph-text` (a `\par` before a `\code` run
+into a paragraph), `0008-empty-code-in-type-of-examples` (an empty `\code`
+block) and `0009-open-and-closed-streams-label-twice` (two sections with one
+`\DefineSection` label).

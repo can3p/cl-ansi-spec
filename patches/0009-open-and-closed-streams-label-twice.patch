@@ -1,0 +1,28 @@
+Give the section of concept-files.tex its own label.
+\DefineSection{OpenAndClosedStreams} is used both for Section 20.1.2
+(File Operations on Open and Closed Streams) and for Section 21.1.1.1.2
+(Open and Closed Streams); the second silently replaced the first, so the
+two references in dict-files.tex that mean the file operations pointed at
+the stream section.  The 20.1.2 section is now OpenAndClosedStreamsFiles,
+and dict-files.tex (lines 68 and 152, in the same position) names it.
+setup-sections.tex, the table the label commands read, gets the same
+rename on line 257 (the glossary's references keep line 261).
+The glossary's two references keep the stream section.
+--- concept-files.tex
++++ concept-files.tex
+@@ -47,1 +47,1 @@
+-\DefineSection{OpenAndClosedStreams}
++\DefineSection{OpenAndClosedStreamsFiles}
+--- dict-files.tex
++++ dict-files.tex
+@@ -68,1 +68,1 @@
+-{\secref\OpenAndClosedStreams},
++{\secref\OpenAndClosedStreamsFiles},
+@@ -152,1 +152,1 @@
+-{\secref\OpenAndClosedStreams},
++{\secref\OpenAndClosedStreamsFiles},
+--- setup-sections.tex
++++ setup-sections.tex
+@@ -257,1 +257,1 @@
+-\def\OpenAndClosedStreams{Section 20.1.2 (File Operations on Open and Closed Streams)}%
++\def\OpenAndClosedStreamsFiles{Section 20.1.2 (File Operations on Open and Closed Streams)}%
