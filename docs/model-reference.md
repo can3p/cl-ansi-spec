@@ -17,6 +17,14 @@ job.
 | `front-matter` | list of node of kind or category `:chapter` | no | The unnumbered chapters of chap-0.tex (\beginSimpleChapter), in order; absent when the model is built from part of the jobs. |
 | `chapters` | list of node of kind or category `:chapter` | yes | The numbered chapters (\beginchapter), 1 to 26, then the appendix A, in that order. |
 
+Example:
+
+```lisp
+(:document :version "15.17" :front-matter
+ ((:chapter :id "Credits" :title ("Credits"))) :chapters
+ ((:chapter :id "ChapOne" :number "1" :title ("Introduction"))))
+```
+
 ### Node kind `:chapter`
 
 A chapter: a numbered one begun by \beginchapter, or an unnumbered
@@ -29,6 +37,14 @@ one of the front matter begun by \beginSimpleChapter or
 | `number` | string | no | The chapter's number as \beginchapter's first argument gives it ("1" … "26", "A"); absent for a simple chapter. |
 | `title` | inline list | yes | The chapter's title, \beginchapter's second argument or the simple chapter's one. |
 | `children` | list of node of kind or category `:section`, `:dictionary-entry`, `:block` | no | What the chapter holds, in order: the blocks before its first section, then its sections. |
+
+Example:
+
+```lisp
+(:chapter :id "ChapFifteen" :number "15" :title ("Arrays") :children
+ ((:section :id "ArrayConcepts" :number "15.1" :level 1 :title
+   ("Array Concepts"))))
+```
 
 ### Node kind `:section`
 
@@ -45,6 +61,15 @@ to the next section of its level or above, or the chapter's end.
 | `dictionary` | boolean | no | True for a dictionary section, begun by \includeDictionary: its children are dictionary entries. |
 | `title` | inline list | yes | The section's title, the argument of the macro that began it. |
 | `children` | list of node of kind or category `:section`, `:dictionary-entry`, `:glossary-group`, `:block` | no | What the section holds, in order: blocks, dictionary entries, glossary groups and its subsections. |
+
+Example:
+
+```lisp
+(:section :id "ArrayElements" :number "15.1.1" :level 2 :title
+ ("Array Elements") :children
+ ((:section :id "ArrayElements/1" :number "15.1.1.1" :level 3 :title
+   ("Array Indices"))))
+```
 
 ### Target kind `:chapter`
 

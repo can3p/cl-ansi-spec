@@ -719,7 +719,10 @@
         "version": {
           "type": "string",
           "title": "version",
-          "description": "The revision of the draft, the text of \\rev in setup-version.tex."
+          "description": "The revision of the draft, the text of \\rev in setup-version.tex.",
+          "examples": [
+            "15.17"
+          ]
         },
         "front-matter": {
           "type": "array",
@@ -727,7 +730,21 @@
             "$ref": "#/$defs/chapter"
           },
           "title": "front-matter",
-          "description": "The unnumbered chapters of chap-0.tex (\\beginSimpleChapter), in\norder; absent when the model is built from part of the jobs."
+          "description": "The unnumbered chapters of chap-0.tex (\\beginSimpleChapter), in\norder; absent when the model is built from part of the jobs.",
+          "examples": [
+            [
+              {
+                "kind": "chapter",
+                "id": "Credits",
+                "title": [
+                  {
+                    "kind": "text",
+                    "text": "Credits"
+                  }
+                ]
+              }
+            ]
+          ]
         },
         "chapters": {
           "type": "array",
@@ -735,7 +752,22 @@
             "$ref": "#/$defs/chapter"
           },
           "title": "chapters",
-          "description": "The numbered chapters (\\beginchapter), 1 to 26, then the\nappendix A, in that order."
+          "description": "The numbered chapters (\\beginchapter), 1 to 26, then the\nappendix A, in that order.",
+          "examples": [
+            [
+              {
+                "kind": "chapter",
+                "id": "ChapOne",
+                "number": "1",
+                "title": [
+                  {
+                    "kind": "text",
+                    "text": "Introduction"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -744,7 +776,38 @@
         "version",
         "chapters"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "document",
+          "version": "15.17",
+          "front-matter": [
+            {
+              "kind": "chapter",
+              "id": "Credits",
+              "title": [
+                {
+                  "kind": "text",
+                  "text": "Credits"
+                }
+              ]
+            }
+          ],
+          "chapters": [
+            {
+              "kind": "chapter",
+              "id": "ChapOne",
+              "number": "1",
+              "title": [
+                {
+                  "kind": "text",
+                  "text": "Introduction"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "chapter": {
       "type": "object",
@@ -761,12 +824,18 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The chapter's id: the reference name of \\beginchapter (its third\nargument, e.g. ChapOne), or a simple chapter's title."
+          "description": "The chapter's id: the reference name of \\beginchapter (its third\nargument, e.g. ChapOne), or a simple chapter's title.",
+          "examples": [
+            "ChapFifteen"
+          ]
         },
         "number": {
           "type": "string",
           "title": "number",
-          "description": "The chapter's number as \\beginchapter's first argument gives it\n(\"1\" … \"26\", \"A\"); absent for a simple chapter."
+          "description": "The chapter's number as \\beginchapter's first argument gives it\n(\"1\" … \"26\", \"A\"); absent for a simple chapter.",
+          "examples": [
+            "15"
+          ]
         },
         "title": {
           "type": "array",
@@ -895,7 +964,15 @@
             ]
           },
           "title": "title",
-          "description": "The chapter's title, \\beginchapter's second argument or the\nsimple chapter's one."
+          "description": "The chapter's title, \\beginchapter's second argument or the\nsimple chapter's one.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Arrays"
+              }
+            ]
+          ]
         },
         "children": {
           "type": "array",
@@ -958,7 +1035,23 @@
             ]
           },
           "title": "children",
-          "description": "What the chapter holds, in order: the blocks before its first\nsection, then its sections."
+          "description": "What the chapter holds, in order: the blocks before its first\nsection, then its sections.",
+          "examples": [
+            [
+              {
+                "kind": "section",
+                "id": "ArrayConcepts",
+                "number": "15.1",
+                "level": 1,
+                "title": [
+                  {
+                    "kind": "text",
+                    "text": "Array Concepts"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -967,7 +1060,34 @@
         "id",
         "title"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "chapter",
+          "id": "ChapFifteen",
+          "number": "15",
+          "title": [
+            {
+              "kind": "text",
+              "text": "Arrays"
+            }
+          ],
+          "children": [
+            {
+              "kind": "section",
+              "id": "ArrayConcepts",
+              "number": "15.1",
+              "level": 1,
+              "title": [
+                {
+                  "kind": "text",
+                  "text": "Array Concepts"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "section": {
       "type": "object",
@@ -984,22 +1104,34 @@
         "id": {
           "type": "string",
           "title": "id",
-          "description": "The label of the \\DefineSection that names the section, or\n<parent-id>/<n> for a section that none names (its n-th among its\nparent's sections)."
+          "description": "The label of the \\DefineSection that names the section, or\n<parent-id>/<n> for a section that none names (its n-th among its\nparent's sections).",
+          "examples": [
+            "ArrayElements"
+          ]
         },
         "number": {
           "type": "string",
           "title": "number",
-          "description": "The section's number, its chapter's and the count of each level\njoined by dots (\"14.1.2\"), as the :write of its \\DefineSection\nconfirms."
+          "description": "The section's number, its chapter's and the count of each level\njoined by dots (\"14.1.2\"), as the :write of its \\DefineSection\nconfirms.",
+          "examples": [
+            "15.1.1"
+          ]
         },
         "level": {
           "type": "integer",
           "title": "level",
-          "description": "The level, 1 for a section of the chapter, 2 for a subsection,\nand so on to 5."
+          "description": "The level, 1 for a section of the chapter, 2 for a subsection,\nand so on to 5.",
+          "examples": [
+            2
+          ]
         },
         "dictionary": {
           "type": "boolean",
           "title": "dictionary",
-          "description": "True for a dictionary section, begun by \\includeDictionary: its\nchildren are dictionary entries."
+          "description": "True for a dictionary section, begun by \\includeDictionary: its\nchildren are dictionary entries.",
+          "examples": [
+            true
+          ]
         },
         "title": {
           "type": "array",
@@ -1128,7 +1260,15 @@
             ]
           },
           "title": "title",
-          "description": "The section's title, the argument of the macro that began it."
+          "description": "The section's title, the argument of the macro that began it.",
+          "examples": [
+            [
+              {
+                "kind": "text",
+                "text": "Array Elements"
+              }
+            ]
+          ]
         },
         "children": {
           "type": "array",
@@ -1194,7 +1334,23 @@
             ]
           },
           "title": "children",
-          "description": "What the section holds, in order: blocks, dictionary entries,\nglossary groups and its subsections."
+          "description": "What the section holds, in order: blocks, dictionary entries,\nglossary groups and its subsections.",
+          "examples": [
+            [
+              {
+                "kind": "section",
+                "id": "ArrayElements/1",
+                "number": "15.1.1.1",
+                "level": 3,
+                "title": [
+                  {
+                    "kind": "text",
+                    "text": "Array Indices"
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -1205,7 +1361,35 @@
         "level",
         "title"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "section",
+          "id": "ArrayElements",
+          "number": "15.1.1",
+          "level": 2,
+          "title": [
+            {
+              "kind": "text",
+              "text": "Array Elements"
+            }
+          ],
+          "children": [
+            {
+              "kind": "section",
+              "id": "ArrayElements/1",
+              "number": "15.1.1.1",
+              "level": 3,
+              "title": [
+                {
+                  "kind": "text",
+                  "text": "Array Indices"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "dictionary-entry": {
       "type": "object",
