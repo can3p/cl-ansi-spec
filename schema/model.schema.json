@@ -1043,6 +1043,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -1353,6 +1356,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -1984,6 +1990,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -2122,6 +2131,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -2327,6 +2339,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -2465,6 +2480,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -2698,6 +2716,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -2896,6 +2917,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -3175,6 +3199,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -3465,6 +3492,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -3716,6 +3746,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -3894,6 +3927,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -4276,6 +4312,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -4486,6 +4525,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -5260,6 +5302,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -5431,6 +5476,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -5600,6 +5648,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -5893,6 +5944,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -6062,6 +6116,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -6494,6 +6551,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -6834,6 +6894,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -6923,6 +6986,70 @@
               }
             ]
           ]
+        },
+        "figures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/figure"
+          },
+          "title": "figures",
+          "description": "The figures set after the definition, which shows them as the next\nfigure (\\thenextfigure), in order.",
+          "examples": [
+            [
+              {
+                "kind": "figure",
+                "id": "ChapTwentySix/fig-1",
+                "number": "26-1",
+                "caption": [
+                  {
+                    "kind": "text",
+                    "text": "Exponent Markers"
+                  }
+                ],
+                "content": [
+                  {
+                    "kind": "table",
+                    "rows": [
+                      {
+                        "kind": "row",
+                        "header": true,
+                        "cells": [
+                          {
+                            "kind": "cell",
+                            "content": [
+                              {
+                                "kind": "strong",
+                                "content": [
+                                  {
+                                    "kind": "text",
+                                    "text": "Marker"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "kind": "cell",
+                            "content": [
+                              {
+                                "kind": "strong",
+                                "content": [
+                                  {
+                                    "kind": "text",
+                                    "text": "Meaning"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
         }
       },
       "required": [
@@ -6973,7 +7100,7 @@
     "glossary-example": {
       "type": "object",
       "title": "glossary-example",
-      "description": "An example of a glossary sense, set in quotes: \\gexample.",
+      "description": "An example of a glossary sense, set in quotes: \\gexample.  It is an\ninline where the glossary's introduction shows the notation in a\nparagraph (concept-glossary.tex:105-106).",
       "properties": {
         "kind": {
           "const": "glossary-example",
@@ -7063,6 +7190,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -7278,6 +7408,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -7485,6 +7618,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -7654,6 +7790,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -7835,6 +7974,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -8032,6 +8174,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -8201,6 +8346,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -8374,6 +8522,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -8543,6 +8694,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -8745,6 +8899,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -9033,6 +9190,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -9216,6 +9376,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -9477,6 +9640,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -9662,6 +9828,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -9845,6 +10014,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -10107,6 +10279,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -10290,6 +10465,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -10621,6 +10799,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -10804,6 +10985,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"
@@ -10991,6 +11175,9 @@
                 "$ref": "#/$defs/issue-end"
               },
               {
+                "$ref": "#/$defs/glossary-example"
+              },
+              {
                 "$ref": "#/$defs/stress"
               },
               {
@@ -11174,6 +11361,9 @@
               },
               {
                 "$ref": "#/$defs/issue-end"
+              },
+              {
+                "$ref": "#/$defs/glossary-example"
               },
               {
                 "$ref": "#/$defs/stress"

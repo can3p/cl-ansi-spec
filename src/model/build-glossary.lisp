@@ -214,26 +214,31 @@ index entry of the term, a space."
                                     (remove-if-not #'stringp (node-field-value item :content)))
                              term))))))
 
+(defun glossary-kind-p (item kind)
+  "True when ITEM, an item of an entry (a string or a node), is a node
+of KIND: a :GLOSSARY-EXAMPLE or :FIGURE among a sense's items."
+  (and (typep item 'node) (eq (node-kind item) kind)))
+
 (defun sense-of (builder number items span)
   "The :GLOSSARY-SENSE of ITEMS numbered NUMBER (NIL for none): its tags
 give its parts of speech and usages, the :GLOSSARY-EXAMPLE nodes its
-examples, the rest its definition."
-  (let ((tags (remove-if-not #'glossary-tag-p items))
-        (examples (remove-if-not (lambda (item)
-                                   (and (typep item 'node)
-                                        (eq (node-kind item) :glossary-example)))
-                                 items))
-        (content (remove-if (lambda (item)
-                              (or (glossary-tag-p item)
-                                  (and (typep item 'node)
-                                       (eq (node-kind item) :glossary-example))))
-                            items)))
-    (make-builder-node builder :glossary-sense
-                       :span span :number number
-                       :parts-of-speech (tags-of tags :part-of-speech)
-                       :usages (tags-of tags :usage)
-                       :content (glossary-trim-inlines content)
-                       :examples examples)))
+examples, the :FIGURE nodes (set after the definition, which shows them
+as the next figure) its figures, the rest its definition."
+  (let ((tags (remove-if-not #'glossary-tag-p items)))
+    (flet ((of-kind (kind)
+             (remove-if-not (lambda (item) (glossary-kind-p item kind)) items)))
+      (make-builder-node builder :glossary-sense
+                         :span span :number number
+                         :parts-of-speech (tags-of tags :part-of-speech)
+                         :usages (tags-of tags :usage)
+                         :content (glossary-trim-inlines
+                                   (remove-if (lambda (item)
+                                                (or (glossary-tag-p item)
+                                                    (glossary-kind-p item :glossary-example)
+                                                    (glossary-kind-p item :figure)))
+                                              items))
+                         :examples (of-kind :glossary-example)
+                         :figures (of-kind :figure)))))
 
 (defun tags-of (tags kind)
   "The values of the tags of KIND among TAGS, in order."

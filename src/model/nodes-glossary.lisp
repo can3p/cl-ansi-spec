@@ -129,12 +129,23 @@ pointers."
              ") representing a specific point in time."))
   (examples (:node :glossary-example) :repeated t
    :doc "The sense's examples, \\gexample, in order."
-   :example ((:glossary-example :content ("This is an example of an example.")))))
+   :example ((:glossary-example :content ("This is an example of an example."))))
+  (figures (:node :figure) :repeated t
+   :doc "The figures set after the definition, which shows them as the next
+figure (\\thenextfigure), in order."
+   :example ((:figure :id "ChapTwentySix/fig-1" :number "26-1"
+              :caption ("Exponent Markers")
+              :content ((:table
+                         :rows ((:row :header t
+                                 :cells ((:cell :content ((:strong :content ("Marker"))))
+                                         (:cell :content ((:strong :content ("Meaning")))))))))))))
 
 (define-node glossary-example
-    (:area :glossary
+    (:area :glossary :categories (:inline)
      :example (:glossary-example :content ("This is an example of an example.")))
-  "An example of a glossary sense, set in quotes: \\gexample."
+  "An example of a glossary sense, set in quotes: \\gexample.  It is an
+inline where the glossary's introduction shows the notation in a
+paragraph (concept-glossary.tex:105-106)."
   (content :inlines :required t
    :doc "The example's text."
    :example ("This is an example of an example.")))

@@ -916,7 +916,7 @@ What an index entry indexes, by its macro.
 What stands in running text beside strings: references, parameters,
 code, emphasis, example notation, math, anchors.
 
-Kinds: `:editor-note`, `:reviewer-note`, `:term-ref`, `:operator-ref`, `:section-ref`, `:figure-ref`, `:this-section`, `:next-figure`, `:param`, `:metavariable`, `:format-directive`, `:lambda-list-keyword`, `:code`, `:emphasis`, `:strong`, `:evaluates-to`, `:may-evaluate-to`, `:does-not-evaluate-to`, `:equivalent`, `:output`, `:input`, `:citation`, `:index-entry`, `:issue-start`, `:issue-end`, `:stress`, `:bnf-break`, `:bnf-optional`, `:bnf-zero-or-more`, `:bnf-one-or-more`, `:bnf-repeat-previous`, `:bnf-group`, `:bnf-parenthesized`, `:bnf-bracketed`, `:bnf-interleave`, `:bnf-required`, `:bnf-indirection`, `:bnf-caret`, `:angle-name`, `:math`.
+Kinds: `:editor-note`, `:reviewer-note`, `:term-ref`, `:operator-ref`, `:section-ref`, `:figure-ref`, `:this-section`, `:next-figure`, `:param`, `:metavariable`, `:format-directive`, `:lambda-list-keyword`, `:code`, `:emphasis`, `:strong`, `:evaluates-to`, `:may-evaluate-to`, `:does-not-evaluate-to`, `:equivalent`, `:output`, `:input`, `:citation`, `:index-entry`, `:issue-start`, `:issue-end`, `:glossary-example`, `:stress`, `:bnf-break`, `:bnf-optional`, `:bnf-zero-or-more`, `:bnf-one-or-more`, `:bnf-repeat-previous`, `:bnf-group`, `:bnf-parenthesized`, `:bnf-bracketed`, `:bnf-interleave`, `:bnf-required`, `:bnf-indirection`, `:bnf-caret`, `:angle-name`, `:math`.
 
 ## Glossary
 
@@ -987,6 +987,7 @@ the entry's one definition.
 | `usages` | list of enumeration `usage` | no | The usages given for this sense alone. |
 | `content` | inline list | yes | The definition's text, its \term references and its `See' pointers. |
 | `examples` | list of node of kind or category `:glossary-example` | no | The sense's examples, \gexample, in order. |
+| `figures` | list of node of kind or category `:figure` | no | The figures set after the definition, which shows them as the next figure (\thenextfigure), in order. |
 
 Example:
 
@@ -999,7 +1000,11 @@ Example:
 
 ### Node kind `:glossary-example`
 
-An example of a glossary sense, set in quotes: \gexample.
+An example of a glossary sense, set in quotes: \gexample.  It is an
+inline where the glossary's introduction shows the notation in a
+paragraph (concept-glossary.tex:105-106).
+
+Categories: `:inline`.
 
 | Field | Type | Required | Description |
 |---|---|---|---|

@@ -241,6 +241,36 @@ S-expressions, and the report."
         "an example is not part of the definition")
     (is equal 1 (length (sexp-field sense :examples)))))
 
+(define-test glossary-figures
+  :parent glossary
+  ;; concept-glossary.tex:1772-1781: exponent marker, a figure after its
+  ;; definition, which shows it as the next figure.
+  (let* ((entry (find "exponent marker" (remove-if-not #'consp (glossary-fixture 1768 1790))
+                      :key (lambda (entry) (sexp-field entry :id)) :test #'equal))
+         (sense (first (sexp-field entry :senses))))
+    (is equal '("26-1") (mapcar (lambda (figure) (sexp-field figure :number))
+                                (sexp-field sense :figures)))
+    (false (find-if (lambda (item) (and (consp item) (eq (first item) :figure)))
+                    (sexp-field sense :content))
+           "a figure is not part of the definition")))
+
+(define-test glossary-example-in-introduction
+  :parent glossary
+  ;; :105-106: the introduction shows \gexample in a paragraph, an inline.
+  (let ((paragraphs '()))
+    (model:walk-nodes (lambda (node)
+                        (when (find-if (lambda (item)
+                                         (and (typep item 'model:node)
+                                              (eq (model:node-kind item) :glossary-example)))
+                                       (and (eq (model:node-kind node) :paragraph)
+                                            (model:node-field-value node :content)))
+                          (push node paragraphs)))
+                      (model:build-fixture "chap-26" :file "concept-glossary.tex"
+                                                     :lines '(98 110)))
+    (is = 1 (length paragraphs))
+    (is equal '() (mapcan #'model:node-problems paragraphs)
+        "the paragraph holding it is valid against its declaration")))
+
 (define-test glossary-problems
   :parent glossary
   ;; A \meaning after nothing, a notation of an unknown text, a notation
