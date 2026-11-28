@@ -524,7 +524,37 @@ and notes, and drops the presentational events.
 
 ### Tables and figures
 
-*Step 3.11.* Not written yet.
+*Step 3.11.* `src/model/build-tables.lisp` (`install-table-handlers`,
+registered in `*handlers*` at load).
+
+- **Tables.** An `:alignment` opens a `:table`, a `:row` a `:row`, a
+  `:cell` a `:cell` whose content is the text and inlines of its list,
+  without the spaces around them (none: an empty cell).  `\span` gives
+  `:columns`.  A column whose template has a `\vrule` (the preamble of
+  the alignment event, its `:loop` honoured) only draws a rule: it has no
+  cell (one with text in it is kept).  A row whose cells are all empty
+  is spacing (`\tabletwo` sets one around each rule) and is dropped;
+  `:no-align` material (rules, glue) is dropped, anything else in it, and
+  anything but rows in an alignment, is reported.  The first row is a
+  heading (`:header`) when every cell that has content holds nothing but
+  a bold run (`\tablefigtwo`'s heading arguments, `\tabletwo`'s `\b`).
+  Only `\halign` is read as a table; a `\valign` is reported.
+- **Figures.** `\DefineFigure` (a mark) gives the label, and the `:write`
+  after it (left to 3.8, which drops it) the number TeX wrote; both wait
+  for the `:figure` that follows (a `\DefineFigure` always precedes its
+  figure in the sources; one that does not would name the next).  The `:caption` inside the figure is
+  `Figure N--M. text`: its paragraph and its bold runs (a caption is set
+  in the bold font) are flattened, the number `N-M` is read from it and
+  the text after it is the figure's `:caption`.  A figure with a caption
+  that gives no number, or whose number is not the one TeX wrote, is
+  reported (the caption's stands); without a caption the written number
+  is used.  The id is the label, else `<chapter-id>/fig-<m>` for the
+  number `N-M`, the chapter's id being that of the enclosing chapter node
+  when it has one, else `N` (3.16 gives final ids).  Text directly in a
+  figure is reported and dropped; the content is its blocks.
+- **`\thenextfigure`** (`:next-figure`) is a `:next-figure` node with no
+  words: its text is the number of the figure that follows, which 3.17
+  resolves.
 
 ### Inlines
 

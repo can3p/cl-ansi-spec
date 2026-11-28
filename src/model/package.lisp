@@ -72,5 +72,7 @@
    #:parse-reference-write #:counted-number
    ;; Dictionary entries (build-entries.lisp, step 3.9)
    #:install-entry-handlers
+   ;; Tables and figures (build-tables.lisp)
+   #:install-table-handlers
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))
