@@ -86,5 +86,8 @@
    #:install-table-handlers
    ;; Ids (ids.lisp)
    #:walk-nodes #:assign-ids
+   ;; Term references (resolve-terms.lisp, step 3.19)
+   #:*term-irregulars* #:*term-suffix-rules* #:*term-rules* #:*term-tiers*
+   #:resolve-terms
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))

@@ -110,7 +110,14 @@ event or entry of the job's log.")
     (:fatal-error "A TeX error that stopped the job.")
     (:id-collision "Addressable nodes of one target kind that keep one id
 after the collision rule (ASSIGN-IDS): each but the first, at its
-span."))
+span.")
+    (:unresolved-term "A term reference no glossary entry matches by the
+inflection rules (RESOLVE-TERMS), at its span.")
+    (:ambiguous-term "A term reference two glossary entries match in one
+tier of the rules, the first kept; or two glossary ids that differ only
+by case.")
+    (:missing-sense "A \\meaning sense the glossary entry of its term
+reference does not number."))
   "The kinds of PROBLEM a build reports, each with its meaning.")
 
 (defstruct (problem (:constructor make-problem
@@ -500,8 +507,9 @@ revision of the draft (JOB-VERSION)."
 (defun build-model (&key (jobs (chapter-jobs)) (registry *registry*) (handlers *handlers*))
   "Build the chapter jobs JOBS (names, \"chap-14\"; every one by default,
 in the order of the standard) in turn (BUILD-JOB) and settle the ids of
-their nodes (ASSIGN-IDS); return the top-level nodes of all of them, in
-order, one report, the id collisions last, and the revision of the
+their nodes (ASSIGN-IDS) and resolve their term references
+(RESOLVE-TERMS); return the top-level nodes of all of them, in
+order, one report, the id collisions and the term problems last, and the revision of the
 draft the jobs give (the first one's)."
   (let* ((reports '()) (version nil)
          (nodes (loop for job in jobs
@@ -511,6 +519,7 @@ draft the jobs give (the first one's)."
                                (unless version (setf version job-version))
                                nodes))))
     (push (make-build-report (nth-value 1 (assign-ids nodes :registry registry))) reports)
+    (push (make-build-report (resolve-terms nodes :registry registry)) reports)
     (values nodes (merge-build-reports (nreverse reports)) version)))
 
 ;;; Fixtures: the model of a job's lines
