@@ -53,7 +53,7 @@ without spans, and the build report."
                     nodes)
             report)))
 
-(defun problem-messages (report &optional (kinds '(:node :unclosed :underflow :unmatched-end)))
+(defun entries-problem-messages (report &optional (kinds '(:node :unclosed :underflow :unmatched-end)))
   "The messages of REPORT's problems of KINDS."
   (loop for problem in (model:build-report-problems report)
         when (member (model:problem-kind problem) kinds)
@@ -116,13 +116,13 @@ without spans, and the build report."
                          (:part :title "Notes"
                           :content ((:paragraph :content ("two")))))))
         nodes)
-    (is equal '() (problem-messages report)
+    (is equal '() (entries-problem-messages report)
         "The heading and the label boxes are dropped without a report."))
   ;; A kind outside the enum is reported, and the entry has none.
   (multiple-value-bind (nodes report)
       (entry-sexps (begin-event :com "x" "Special Form") (ev :end :com))
     (is equal '((:dictionary-entry :id "x" :names ("x"))) nodes)
-    (is = 2 (length (problem-messages report))
+    (is = 2 (length (entries-problem-messages report))
         "An unknown kind, and the entry's missing required kind."))
   ;; Something with a meaning in a heading is not dropped silently.
   (multiple-value-bind (nodes report)
@@ -131,13 +131,13 @@ without spans, and the build report."
                    (ev :end :com))
     (declare (ignore nodes))
     (true (some (lambda (message) (search "The heading of an entry holds" message))
-                (problem-messages report))))
+                (entries-problem-messages report))))
   ;; A label outside an entry, and a stray end.
   (multiple-value-bind (nodes report)
       (entry-sexps (mark-event :label "Syntax" ":") (ev :end :com))
     (declare (ignore nodes))
     (true (some (lambda (message) (search "outside any entry" message))
-                (problem-messages report)))
+                (entries-problem-messages report)))
     (true (member :underflow (mapcar #'model:problem-kind (model:build-report-problems report)))))
   ;; Content between the entry's start and its first label has no node to hold it.
   (multiple-value-bind (nodes report)
@@ -147,7 +147,7 @@ without spans, and the build report."
                    (ev :end :com))
     (declare (ignore nodes))
     (true (some (lambda (message) (search "outside any part" message))
-                (problem-messages report)))))
+                (entries-problem-messages report)))))
 
 (define-test entries-end-inside-a-paragraph
   :parent entries
@@ -164,7 +164,7 @@ without spans, and the build report."
                  :parts ((:part :title "Notes" :content ((:paragraph :content ("last"))))))
                 (:paragraph :content ("next")))
         nodes)
-    (is equal '() (problem-messages report))
+    (is equal '() (entries-problem-messages report))
     (is equal '(:unhandled) (mapcar #'model:problem-kind (model:build-report-problems report))
         "Only the glue, which no handler of this table takes.")))
 
@@ -192,7 +192,7 @@ and TAIL, and the report."
                                              ,@(unless no-return '(:values ("item")))
                                              ,@(when no-return '(:no-return t)))
                  node)
-             (is equal '() (problem-messages report))))
+             (is equal '() (entries-problem-messages report))))
   ;; A no-return signature has the arrow, and no values.
   (is equal '(:operator-signature :operator :function :names ("error") :no-return t)
       (signature-of :defun-no-return '("error") '("error")
@@ -212,13 +212,13 @@ and TAIL, and the report."
     (is equal '((:operator-signature :operator :function :names ("endp")
                  :lambda-list ((:param :name "list")) :values ((:param :name "boolean"))))
         nodes)
-    (is equal '() (problem-messages report)))
+    (is equal '() (entries-problem-messages report)))
   ;; A signature that does not start with its name is reported, and kept.
   (multiple-value-bind (node report) (signature-of :defun '("f") '("g x"))
     (is equal '(:operator-signature :operator :function :names ("f")
                 :lambda-list ("g x"))
         node)
-    (is = 1 (length (problem-messages report)))))
+    (is = 1 (length (entries-problem-messages report)))))
 
 (define-test entries-setf-variable-and-type-signatures
   :parent entries
@@ -230,7 +230,7 @@ and TAIL, and the report."
   (multiple-value-bind (node report)
       (signature-of :defsetf '("f") '("f x"))
     (is equal '(:setf-signature :names ("f") :new-value ("f x")) node)
-    (true (problem-messages report)))
+    (true (entries-problem-messages report)))
   (is equal '(:variable-signature :name "*print-pretty*")
       (signature-of :defvar '("print-pretty") '("*print-pretty*")))
   (is equal '(:variable-signature :name "pi" :constant t)
@@ -248,7 +248,7 @@ and TAIL, and the report."
     (is equal '((:type-signature :name "cons"
                  :syntax ("car-typespec" (:bnf-break) "x")))
         nodes)
-    (is equal '() (problem-messages report)))
+    (is equal '() (entries-problem-messages report)))
   ;; A type specifier with no syntax.
   (is equal '((:type-signature :name "null"))
       (entry-sexps (mark-event :deftype "null" "..."))))
@@ -287,7 +287,7 @@ and TAIL, and the report."
                    :lambda-list ("x") :values ("o"))
                   (:setf-signature :names ("car" "cdr") :lambda-list ("x") :new-value ("n")))
           nodes)
-      (is equal '() (problem-messages report)))
+      (is equal '() (entries-problem-messages report)))
     (multiple-value-bind (nodes report)
         (apply #'entry-sexps
                (append (list (begin-event :defsetf-multi "x" "n") (ev :begin :alignment))
@@ -296,9 +296,9 @@ and TAIL, and the report."
                        (list (ev :end :alignment) (ev :end :defsetf-multi))))
       (is equal '((:setf-signature :names ("bit" "sbit") :lambda-list ("a") :new-value ("n")))
           nodes)
-      (is equal '() (problem-messages report)))
+      (is equal '() (entries-problem-messages report)))
     ;; A multi signature without a name is reported.
-    (is = 1 (length (problem-messages
+    (is = 1 (length (entries-problem-messages
                      (nth-value 1 (entry-sexps (begin-event :defun-multi "x" "v" "...")
                                                (ev :end :defun-multi))))))
     ;; \entry outside a signature (a row of \tabletwo) builds nothing, reports nothing.
