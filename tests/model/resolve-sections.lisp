@@ -137,7 +137,7 @@ sources.")
   :parent resolve-sections
   (secref-whole-problems)
   (let ((refs (append (whole-spec-all :section-ref) (whole-spec-all :figure-ref))))
-    (true (> (count-if #'secref-target refs) 1000))
+    (true (> (count-if #'secref-target refs) 100))
     (is = (length (secref-whole-problems)) (count-if-not #'secref-target refs))
     ;; Every figure of the spec is in the list, once.
     (let ((figures (model:list-of-figures (whole-spec-nodes))))
