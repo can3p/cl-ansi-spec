@@ -70,5 +70,7 @@
    ;; Structure (build-structure.lisp)
    #:install-structure-handlers #:job-version #:build-standard
    #:parse-reference-write #:counted-number
+   ;; Dictionary entries (build-entries.lisp, step 3.9)
+   #:install-entry-handlers
    ;; Printing nodes (print.lisp)
    #:span-sexp #:node-sexp #:print-node))

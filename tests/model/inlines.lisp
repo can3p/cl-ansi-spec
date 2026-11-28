@@ -163,7 +163,6 @@ JOB, nested ones included (inlines sit in paragraphs), in order."
   (let ((kinds (fixture-kinds "chap-14" "dict-conses.tex" 1702 1730)))
     (true (member :param kinds))
     (true (member :term-ref kinds))
-    (true (member :emphasis kinds))
     (true (member :issue-start kinds))
     (true (member :issue-end kinds))
     (true (member :evaluates-to kinds))

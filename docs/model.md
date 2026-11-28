@@ -411,7 +411,75 @@ sections and the standard. Its handlers are the functions of
 
 ### Entries
 
-*Step 3.9.* Not written yet.
+`src/model/build-entries.lisp` (step 3.9) builds a dictionary entry from
+the events `\begincom` … `\endcom` make; `install-entry-handlers`
+registers its handlers (in `*handlers*` at load, in a table of their own
+for tests).
+
+- **Entry.** `(:begin :com)` has two arguments: the names, a
+  comma-separated list (catcode-active commas, lines wrapped: split on
+  commas, trimmed), and the `\ftype` text.  The kind is that text in
+  kebab-case and must be a value of `entry-kind` (an unknown one is
+  reported and the entry has none).  The id is the first name: the
+  collision rule (`<name>/<kind>`) needs every entry and is 3.16's
+  (`ids.lisp`).  Three entries spelled the kind otherwise
+  (`function`, `macro`, `Special Form`): patches 0004–0006.
+- **Heading.** `\dobegincom` typesets the names and the kind in a
+  paragraph of its own, and each `\label` its title in a box.  The part
+  and the entry carry that meaning, so the paragraph and the box are
+  skipped; one holding an event with a vocabulary key is reported, not
+  dropped silently.  Everything before the first part is built as usual,
+  and what no part can hold (the entry's `:parts` hold parts only) is
+  reported.
+- **Parts.** `(:mark :label)` closes the part before and opens one:
+  its title is argument 1; `:none` is true when argument 2 is not `:`
+  (`\label Side Effects:\None.`, which the `(:mark :label-confidence)`
+  that follows completes: its `.`, `!` or `?`, how sure the authors are
+  that the part is empty, is the part's `:confidence`).  A part runs to
+  the next label or to the entry's end.
+- **The end.** `\endcom` ends the entry's last part.  It may sit inside
+  the last paragraph (dict-conses.tex:201, :4021), so that its `(:end
+  :com)` comes before the paragraph's: the handler first takes the
+  events that follow as usual while a container of another handler is
+  open (stopping at a new paragraph, entry or part, or an end that closes
+  nothing there), so that the paragraph closes where TeX closed it.  A
+  stray `\endcom` is an `:underflow`.
+- **Signatures.** A `\Def…` macro sets a signature in a paragraph of its
+  own, which the part's blocks do not need: the handler closes it and
+  drops its end.  It takes the signature's events itself, up to its
+  `:end`, into a container of its own (text there is read as it comes,
+  not by font): the first `:evaluates-to` (the arrow; also in the
+  `NoReturn` forms) is dropped and splits the words into those before
+  it (the name, then the lambda list) and after (the values).  Position
+  does not matter, so the `Newline` forms need no rule of their own; a
+  box (the stacked keyword parameters of `make-array`) starts a word.
+  The name is removed from the front of the first words (reported when it
+  is not there).
+  - `:operator-signature`: `:defun`, `:defmac`, `:defspec`, `:defgen`,
+    `:defmeth` and their `-no-return` forms; no values and `:no-return t`
+    for the latter.
+  - `:setf-signature`: `\Defsetf`'s words are `(setf (NAME lambda-list)
+    new-value)`: the lambda list ends at the first unbalanced `)`, the
+    new value at the last.
+  - `:variable-signature`: `:defvar` and `:defcon` (`:constant t`); no
+    entry of the sources uses them, so their tests use events made by
+    hand.
+  - `:type-signature`: `(:mark :deftype)`, whose alignment follows: one
+    row per line of syntax, each `(NAME …)` without its parentheses and
+    name, joined by `bnf-break`; the macro's empty last paragraph is
+    dropped.
+  - The `-multi` forms set a table with one `\entry` row per name (events
+    outside the captured rows, the layout of the rest of the table, are
+    skipped): the
+    names are the `(:mark :entry)` marks (the second table of
+    `\DefunMultiAccessorWithValues` repeats them), and the words of the
+    first row of each table are the signature's.  The accessor builds an
+    operator and a setf signature, `\DefsetfMulti` a setf one.  An
+    `:entry` mark elsewhere (a row of `\tabletwo`) builds nothing: its
+    cells are built in the table.
+- **Reports.** A shape the rules do not expect (a signature that does not
+  start with its name, a setf form without its parentheses, a label
+  outside an entry, content outside a part) is a `:node` problem.
 
 ### Blocks
 

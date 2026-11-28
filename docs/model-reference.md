@@ -99,6 +99,17 @@ one or more defined names of one kind.
 | `entry-kind` | enumeration `entry-kind` | yes | What the names are, from the entry's \ftype. |
 | `parts` | list of node of kind or category `:part` | no | The entry's parts, one per \label, in order. |
 
+Example:
+
+```lisp
+(:dictionary-entry :id "endp" :names ("endp") :entry-kind :function
+ :parts
+ ((:part :title "Syntax" :content
+   ((:operator-signature :operator :function :names ("endp")
+     :lambda-list ("list") :values ("generalized-boolean"))))
+  (:part :title "Side Effects" :none common-lisp:t :confidence ".")))
+```
+
 ### Node kind `:part`
 
 A part of a dictionary entry: a \label heading (Syntax, Arguments and
@@ -109,7 +120,14 @@ the entry's end.
 |---|---|---|---|
 | `title` | string | yes | The heading, the text of the \label before its colon. |
 | `none` | boolean | no | True when the part says only "None." (\None after the \label). |
+| `confidence` | string | no | For a part that says None: the punctuation after it in the source (".", "!" or "?"), how sure the authors are that the part is empty; absent otherwise. |
 | `content` | list of node of kind or category `:block` | no | The part's blocks; absent when NONE is true. |
+
+Example:
+
+```lisp
+(:part :title "Side Effects" :none common-lisp:t :confidence ".")
+```
 
 ### Node kind `:operator-signature`
 
@@ -128,6 +146,13 @@ Categories: `:block`.
 | `values` | inline list | no | The values as written after the arrow; absent for a form without values (\Defun, \Defmeth) and when NO-RETURN is true. |
 | `no-return` | boolean | no | True for a NoReturn form: the operator never returns normally. |
 
+Example:
+
+```lisp
+(:operator-signature :operator :function :names ("endp") :lambda-list
+ ("list") :values ("generalized-boolean"))
+```
+
 ### Node kind `:setf-signature`
 
 The syntax of a setf form: \Defsetf, \DefsetfMulti, and the setf
@@ -141,10 +166,19 @@ Categories: `:block`.
 | `lambda-list` | inline list | no | The accessor's lambda list as written; absent when empty. |
 | `new-value` | inline list | yes | The new value as written. |
 
+Example:
+
+```lisp
+(:setf-signature :names ("nth") :lambda-list ("n list") :new-value
+ ("new-object"))
+```
+
 ### Node kind `:variable-signature`
 
 The syntax of a variable or a constant: \Defvar, \Defvarnoast,
-\Defcon.
+\Defcon.  No entry of the sources uses them (a variable's entry has
+no signature), so no node of the spec is an example of the builder's
+output.
 
 Categories: `:block`.
 
@@ -152,6 +186,12 @@ Categories: `:block`.
 |---|---|---|---|
 | `name` | string | yes | The variable's name, with its asterisks when the source sets them. |
 | `constant` | boolean | no | True for a constant variable (\Defcon). |
+
+Example:
+
+```lisp
+(:variable-signature :name "*print-pretty*")
+```
 
 ### Node kind `:type-signature`
 
@@ -163,6 +203,14 @@ Categories: `:block`.
 |---|---|---|---|
 | `name` | string | yes | The type specifier's symbol. |
 | `syntax` | inline list | no | The lines of the compound form after the name, with their BNF notation; absent when there are none. |
+
+Example:
+
+```lisp
+(:type-signature :name "cons" :syntax
+ ((:bnf-bracketed :content
+   ("car-typespec " (:bnf-optional :content ("cdr-typespec"))))))
+```
 
 ### Enumeration `entry-kind`
 
